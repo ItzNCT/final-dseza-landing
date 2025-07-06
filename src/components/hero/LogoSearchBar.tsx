@@ -64,8 +64,6 @@ const LogoSearchBar: React.FC = () => {
         </div>
         
         <div className={`${textColor} flex items-center`}>
-          <a href="#" className={`${textColor} ${hoverColor} transition-colors duration-300`}>{t('logoSearchBar.register')}</a>
-          <span className="mx-2 opacity-50">|</span>
           <a href="#" className={`${textColor} ${hoverColor} transition-colors duration-300`}>{t('logoSearchBar.login')}</a>
         </div>
       </div>

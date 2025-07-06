@@ -19,13 +19,13 @@ export const getNavigationMenuItems = (): MenuItem[] => {
               {
                 title: "Thư ngỏ",
                 titleEn: "Welcome Letter",
-                url: "https://dseza.danang.gov.vn/chi-tiet-tin-tuc/thu-ngo/",
+                url: "/gioi-thieu/thu-ngo",
                 iconName: "general-partner"
               },
               {
                 title: "Tổng quan về Đà Nẵng",
                 titleEn: "Overview of Da Nang",
-                url: "https://dseza.danang.gov.vn/chi-tiet-tin-tuc/tong-quan-ve-tpda-nang/",
+                url: "/gioi-thieu/tong-quan-ve-da-nang",
                 iconName: "real-estate"
               },
               {
@@ -37,17 +37,17 @@ export const getNavigationMenuItems = (): MenuItem[] => {
                   {
                     title: "Chức năng, nhiệm vụ",
                     titleEn: "Functions and Duties",
-                    url: "https://dseza.danang.gov.vn/chi-tiet-tin-tuc/chuc-nang-nhiem-vu-quyen-han-ban-quan-ly/"
+                    url: "/tong-quan-ban-quan-ly/chuc-nang-nhiem-vu"
                   },
                   {
                     title: "Các phòng ban",
                     titleEn: "Departments",
-                    url: "https://dseza.danang.gov.vn/chi-tiet-tin-tuc/cac-phong-ban/"
+                    url: "/tong-quan-ban-quan-ly/cac-phong-ban"
                   },
                   {
                     title: "Đơn vị trực thuộc",
                     titleEn: "Affiliated Units",
-                    url: "https://dseza.danang.gov.vn/chi-tiet-tin-tuc/don-vi-truc-thuoc/"
+                    url: "/tong-quan-ban-quan-ly/don-vi-truc-thuoc"
                   },
                 ]
               },
@@ -309,7 +309,7 @@ export const getNavigationMenuItems = (): MenuItem[] => {
     {
       title: "nav.investmentGuide",
       translatable: true,
-      url: "https://dseza.danang.gov.vn/danh-sach-tin-tuc/cam-nang-dau-tu/",
+      url: "/cam-nang-dau-tu",
     },
     {
       title: "nav.documents",
@@ -380,8 +380,11 @@ export const getNavigationMenuItems = (): MenuItem[] => {
               <div className="mt-4 p-4 border rounded-lg">
                 <h5 className="font-semibold mb-2">{t('menuSpecial.quickDocSearchTitle')}</h5>
                 <input
+                  id="quick-doc-search"
+                  name="quickDocSearch"
                   type="text"
                   placeholder={t('menuSpecial.quickDocSearchPlaceholder')}
+                  autoComplete="off"
                   className="w-full px-3 py-2 border rounded mt-2 mb-2 dark:bg-dseza-dark-secondary dark:border-dseza-dark-hover"
                 />
                 <button className="w-full bg-dseza-light-primary dark:bg-dseza-dark-primary text-white py-2 rounded text-sm font-medium">
@@ -489,6 +492,81 @@ export const getNavigationMenuItems = (): MenuItem[] => {
                 </a>
               </div>
             )
+          }
+        ]
+      }
+    },
+    {
+      title: 'nav.utilities',
+      translatable: true,
+      url: '#',
+      megaMenuConfig: {
+        columns: [
+          {
+            title: "Hỏi đáp | Góp ý",
+            titleEn: "Q&A | Feedback",
+            contents: [
+              {
+                title: "Hỏi | Đáp",
+                titleEn: "Q&A",
+                url: "https://dseza.danang.gov.vn/hoi-dap/",
+                iconName: "general-partner"
+              },
+              {
+                title: "Câu hỏi thường gặp",
+                titleEn: "FAQ",
+                url: "https://dseza.danang.gov.vn/cau-hoi-thuong-gap/",
+                iconName: "real-estate"
+              },
+              {
+                title: "Cổng góp ý TP. Đà Nẵng",
+                titleEn: "Da Nang City Feedback Portal",
+                url: "https://gopy.danang.gov.vn/",
+                iconName: "business-development"
+              }
+            ]
+          },
+          {
+            title: "Kết nối doanh nghiệp",
+            titleEn: "Business Connection",
+            contents: [
+              {
+                title: "Cà phê cùng DSEZA",
+                titleEn: "Coffee with DSEZA",
+                url: "https://docs.google.com/forms/d/e/1FAIpQLSc7gyKy8ESi7k9Hxja0Mi9YAnWLf_yU3fQPnyzYp9hWGLLREg/viewform",
+                iconName: "venture-capital"
+              }
+            ]
+          },
+          {
+            title: "Xem thêm",
+            titleEn: "See More",
+            contents: [
+              {
+                title: "Lịch công tác",
+                titleEn: "Work Schedule",
+                url: "https://dseza.danang.gov.vn/lich-cong-tac/",
+                iconName: "investor-relations"
+              },
+              {
+                title: "Dữ liệu chuyên ngành",
+                titleEn: "Specialized Data",
+                url: "https://dseza.danang.gov.vn/",
+                iconName: "wealth-management"
+              },
+              {
+                title: "Mua sắm công",
+                titleEn: "Public Procurement",
+                url: "https://dseza.danang.gov.vn/",
+                iconName: "private-equity"
+              },
+              {
+                title: "Làm theo năng lực | Hưởng theo lao động",
+                titleEn: "Merit-based Work | Performance-based Benefits",
+                url: "https://dseza.danang.gov.vn/media/i1kpng1s/t%C3%A0i-li%E1%BB%87u-s%E1%BB%AD-d%E1%BB%A5ng.pdf",
+                iconName: "family-offices"
+              }
+            ]
           }
         ]
       }

@@ -21,6 +21,7 @@ const viTranslations: TranslationObject = {
     investmentGuide: "Cẩm nang đầu tư",
     documents: "Văn bản",
     adminReform: "Cải cách hành chính",
+    utilities: "Tiện ích",
   },
 
   // Home Sections
@@ -231,7 +232,6 @@ const viTranslations: TranslationObject = {
   // Logo Search Bar
   logoSearchBar: {
     searchPlaceholder: "Tìm kiếm...",
-    register: "Đăng ký",
     login: "Đăng nhập",
   },
 
@@ -261,6 +261,7 @@ const enTranslations: TranslationObject = {
     investmentGuide: "Investment Guide",
     documents: "Documents",
     adminReform: "Administrative Reform",
+    utilities: "Utilities",
   },
 
   // Home Sections

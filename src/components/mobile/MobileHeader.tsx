@@ -433,7 +433,7 @@ const MobileHeader: React.FC = () => {
                     <ThemeToggle />
                   </div>
                   
-                  {/* Login/Register Button */}
+                  {/* Login Button */}
                   <div className="mt-4">
                     <Button
                       className={cn(
@@ -443,7 +443,7 @@ const MobileHeader: React.FC = () => {
                         theme === "dark" ? "text-dseza-dark-main-bg" : "text-white"
                       )}
                     >
-                      Đăng ký / Đăng nhập
+                      Đăng nhập
                     </Button>
                   </div>
                 </div>
