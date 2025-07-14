@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
+import { extractImageUrl } from '@/utils/drupal';
 
-// Use relative path for proxy, with fallback to env variable
-const DRUPAL_BASE_URL = import.meta.env.VITE_API || '';
+// Use relative path for proxy in development, full URL in production
+const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
+  import.meta.env.VITE_API || 
+  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
 
 // Define TypeScript interfaces for the homepage data structure
 interface NewsItem {
@@ -49,6 +52,24 @@ interface QuickAccessLink {
   order: number;
 }
 
+// Define TypeScript interfaces for the menu data structure
+interface MenuItem {
+  id: string;
+  title: string;
+  url: string;
+  expanded: boolean;
+  children?: MenuItem[];
+  attributes?: {
+    class?: string;
+    target?: string;
+    rel?: string;
+  };
+}
+
+interface MainMenuData {
+  menuItems: MenuItem[];
+}
+
 export interface HomepageData {
   news: NewsItem[];
   events: Event[];
@@ -71,8 +92,159 @@ export interface HomepageData {
 }
 
 /**
+ * Fetch main menu data from Drupal GraphQL endpoint
+ */
+async function fetchMainMenuData(): Promise<MainMenuData> {
+  try {
+    const graphqlQuery = {
+      query: `
+        query GetMainMenu {
+          menu(name: "main") {
+            name
+            items {
+              id
+              title
+              url
+              expanded
+              children {
+                id
+                title
+                url
+                expanded
+                children {
+                  id
+                  title
+                  url
+                  expanded
+                }
+              }
+            }
+          }
+        }
+      `
+    };
+
+    const response = await fetch('http://dseza.lndo.site/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(graphqlQuery),
+    });
+
+    if (!response.ok) {
+      throw new Error(`GraphQL request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+
+    if (result.errors) {
+      throw new Error(`GraphQL errors: ${result.errors.map((err: any) => err.message).join(', ')}`);
+    }
+
+    // Transform the GraphQL response to our interface
+    const menuItems: MenuItem[] = result.data?.menu?.items?.map((item: any) => ({
+      id: item.id,
+      title: item.title,
+      url: item.url,
+      expanded: item.expanded,
+      children: item.children?.map((child: any) => ({
+        id: child.id,
+        title: child.title,
+        url: child.url,
+        expanded: child.expanded,
+        children: child.children?.map((grandchild: any) => ({
+          id: grandchild.id,
+          title: grandchild.title,
+          url: grandchild.url,
+          expanded: grandchild.expanded,
+        })) || [],
+      })) || [],
+    })) || [];
+
+    return {
+      menuItems,
+    };
+
+  } catch (error) {
+    throw new Error(`Failed to fetch main menu data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Fetch latest news articles from JSON:API
+ */
+async function fetchNewsList(baseUrl: string): Promise<NewsItem[]> {
+  const url = `${baseUrl}/jsonapi/node/bai-viet`
+    + '?filter[status][value]=1'               // Published
+    + '&sort=-created'                         // Newest first
+    + '&page[limit]=4'                         // 4 articles
+    + '&include=field_anh_dai_dien.field_media_image';
+
+  const response = await fetch(url, {
+    headers: {
+      'Accept': 'application/vnd.api+json',
+      'Content-Type': 'application/vnd.api+json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch news: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  return data.data?.map((item: any) => ({
+    id: item.id,                 // JSON:API id is UUID
+    title: item.attributes.title,
+    summary: item.attributes.body?.summary || item.attributes.body?.value?.substring(0, 200) + '...' || '',
+    published_date: item.attributes.created,
+    featured_image: extractImageUrl(item.relationships.field_anh_dai_dien, data.included),
+    category: 'bai-viet',
+  })) || [];
+}
+
+/**
+ * Fetch featured events from JSON:API
+ */
+async function fetchFeaturedEvents(baseUrl: string): Promise<Event[]> {
+  const url = `${baseUrl}/jsonapi/node/su-kien`
+    + '?filter[status][value]=1'
+    + '&filter[field_start_date][value][condition][operator]=>='
+    + `&filter[field_start_date][value][condition][value]=${new Date().toISOString()}`
+    + '&filter[field_featured][value]=1'       // Chỉ sự kiện gắn featured
+    + '&sort=field_start_date'
+    + '&page[limit]=4'
+    + '&include=field_featured_image.field_media_image';
+
+  const response = await fetch(url, {
+    headers: {
+      'Accept': 'application/vnd.api+json',
+      'Content-Type': 'application/vnd.api+json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch featured events: ${response.status}`);
+  }
+
+  const data = await response.json();
+  
+  return data.data?.map((item: any) => ({
+    id: item.id,
+    title: item.attributes.title,
+    description: item.attributes.body?.value || item.attributes.field_description || '',
+    start_date: item.attributes.field_start_date,
+    end_date: item.attributes.field_end_date || undefined,
+    location: item.attributes.field_location || '',
+    featured_image: extractImageUrl(item.relationships?.field_featured_image, data.included),
+  })) || [];
+}
+
+/**
  * Fetch data from Drupal JSON:API endpoints and combine into homepage data
- * Uses relative URLs to work with Vite proxy configuration
+ * Uses pure JSON:API for better reliability
  */
 async function fetchHomepageData(): Promise<HomepageData> {
   try {
@@ -82,20 +254,10 @@ async function fetchHomepageData(): Promise<HomepageData> {
     
     // Fetch different content types from JSON:API
     const [newsResponse, eventsResponse, quickLinksResponse] = await Promise.allSettled([
-      // Fetch recent news/articles
-      fetch(`${baseUrl}/jsonapi/node/article?sort=-created&page[limit]=5`, {
-        headers: {
-          'Accept': 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json',
-        },
-      }),
-      // Fetch upcoming events (if you have event content type)
-      fetch(`${baseUrl}/jsonapi/node/event?sort=field_start_date&page[limit]=5`, {
-        headers: {
-          'Accept': 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json',
-        },
-      }),
+      // Fetch recent news/articles via JSON:API
+      fetchNewsList(baseUrl),
+      // Fetch featured events via JSON:API
+      fetchFeaturedEvents(baseUrl),
       // Fetch quick access links
       fetch(`${baseUrl}/jsonapi/block_content/quick_link`, {
         headers: {
@@ -105,33 +267,16 @@ async function fetchHomepageData(): Promise<HomepageData> {
       }),
     ]);
 
-    // Process news data
+    // Process news data from JSON:API
     let news: NewsItem[] = [];
-    if (newsResponse.status === 'fulfilled' && newsResponse.value.ok) {
-      const newsData = await newsResponse.value.json();
-      news = newsData.data?.map((item: any) => ({
-        id: item.id,
-        title: item.attributes.title,
-        summary: item.attributes.body?.summary || item.attributes.body?.value?.substring(0, 200) + '...' || '',
-        published_date: item.attributes.created,
-        featured_image: item.relationships?.field_featured_image?.data?.id || undefined,
-        category: item.attributes.type || 'article',
-      })) || [];
+    if (newsResponse.status === 'fulfilled') {
+      news = newsResponse.value;
     }
 
-    // Process events data
+    // Process events data from JSON:API
     let events: Event[] = [];
-    if (eventsResponse.status === 'fulfilled' && eventsResponse.value.ok) {
-      const eventsData = await eventsResponse.value.json();
-      events = eventsData.data?.map((item: any) => ({
-        id: item.id,
-        title: item.attributes.title,
-        description: item.attributes.body?.value || item.attributes.field_description || '',
-        start_date: item.attributes.field_start_date || item.attributes.created,
-        end_date: item.attributes.field_end_date || undefined,
-        location: item.attributes.field_location || '',
-        featured_image: item.relationships?.field_featured_image?.data?.id || undefined,
-      })) || [];
+    if (eventsResponse.status === 'fulfilled') {
+      events = eventsResponse.value;
     }
 
     // Process quick access links
@@ -163,11 +308,42 @@ async function fetchHomepageData(): Promise<HomepageData> {
       announcements: [],
     };
 
-  } catch (error) {
-    console.error('Error fetching homepage data:', error);
-    throw new Error(`Failed to fetch homepage data: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
+      } catch (error) {
+      throw new Error(`Failed to fetch homepage data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
 }
+
+/**
+ * Custom hook to fetch and manage main menu data using React Query
+ * @returns Object containing menu data, loading state, and error state
+ */
+export const useMainMenu = () => {
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+  } = useQuery({
+    queryKey: ['mainMenuData'],
+    queryFn: fetchMainMenuData,
+    staleTime: 10 * 60 * 1000, // 10 minutes (menu data changes less frequently)
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+
+  return {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+    menuItems: data?.menuItems || [],
+  };
+};
 
 /**
  * Custom hook to fetch and manage homepage data using React Query
@@ -184,10 +360,9 @@ export const useHomepageData = () => {
   } = useQuery({
     queryKey: ['homepageData'],
     queryFn: fetchHomepageData,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 60_000, // 1 minute – homepage should be quite fresh
     gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retry: 1, // news is not critical
   });
 
   return {
@@ -200,5 +375,6 @@ export const useHomepageData = () => {
   };
 };
 
-// Export the fetch function for potential standalone use
-export { fetchHomepageData };
+// Export the fetch functions for potential standalone use
+export { fetchHomepageData, fetchMainMenuData };
+export type { MainMenuData, MenuItem };

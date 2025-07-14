@@ -3,18 +3,88 @@ import React, { useRef, useState, useEffect } from 'react';
 import { cn } from "@/lib/utils";
 import MegaMenu from './MegaMenu';
 import NavigationMenuItem from './NavigationMenuItem';
-import { getNavigationMenuItems } from './navigation/menuData';
-import { MenuItem as NavigationMenuItemType } from './types/megaMenu';
+import { useMainMenu } from '@/api/hooks';
+import { MenuItem as NavigationMenuItemType, MegaMenuContentType } from './types/megaMenu';
+import type { MenuLinkWithSubtree } from '@/api/hooks';
 
 const TOP_BAR_HEIGHT_STRING = "3rem"; 
 const INITIAL_NAV_TOP_STRING = "9rem";
 const SCROLL_THRESHOLD_PX = 96; 
 
+// Skeleton component for loading state
+const MenuItemSkeleton: React.FC = () => (
+  <li className="px-4 py-2">
+    <div className="animate-pulse">
+      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-20"></div>
+    </div>
+  </li>
+);
+
+// Function to map API data from GraphQL to NavigationMenuItemType
+const mapApiDataToMenuItems = (apiMenuLinks: MenuLinkWithSubtree[]): NavigationMenuItemType[] => {
+  return apiMenuLinks.map((linkItem) => {
+    // Basic mapping from GraphQL structure to NavigationMenuItemType
+    const navigationItem: NavigationMenuItemType = {
+      title: linkItem.link.label,
+      url: linkItem.link.url.path,
+      translatable: false, // API data doesn't have this field, set default
+    };
+
+    // If the API item has subtree, create megaMenuConfig from subtree data
+    if (linkItem.subtree && linkItem.subtree.length > 0) {
+      // Create mega menu configuration from GraphQL subtree structure
+      navigationItem.megaMenuConfig = {
+        columns: [
+          {
+            title: linkItem.link.label, // Use parent title as column title
+            titleEn: linkItem.link.label, // Fallback to same title
+            contents: linkItem.subtree.map((level2Item) => {
+              const content: MegaMenuContentType = {
+                title: level2Item.link.label,
+                titleEn: level2Item.link.label,
+                url: level2Item.link.url.path,
+              };
+
+              // If level 2 has subtree (level 3), map them as items
+              if (level2Item.subtree && level2Item.subtree.length > 0) {
+                content.items = level2Item.subtree.map((level3Item) => {
+                  const item = {
+                    title: level3Item.link.label,
+                    titleEn: level3Item.link.label,
+                    url: level3Item.link.url.path,
+                  };
+
+                  // Note: Level 4 (level3Item.subtree) is available but not used in current MegaMenu structure
+                  // The current MegaMenuContentType only supports 3 levels: contents -> items -> (no further nesting)
+                  // If you need level 4, you would need to extend the MegaMenuContentType interface
+
+                  return item;
+                });
+              }
+
+              return content;
+            }),
+          },
+        ],
+      };
+    }
+
+    return navigationItem;
+  });
+};
+
 const NavigationBar: React.FC = () => {
   const [activeMenuIndex, setActiveMenuIndex] = useState<number | null>(null);
   const navRef = useRef<HTMLElement>(null);
-  const menuItems: NavigationMenuItemType[] = getNavigationMenuItems();
   const [isSticky, setIsSticky] = useState(false);
+  
+  // Use the new hook to fetch menu data from GraphQL API
+  const { data: menuData, isLoading, isError, menuLinks } = useMainMenu();
+  
+  // Map API data to the expected format for NavigationMenuItem components
+  const menuItems: NavigationMenuItemType[] = isLoading || isError 
+    ? [] 
+    : mapApiDataToMenuItems(menuLinks);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,7 +111,7 @@ const NavigationBar: React.FC = () => {
   }, []);
 
   const handleMenuClick = (index: number) => {
-    if (!menuItems[index].megaMenuConfig) {
+    if (!menuItems[index]?.megaMenuConfig) {
       setActiveMenuIndex(null);
     } else {
       setActiveMenuIndex(activeMenuIndex === index ? null : index);
@@ -50,6 +120,29 @@ const NavigationBar: React.FC = () => {
 
   // Sử dụng các lớp glass đã chuẩn hóa
   const navClasses = isSticky ? "glass-sticky" : "glass-initial";
+
+  // Error state - show fallback navigation
+  if (isError) {
+    return (
+      <nav
+        ref={navRef}
+        className={cn(
+          "left-0 right-0 z-30",
+          navClasses,
+          isSticky ? `fixed` : `absolute`
+        )}
+        style={{
+          top: isSticky ? TOP_BAR_HEIGHT_STRING : INITIAL_NAV_TOP_STRING,
+        }}
+      >
+        <div className="container mx-auto px-6">
+          <div className="flex justify-center items-center py-4">
+            <p className="text-red-500 text-sm">Failed to load navigation menu</p>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav
@@ -65,19 +158,28 @@ const NavigationBar: React.FC = () => {
     >
       <div className="container mx-auto px-6">
         <ul className="flex justify-center gap-x-8">
-          {menuItems.map((item, index) => (
-            <NavigationMenuItem
-              key={index}
-              item={item}
-              index={index}
-              activeMenuIndex={activeMenuIndex}
-              onMenuClick={handleMenuClick}
-            />
-          ))}
+          {isLoading ? (
+            // Show skeleton loading for menu items - simulate typical menu count
+            Array.from({ length: 6 }, (_, index) => (
+              <MenuItemSkeleton key={`skeleton-${index}`} />
+            ))
+          ) : (
+            menuItems.map((item, index) => (
+              <NavigationMenuItem
+                key={`${item.title}-${index}`}
+                item={item}
+                index={index}
+                activeMenuIndex={activeMenuIndex}
+                onMenuClick={handleMenuClick}
+              />
+            ))
+          )}
         </ul>
       </div>
 
-      {activeMenuIndex !== null && menuItems[activeMenuIndex].megaMenuConfig && (
+      {activeMenuIndex !== null && 
+       !isLoading && 
+       menuItems[activeMenuIndex]?.megaMenuConfig && (
         // MegaMenu sẽ kế thừa hiệu ứng glass từ navClasses của NavigationBar
         // Chỉ cần thêm style riêng cho MegaMenu nếu muốn (ví dụ: shadow)
         <MegaMenu config={menuItems[activeMenuIndex].megaMenuConfig!} />

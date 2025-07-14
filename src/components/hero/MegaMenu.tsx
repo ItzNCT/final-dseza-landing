@@ -65,7 +65,7 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
         <div className={`grid ${gridCols} gap-8`}>
           {config.columns.map((column, colIndex) => (
             <div key={colIndex} className="menu-column">
-              <h5 className="text-lg font-semibold pb-3 mb-3 border-b border-foreground/10 dark:border-dseza-dark-hover/50">
+              <h5 className="text-lg font-semibold pb-3 mb-3 border-b border-dseza-light-border/40 dark:border-dseza-dark-border/40">
                 {getLocalizedTitle(column.title, column.titleEn)}
               </h5>
               <ul className="space-y-1">
@@ -76,14 +76,24 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
                     <li key={contentIndex}>
                       <div
                         className={cn(
-                          "flex items-center justify-between gap-3 py-2 px-3 rounded-md hover:bg-white/20 dark:hover:bg-dseza-dark-hover/70 transition-colors",
-                          { "cursor-pointer": !!content.items }
+                          "flex items-center justify-between gap-3 py-3 px-4 rounded-lg",
+                          "transition-all duration-200 ease-in-out",
+                          "hover:bg-dseza-light-hover/80 dark:hover:bg-dseza-dark-hover/80",
+                          "hover:scale-[1.02] hover:shadow-sm",
+                          "border border-transparent",
+                          "hover:border-dseza-light-primary/20 dark:hover:border-dseza-dark-primary/20",
+                          { "cursor-pointer": !!content.items },
+                          { "bg-dseza-light-hover/40 dark:bg-dseza-dark-hover/40": isDropdownOpen }
                         )}
                         onClick={() => content.items && toggleDropdown(dropdownId)}
                       >
                         <a
                           href={content.items ? undefined : content.url || "#"}
-                          className="flex items-center gap-3 flex-grow"
+                          className={cn(
+                            "flex items-center gap-3 flex-grow",
+                            "transition-colors duration-200",
+                            "hover:text-dseza-light-primary dark:hover:text-dseza-dark-primary"
+                          )}
                           onClick={(e) => {
                             if (content.items) {
                               e.preventDefault();
@@ -91,7 +101,11 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
                           }}
                         >
                           {content.iconName && iconMap[content.iconName] && (
-                            <span className="text-dseza-light-primary dark:text-dseza-dark-primary">
+                            <span className={cn(
+                              "text-dseza-light-primary dark:text-dseza-dark-primary",
+                              "transition-all duration-200",
+                              "group-hover:scale-110"
+                            )}>
                               {React.createElement(iconMap[content.iconName], { size: 20 })}
                             </span>
                           )}
@@ -102,19 +116,35 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
                         {content.items && (
                           <button
                             aria-expanded={isDropdownOpen}
-                            className="focus:outline-none"
+                            className={cn(
+                              "p-1 rounded-full transition-all duration-200",
+                              "hover:bg-dseza-light-primary/10 dark:hover:bg-dseza-dark-primary/10",
+                              "text-dseza-light-primary dark:text-dseza-dark-primary",
+                              "focus:outline-none focus:ring-2 focus:ring-dseza-light-primary/50 dark:focus:ring-dseza-dark-primary/50",
+                              { "rotate-180": isDropdownOpen }
+                            )}
                           >
-                            {isDropdownOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                            <ChevronDown size={16} />
                           </button>
                         )}
                       </div>
                       {content.items && isDropdownOpen && (
-                        <ul className="ml-6 mt-1 space-y-1 pl-5 border-l border-gray-300 dark:border-gray-600">
+                        <ul className="ml-6 mt-2 space-y-1 pl-6 border-l-2 border-dseza-light-primary/30 dark:border-dseza-dark-primary/30">
                           {content.items.map((item, itemIndex) => (
                             <li key={itemIndex}>
                               <a
                                 href={item.url}
-                                className="block py-1.5 px-3 rounded-md text-sm hover:bg-white/10 dark:hover:bg-dseza-dark-hover/50 transition-colors"
+                                className={cn(
+                                  "block py-2.5 px-4 rounded-lg text-sm",
+                                  "transition-all duration-200 ease-in-out",
+                                  "hover:bg-dseza-light-hover/60 dark:hover:bg-dseza-dark-hover/60",
+                                  "hover:text-dseza-light-primary dark:hover:text-dseza-dark-primary",
+                                  "hover:translate-x-1 hover:shadow-sm",
+                                  "border border-transparent",
+                                  "hover:border-dseza-light-primary/15 dark:hover:border-dseza-dark-primary/15",
+                                  "text-dseza-light-secondary-text dark:text-dseza-dark-secondary-text",
+                                  "hover:font-medium"
+                                )}
                               >
                                 {getLocalizedTitle(item.title, item.titleEn)}
                               </a>
@@ -127,7 +157,7 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
                 })}
               </ul>
               {column.specialContent && (
-                <div className="mt-5">
+                <div className="mt-6 p-4 rounded-lg border border-dseza-light-border/30 dark:border-dseza-dark-border/30 bg-dseza-light-hover/20 dark:bg-dseza-dark-hover/20">
                   {column.specialContent}
                 </div>
               )}
@@ -135,7 +165,7 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
           ))}
         </div>
         {config.featuredContent && (
-          <div className="mt-8 border-t border-foreground/10 dark:border-dseza-dark-hover/50 pt-6">
+          <div className="mt-8 border-t border-dseza-light-border/30 dark:border-dseza-dark-border/30 pt-6">
             {config.featuredContent}
           </div>
         )}

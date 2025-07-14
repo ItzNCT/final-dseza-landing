@@ -1,11 +1,14 @@
 
 import React from "react";
+import { Link } from "react-router-dom";
 import { useTheme } from "@/context/ThemeContext";
 import { cn } from "@/lib/utils";
 import { Calendar } from "lucide-react";
 import { useTranslation } from "@/utils/translations";
 import { useLanguage } from "@/context/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useHomepageData } from "@/hooks/useHomepageData";
+import { getImageWithFallback } from "@/utils/drupal";
 
 // Define types for event data
 interface EventCardProps {
@@ -23,7 +26,7 @@ interface EventCardProps {
  * Individual mobile event card component
  */
 const MobileEventCard: React.FC<EventCardProps> = ({ 
-  image, date, title, titleEn, excerpt, excerptEn, url = "#" 
+  id, image, date, title, titleEn, excerpt, excerptEn, url = "#" 
 }) => {
   const { theme } = useTheme();
   const { language } = useLanguage();
@@ -40,8 +43,8 @@ const MobileEventCard: React.FC<EventCardProps> = ({
   const hoverShadow = theme === "dark" ? "hover:shadow-xl hover:shadow-black/35" : "hover:shadow-xl";
   
   return (
-    <a
-      href={url}
+    <Link
+      to={`/su-kien/${id}`}
       className={cn(
         "block rounded-xl overflow-hidden",
         cardBg,
@@ -84,7 +87,7 @@ const MobileEventCard: React.FC<EventCardProps> = ({
           </p>
         )}
       </div>
-    </a>
+    </Link>
   );
 };
 
@@ -117,64 +120,25 @@ const EventCardSkeleton: React.FC = () => {
 const MobileFeaturedEvents: React.FC = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const { data, isLoading, isError } = useHomepageData();
   
   // Theme-specific styles for the section container
   const sectionBg = theme === "dark" ? "bg-[#1E272F]" : "bg-white";
   const titleText = theme === "dark" ? "text-white" : "text-black";
   
-  // Sample event data - in a real app, this would come from an API
-  const events = [
-    {
-      id: "1",
-      image: "/media/Featuredevent/Featuredevent1.png",
-      date: "20/05/2025",
-      title: "Hội nghị xúc tiến đầu tư công nghệ cao Đà Nẵng năm 2025",
-      titleEn: "Da Nang High-Tech Investment Promotion Conference 2025",
-      excerpt: "Hội nghị xúc tiến đầu tư công nghệ cao Đà Nẵng năm 2025 với sự tham gia của nhiều doanh nghiệp lớn trong và ngoài nước.",
-      excerptEn: "Da Nang High-Tech Investment Promotion Conference 2025 with the participation of many large domestic and foreign enterprises.",
-      url: "#event1"
-    },
-    {
-      id: "2",
-      image: "/media/Featuredevent/Featuredevent2.png",
-      date: "15/05/2025",
-      title: "Triển lãm công nghệ và đổi mới sáng tạo khu công nghệ cao",
-      titleEn: "High-Tech Park Technology and Innovation Exhibition",
-      excerpt: "Triển lãm giới thiệu các thành tựu công nghệ mới nhất và các dự án đổi mới sáng tạo từ các doanh nghiệp trong khu công nghệ cao.",
-      excerptEn: "Exhibition introducing the latest technological achievements and innovation projects from businesses in the high-tech park.",
-      url: "#event2"
-    },
-    {
-      id: "3",
-      image: "/media/Featuredevent/Featuredevent3.png",
-      date: "10/05/2025",
-      title: "Hội thảo ứng dụng AI trong sản xuất công nghiệp",
-      titleEn: "Workshop on AI Applications in Industrial Production",
-      excerpt: "Hội thảo chia sẻ kinh nghiệm và giải pháp ứng dụng trí tuệ nhân tạo vào quy trình sản xuất công nghiệp hiện đại.",
-      excerptEn: "Workshop sharing experiences and solutions for applying artificial intelligence to modern industrial production processes.",
-      url: "#event3"
-    },
-    {
-      id: "4",
-      image: "/media/Featuredevent/Featuredevent4.png",
-      date: "05/05/2025",
-      title: "Khóa đào tạo chuyên sâu về phát triển phần mềm",
-      titleEn: "Advanced Software Development Training Course",
-      excerpt: "Khóa đào tạo nâng cao kỹ năng lập trình và phát triển phần mềm cho các kỹ sư công nghệ thông tin.",
-      excerptEn: "Training course to enhance programming and software development skills for IT engineers.",
-      url: "#event4"
-    },
-    {
-      id: "5",
-      image: "/media/Featuredevent/Featuredevent5.png",
-      date: "01/05/2025",
-      title: "Lễ khánh thành nhà máy sản xuất chip bán dẫn",
-      titleEn: "Opening Ceremony of Semiconductor Chip Manufacturing Plant",
-      excerpt: "Lễ khánh thành nhà máy sản xuất chip bán dẫn công nghệ cao đầu tiên tại Khu công nghệ cao Đà Nẵng.",
-      excerptEn: "Opening ceremony of the first high-tech semiconductor chip manufacturing plant in Da Nang High-Tech Park.",
-      url: "#event5"
+  // Format date function
+  const formatDate = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
     }
-  ];
+  };
 
   return (
     <section className={cn(
@@ -189,22 +153,50 @@ const MobileFeaturedEvents: React.FC = () => {
         {t('featuredEvents.title') || "SỰ KIỆN TIÊU ĐIỂM"}
       </h2>
       
-      {/* Events List (Vertical Stack) */}
-      <div className="flex flex-col space-y-4">
-        {events.map((event) => (
-          <MobileEventCard
-            key={event.id}
-            id={event.id}
-            image={event.image}
-            date={event.date}
-            title={event.title}
-            titleEn={event.titleEn}
-            excerpt={event.excerpt}
-            excerptEn={event.excerptEn}
-            url={event.url}
-          />
-        ))}
-      </div>
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex flex-col space-y-4">
+          {[...Array(3)].map((_, index) => (
+            <EventCardSkeleton key={index} />
+          ))}
+        </div>
+      )}
+
+      {/* Error State */}
+      {isError && (
+        <div className="text-center py-8">
+          <p className={cn("text-lg", titleText)}>
+            {t('common.errorLoading') || 'Có lỗi xảy ra khi tải dữ liệu sự kiện.'}
+          </p>
+        </div>
+      )}
+
+      {/* Data State */}
+      {data?.events && !isLoading && !isError && (
+        <div className="flex flex-col space-y-4">
+          {data.events.map((event) => (
+            <MobileEventCard
+              key={event.id}
+              id={event.id}
+                             image={getImageWithFallback(event.featured_image)}
+              date={formatDate(event.start_date)}
+              title={event.title}
+              titleEn={event.title} // API doesn't have separate English titles yet
+              excerpt={event.description}
+              excerptEn={event.description} // API doesn't have separate English descriptions yet
+            />
+          ))}
+        </div>
+      )}
+
+      {/* No Data State */}
+      {data && !data.events?.length && !isLoading && !isError && (
+        <div className="text-center py-8">
+          <p className={cn("text-lg", titleText)}>
+            {t('featuredEvents.noEvents') || 'Chưa có sự kiện nào được đăng tải.'}
+          </p>
+        </div>
+      )}
     </section>
   );
 };

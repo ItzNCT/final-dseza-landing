@@ -4,6 +4,8 @@ import { Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/utils/translations";
 import { useLanguage } from "@/context/LanguageContext";
+import { useHomepageData } from "@/hooks/useHomepageData";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ZoneData {
   id: number;
@@ -16,6 +18,47 @@ interface ZoneData {
   imageLarge: string;
 }
 
+// MainDisplaySkeleton component for loading state
+const MainDisplaySkeleton = () => {
+  const { theme } = useTheme();
+  
+  return (
+    <div className="relative h-80 sm:h-96 md:h-[400px] rounded-2xl overflow-hidden mb-8">
+      <Skeleton className="absolute inset-0 w-full h-full" />
+      
+      {/* Bottom left skeleton */}
+      <div className="absolute bottom-6 left-6">
+        <Skeleton className="h-8 w-64 mb-2 bg-white/20" />
+        <div className="flex items-center">
+          <Building2 className="w-5 h-5 mr-2 text-white/60" />
+          <Skeleton className="h-5 w-32 bg-white/20" />
+        </div>
+      </div>
+      
+      {/* Bottom right skeleton */}
+      <div className="absolute bottom-6 right-6 text-right">
+        <Skeleton className="h-4 w-32 mb-1 bg-white/20" />
+        <div className="h-2 w-32 sm:w-48 bg-white/30 rounded-full mb-2">
+          <Skeleton className="h-full w-3/4 rounded-full bg-white/20" />
+        </div>
+        <Skeleton className="h-4 w-28 bg-white/20" />
+      </div>
+    </div>
+  );
+};
+
+// ZoneThumbnailSkeleton component for loading state
+const ZoneThumbnailSkeleton = () => {
+  return (
+    <div className="relative h-48 rounded-lg overflow-hidden">
+      <Skeleton className="absolute inset-0 w-full h-full" />
+      <div className="absolute bottom-0 left-0 right-0">
+        <Skeleton className="h-8 w-full bg-white/20" />
+      </div>
+    </div>
+  );
+};
+
 /**
  * Functional Zones section displaying Da Nang's industrial and high-tech zones
  */
@@ -24,14 +67,19 @@ const FunctionalZones: React.FC = () => {
   const [selectedZone, setSelectedZone] = useState<number>(1);
   const { t } = useTranslation();
   const { language } = useLanguage();
+  const { data, isLoading, isError } = useHomepageData();
   
   // Theme-specific styles
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
   const primaryAccent = theme === "dark" ? "bg-dseza-dark-primary-accent" : "bg-dseza-light-primary-accent";
   const secondaryAccent = theme === "dark" ? "bg-dseza-dark-secondary-accent" : "bg-dseza-light-secondary-accent";
   
-  // Zones data with real images
-  const zonesData: ZoneData[] = [
+  const getZoneName = (zone: ZoneData): string => {
+    return language === 'vi' ? zone.nameVi : zone.nameEn;
+  };
+
+  // Fallback zones data until API implements functionalZones
+  const fallbackZonesData: ZoneData[] = [
     { 
       id: 1, 
       nameVi: "Khu công nghệ Cao Đà Nẵng", 
@@ -114,11 +162,10 @@ const FunctionalZones: React.FC = () => {
     }
   ];
 
-  const getZoneName = (zone: ZoneData): string => {
-    return language === 'vi' ? zone.nameVi : zone.nameEn;
-  };
-
-  const currentZone = zonesData.find(zone => zone.id === selectedZone) || zonesData[0];
+  // Get functional zones from API data (fallback to static data until API is ready)
+  // TODO: Replace with data?.functionalZones when API implements this endpoint
+  const functionalZones = data?.news ? fallbackZonesData : [];
+  const currentZone = functionalZones.find((zone: ZoneData) => zone.id === selectedZone) || functionalZones[0];
   
   return (
     <section className={cn(
@@ -133,69 +180,106 @@ const FunctionalZones: React.FC = () => {
           {t('functionalZones.title')}
         </h2>
         
-        {/* Large interactive display panel */}
-        <div 
-          className="relative h-80 sm:h-96 md:h-[400px] rounded-2xl overflow-hidden mb-8" 
-          style={{
-            backgroundImage: `url(${currentZone.imageLarge})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        >
-          <div className="absolute inset-0 bg-black/40"></div>
-          
-          {/* Bottom left - Zone name and enterprise info */}
-          <div className="absolute bottom-6 left-6">
-            <h3 className="font-montserrat font-bold text-2xl md:text-3xl text-white mb-2">
-              {getZoneName(currentZone)}
-            </h3>
-            <div className="flex items-center text-white">
-              <Building2 className="w-5 h-5 mr-2" />
-              <span className="font-inter text-lg">{currentZone.enterprises} {t('functionalZones.enterprises')}</span>
+        {/* Loading State */}
+        {isLoading && (
+          <>
+            <MainDisplaySkeleton />
+            
+            {/* Grid of zone thumbnail skeletons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <ZoneThumbnailSkeleton key={index} />
+              ))}
             </div>
+          </>
+        )}
+
+        {/* Error State */}
+        {isError && (
+          <div className="text-center py-12">
+            <p className={cn("text-lg", textColor)}>
+              {t('common.errorLoading') || 'Có lỗi xảy ra khi tải dữ liệu khu chức năng.'}
+            </p>
           </div>
-          
-          {/* Bottom right - Occupancy and area info */}
-          <div className="absolute bottom-6 right-6 text-right">
-            <p className="text-white font-inter mb-1">{t('functionalZones.occupancyRate')}: {currentZone.occupancy}%</p>
-            <div className="h-2 w-32 sm:w-48 bg-white/30 rounded-full mb-2">
-              <div 
-                className={`h-full rounded-full ${primaryAccent}`}
-                style={{ width: `${currentZone.occupancy}%` }}
-              ></div>
-            </div>
-            <p className="text-white font-inter">{t('functionalZones.area')}: {currentZone.area}</p>
-          </div>
-        </div>
-        
-        {/* Grid of zone thumbnails */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {zonesData.map(zone => (
+        )}
+
+        {/* Data State */}
+        {functionalZones.length > 0 && !isLoading && !isError && currentZone && (
+          <>
+            {/* Large interactive display panel */}
             <div 
-              key={zone.id}
-              className={cn(
-                "relative h-48 rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:scale-105",
-                zone.id === selectedZone ? "ring-2 ring-offset-2" : "",
-                theme === "dark" ? "ring-dseza-dark-primary-accent" : "ring-dseza-light-primary-accent"
-              )}
-              onClick={() => setSelectedZone(zone.id)}
+              className="relative h-80 sm:h-96 md:h-[400px] rounded-2xl overflow-hidden mb-8" 
               style={{
-                backgroundImage: `url(${zone.imageThumb})`,
+                backgroundImage: `url(${currentZone.imageLarge})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}
             >
-              <div className="absolute bottom-0 left-0 right-0">
-                <div className={cn(
-                  "px-3 py-2 font-montserrat font-medium text-white text-xs",
-                  zone.id === selectedZone ? primaryAccent : secondaryAccent
-                )}>
-                  {getZoneName(zone)}
+              <div className="absolute inset-0 bg-black/40"></div>
+              
+              {/* Bottom left - Zone name and enterprise info */}
+              <div className="absolute bottom-6 left-6">
+                <h3 className="font-montserrat font-bold text-2xl md:text-3xl text-white mb-2">
+                  {getZoneName(currentZone)}
+                </h3>
+                <div className="flex items-center text-white">
+                  <Building2 className="w-5 h-5 mr-2" />
+                  <span className="font-inter text-lg">{currentZone.enterprises} {t('functionalZones.enterprises')}</span>
                 </div>
               </div>
+              
+              {/* Bottom right - Occupancy and area info */}
+              <div className="absolute bottom-6 right-6 text-right">
+                <p className="text-white font-inter mb-1">{t('functionalZones.occupancyRate')}: {currentZone.occupancy}%</p>
+                <div className="h-2 w-32 sm:w-48 bg-white/30 rounded-full mb-2">
+                  <div 
+                    className={`h-full rounded-full ${primaryAccent}`}
+                    style={{ width: `${currentZone.occupancy}%` }}
+                  ></div>
+                </div>
+                <p className="text-white font-inter">{t('functionalZones.area')}: {currentZone.area}</p>
+              </div>
             </div>
-          ))}
-        </div>
+            
+            {/* Grid of zone thumbnails */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {functionalZones.map((zone: ZoneData) => (
+                <div 
+                  key={zone.id}
+                  className={cn(
+                    "relative h-48 rounded-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:scale-105",
+                    zone.id === selectedZone ? "ring-2 ring-offset-2" : "",
+                    theme === "dark" ? "ring-dseza-dark-primary-accent" : "ring-dseza-light-primary-accent"
+                  )}
+                  onClick={() => setSelectedZone(zone.id)}
+                  style={{
+                    backgroundImage: `url(${zone.imageThumb})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                >
+                  <div className="absolute bottom-0 left-0 right-0">
+                    <div className={cn(
+                      "px-3 py-2 font-montserrat font-medium text-white text-xs",
+                      zone.id === selectedZone ? primaryAccent : secondaryAccent
+                    )}>
+                      {getZoneName(zone)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* No Data State */}
+        {data && functionalZones.length === 0 && !isLoading && !isError && (
+          <div className="text-center py-12">
+            <p className={cn("text-lg", textColor)}>
+              {t('functionalZones.noZones') || 'Chưa có thông tin về các khu chức năng.'}
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -9,6 +9,8 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import ArticleDetailPage from "@/pages/Article/ArticleDetailPage";
+import EventDetailPage from "@/pages/Event/EventDetailPage";
 import MobileLayout from "./components/mobile/MobileLayout";
 
 // Create a client
@@ -26,6 +28,8 @@ const App: React.FC = () => (
               <MobileLayout>
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/bai-viet/:uuid" element={<ArticleDetailPage />} />
+                  <Route path="/su-kien/:uuid" element={<EventDetailPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

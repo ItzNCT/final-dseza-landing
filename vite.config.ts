@@ -28,6 +28,12 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,   // đặt true nếu backend dùng SSL hợp lệ
         },
+        // Proxy cho GraphQL endpoints
+        '/graphql': {
+          target: API_TARGET,
+          changeOrigin: true,
+          secure: false,
+        },
         // (tuỳ chọn) proxy luôn cả OAuth, REST khác…
         '/oauth': {
           target: API_TARGET,

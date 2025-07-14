@@ -1,33 +1,34 @@
 import React from "react";
-import { ChevronRight, Calendar, Tag, Share2, Facebook, Twitter, Mail, Copy } from "lucide-react";
+import { ChevronRight, Calendar, MapPin, Share2, Facebook, Twitter, Mail, Copy } from "lucide-react";
 import { useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { cn } from "@/lib/utils";
-import { useArticleDetail } from "@/api/hooks";
-import { extractImageUrl } from "@/utils/drupal";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * ArticleDetailPage component for displaying detailed article content
+ * EventDetailPage component for displaying detailed event content
  */
-const ArticleDetailPage: React.FC = () => {
+const EventDetailPage: React.FC = () => {
   const { toast } = useToast();
   const { uuid } = useParams<{ uuid: string }>();
-  const { data, isLoading, isError, error } = useArticleDetail(uuid || '');
+  // TODO: Implement useEventDetail hook similar to useArticleDetail
+  const data = null;
+  const isLoading = false;
+  const isError = false;
+  const error = null;
 
   // Debug logging
-  // console.log('ArticleDetailPage Debug:', { uuid, isLoading, isError, error, data });
+  // console.log('EventDetailPage Debug:', { uuid, isLoading, isError, error, data });
 
   const handleShare = (platform: string) => {
     const url = window.location.href;
-    const title = data?.data?.attributes?.title || "Bài viết";
+    const title = "Sự kiện";
     
     switch (platform) {
       case 'facebook':
@@ -43,20 +44,11 @@ const ArticleDetailPage: React.FC = () => {
         navigator.clipboard.writeText(url).then(() => {
           toast({
             title: "Đã sao chép!",
-            description: "Đường dẫn bài viết đã được sao chép vào clipboard.",
+            description: "Đường dẫn sự kiện đã được sao chép vào clipboard.",
           });
         });
         break;
     }
-  };
-
-  // Get featured image URL from included data
-  const getFeaturedImageUrl = () => {
-    if (!data?.data?.relationships?.field_anh_dai_dien || !data?.included) {
-      return null;
-    }
-    
-    return extractImageUrl(data.data.relationships.field_anh_dai_dien, data.included);
   };
 
   // Format date
@@ -77,7 +69,7 @@ const ArticleDetailPage: React.FC = () => {
         <LogoSearchBar />
         <NavigationBar />
         
-        <main className="pt-52"> {/* Increased padding to accommodate full header */}
+        <main className="pt-52">
           {/* Breadcrumb Skeleton */}
           <div className="bg-muted/30 py-4">
             <div className="container mx-auto px-4">
@@ -85,7 +77,7 @@ const ArticleDetailPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Article Content Skeleton */}
+          {/* Event Content Skeleton */}
           <div className="container mx-auto px-4 py-8">
             <article className="max-w-4xl mx-auto">
               {/* Title Skeleton */}
@@ -126,14 +118,14 @@ const ArticleDetailPage: React.FC = () => {
         <LogoSearchBar />
         <NavigationBar />
         
-        <main className="pt-52"> {/* Increased padding to accommodate full header */}
+        <main className="pt-52">
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-4xl font-bold mb-4 text-destructive">
-                Không thể tải bài viết
+                Không thể tải sự kiện
               </h1>
               <p className="text-muted-foreground mb-8">
-                {error?.message || "Đã có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau."}
+                {error?.message || "Đã có lỗi xảy ra khi tải sự kiện. Vui lòng thử lại sau."}
               </p>
               <Button onClick={() => window.history.back()}>
                 Quay lại
@@ -147,7 +139,7 @@ const ArticleDetailPage: React.FC = () => {
     );
   }
 
-  if (!data?.data) {
+  if (!data) {
     return (
       <div className="min-h-screen bg-background">
         {/* Header */}
@@ -155,18 +147,18 @@ const ArticleDetailPage: React.FC = () => {
         <LogoSearchBar />
         <NavigationBar />
         
-        <main className="pt-52"> {/* Increased padding to accommodate full header */}
+        <main className="pt-52">
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-4xl font-bold mb-4">
-                Không tìm thấy bài viết
+                Không tìm thấy sự kiện
               </h1>
               <p className="text-muted-foreground mb-8">
-                Bài viết bạn tìm kiếm không tồn tại hoặc đã bị xóa.
+                Sự kiện bạn tìm kiếm không tồn tại hoặc đã bị xóa.
               </p>
               {/* Debug: Show current UUID */}
               <p className="text-sm text-muted-foreground mb-4">
-                Article UUID: {uuid}
+                Event UUID: {uuid}
               </p>
               <div className="space-y-4">
                 <Button onClick={() => window.history.back()}>
@@ -177,36 +169,25 @@ const ArticleDetailPage: React.FC = () => {
                 <div className="text-sm text-muted-foreground border p-4 rounded-lg bg-muted/50">
                   <p className="font-semibold mb-2">Debug Information:</p>
                   <p>Base URL: https://dseza-backend.lndo.site</p>
-                  <p>Full URL: https://dseza-backend.lndo.site/jsonapi/node/bai-viet/{uuid}</p>
+                  <p>Full URL: https://dseza-backend.lndo.site/jsonapi/node/su-kien/{uuid}</p>
                   <p className="mt-2">Bạn có thể kiểm tra API trực tiếp tại:</p>
                   <div className="mt-2 space-y-1">
                     <a 
-                      href="https://dseza-backend.lndo.site/jsonapi/node/bai-viet" 
+                      href="https://dseza-backend.lndo.site/jsonapi/node/su-kien" 
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline block"
                     >
-                      📋 Danh sách tất cả bài viết
+                      📋 Danh sách tất cả sự kiện
                     </a>
                     <a 
-                      href={`https://dseza-backend.lndo.site/jsonapi/node/bai-viet/${uuid}?include=field_anh_dai_dien.field_media_image`}
+                      href={`https://dseza-backend.lndo.site/jsonapi/node/su-kien/${uuid}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline block"
                     >
-                      🔍 Chi tiết bài viết UUID: {uuid}
+                      🔍 Chi tiết sự kiện UUID: {uuid}
                     </a>
-                  </div>
-                </div>
-                
-                {/* Debug: Test with sample IDs */}
-                <div className="text-sm text-muted-foreground">
-                  <p>Thử test với các ID mẫu:</p>
-                  <div className="flex gap-2 justify-center mt-2">
-                    <a href="/bai-viet/1" className="text-blue-600 hover:underline">ID: 1</a>
-                    <a href="/bai-viet/2" className="text-blue-600 hover:underline">ID: 2</a>
-                    <a href="/bai-viet/3" className="text-blue-600 hover:underline">ID: 3</a>
-                    <a href="/bai-viet/4" className="text-blue-600 hover:underline">ID: 4</a>
                   </div>
                 </div>
               </div>
@@ -219,18 +200,16 @@ const ArticleDetailPage: React.FC = () => {
     );
   }
 
-  const article = data.data;
-  const featuredImageUrl = getFeaturedImageUrl();
-
+  // TODO: Implement event detail rendering when data is available
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - Complete header structure */}
+      {/* Header */}
       <TopBar />
       <LogoSearchBar />
       <NavigationBar />
       
       {/* Main Content */}
-      <main className="pt-52"> {/* Increased padding to accommodate full header */}
+      <main className="pt-52">
         {/* Breadcrumb */}
         <div className="bg-muted/30 py-4">
           <div className="container mx-auto px-4">
@@ -239,67 +218,49 @@ const ArticleDetailPage: React.FC = () => {
                 Trang chủ
               </a>
               <ChevronRight className="h-4 w-4" />
-              <a href="/tin-tuc" className="hover:text-primary transition-colors">
-                Tin tức
+              <a href="/su-kien" className="hover:text-primary transition-colors">
+                Sự kiện
               </a>
               <ChevronRight className="h-4 w-4" />
               <span className="text-foreground font-medium line-clamp-1">
-                {article.attributes.title}
+                Sự kiện
               </span>
             </nav>
           </div>
         </div>
 
-        {/* Article Content */}
+        {/* Event Content */}
         <div className="container mx-auto px-4 py-8">
           <article className="max-w-4xl mx-auto">
-            {/* Article Header */}
+            {/* Event Header */}
             <header className="mb-8">
               <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
-                {article.attributes.title}
+                Chi tiết sự kiện
               </h1>
               
               {/* Meta Information */}
               <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-6">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span>Ngày đăng: {formatDate(article.attributes.created)}</span>
+                  <span>Thời gian: Đang cập nhật</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Tag className="h-4 w-4" />
-                  <span>Chuyên mục: Tin tức</span>
+                  <MapPin className="h-4 w-4" />
+                  <span>Địa điểm: Đang cập nhật</span>
                 </div>
               </div>
             </header>
 
-            {/* Featured Image */}
-            {featuredImageUrl && (
-              <div className="mb-8">
-                <img
-                  src={featuredImageUrl}
-                  alt={article.attributes.title}
-                  className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
-                />
-                <p className="text-sm text-muted-foreground mt-2 text-center italic">
-                  {article.attributes.title}
-                </p>
-              </div>
-            )}
-
-            {/* Article Content */}
+            {/* Event Content */}
             <div className="prose prose-lg max-w-none mt-8">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(article.attributes.body.processed)
-                }}
-              />
+              <p>Nội dung sự kiện đang được cập nhật...</p>
             </div>
 
             {/* Share Section */}
             <div className="mt-12 pt-8 border-t">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Share2 className="h-5 w-5" />
-                Chia sẻ bài viết:
+                Chia sẻ sự kiện:
               </h3>
               <div className="flex flex-wrap gap-3">
                 <Button
@@ -350,4 +311,4 @@ const ArticleDetailPage: React.FC = () => {
   );
 };
 
-export default ArticleDetailPage;
+export default EventDetailPage; 
