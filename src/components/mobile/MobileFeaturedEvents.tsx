@@ -44,7 +44,7 @@ const MobileEventCard: React.FC<EventCardProps> = ({
   
   return (
     <Link
-      to={`/su-kien/${id}`}
+      to={`/bai-viet/${id}`}
       className={cn(
         "block rounded-xl overflow-hidden",
         cardBg,

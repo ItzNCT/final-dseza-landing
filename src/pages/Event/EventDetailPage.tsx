@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useEventDetail } from "@/api/hooks";
 
 /**
  * EventDetailPage component for displaying detailed event content
@@ -17,18 +18,14 @@ import { useToast } from "@/hooks/use-toast";
 const EventDetailPage: React.FC = () => {
   const { toast } = useToast();
   const { uuid } = useParams<{ uuid: string }>();
-  // TODO: Implement useEventDetail hook similar to useArticleDetail
-  const data = null;
-  const isLoading = false;
-  const isError = false;
-  const error = null;
+  const { data, isLoading, isError, error } = useEventDetail(uuid!);
 
   // Debug logging
   // console.log('EventDetailPage Debug:', { uuid, isLoading, isError, error, data });
 
   const handleShare = (platform: string) => {
     const url = window.location.href;
-    const title = "Sự kiện";
+    const title = data?.data?.attributes?.title || "Sự kiện";
     
     switch (platform) {
       case 'facebook':
@@ -50,6 +47,13 @@ const EventDetailPage: React.FC = () => {
         break;
     }
   };
+
+  // Extract event data from API response
+  const eventData = data?.data?.attributes;
+  const eventTitle = eventData?.title || "";
+  const eventDate = eventData?.created || "";
+  const eventContent = eventData?.body?.processed || eventData?.body?.value || "";
+  const eventFeatured = eventData?.field_su_kien_tieu_bieu || false;
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -169,24 +173,24 @@ const EventDetailPage: React.FC = () => {
                 <div className="text-sm text-muted-foreground border p-4 rounded-lg bg-muted/50">
                   <p className="font-semibold mb-2">Debug Information:</p>
                   <p>Base URL: https://dseza-backend.lndo.site</p>
-                  <p>Full URL: https://dseza-backend.lndo.site/jsonapi/node/su-kien/{uuid}</p>
+                  <p>Full URL: https://dseza-backend.lndo.site/jsonapi/node/bai-viet/{uuid}</p>
                   <p className="mt-2">Bạn có thể kiểm tra API trực tiếp tại:</p>
                   <div className="mt-2 space-y-1">
                     <a 
-                      href="https://dseza-backend.lndo.site/jsonapi/node/su-kien" 
+                      href="https://dseza-backend.lndo.site/jsonapi/node/bai-viet?filter[field_su_kien_tieu_bieu][value]=1" 
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline block"
                     >
-                      📋 Danh sách tất cả sự kiện
+                      📋 Danh sách sự kiện tiêu điểm
                     </a>
                     <a 
-                      href={`https://dseza-backend.lndo.site/jsonapi/node/su-kien/${uuid}`}
+                      href={`https://dseza-backend.lndo.site/jsonapi/node/bai-viet/${uuid}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline block"
                     >
-                      🔍 Chi tiết sự kiện UUID: {uuid}
+                      🔍 Chi tiết bài viết UUID: {uuid}
                     </a>
                   </div>
                 </div>
@@ -223,7 +227,7 @@ const EventDetailPage: React.FC = () => {
               </a>
               <ChevronRight className="h-4 w-4" />
               <span className="text-foreground font-medium line-clamp-1">
-                Sự kiện
+                {eventTitle || "Sự kiện"}
               </span>
             </nav>
           </div>
@@ -235,15 +239,23 @@ const EventDetailPage: React.FC = () => {
             {/* Event Header */}
             <header className="mb-8">
               <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
-                Chi tiết sự kiện
+                {eventTitle || "Chi tiết sự kiện"}
               </h1>
+              
+              {eventFeatured && (
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium mb-4">
+                  <span>✨ Sự kiện nổi bật</span>
+                </div>
+              )}
               
               {/* Meta Information */}
               <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-6">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>Thời gian: Đang cập nhật</span>
-                </div>
+                {eventDate && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(eventDate)}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   <span>Địa điểm: Đang cập nhật</span>
@@ -253,7 +265,11 @@ const EventDetailPage: React.FC = () => {
 
             {/* Event Content */}
             <div className="prose prose-lg max-w-none mt-8">
-              <p>Nội dung sự kiện đang được cập nhật...</p>
+              {eventContent ? (
+                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(eventContent) }} />
+              ) : (
+                <p>Nội dung sự kiện đang được cập nhật...</p>
+              )}
             </div>
 
             {/* Share Section */}

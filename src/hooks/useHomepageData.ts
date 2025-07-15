@@ -178,9 +178,10 @@ async function fetchMainMenuData(): Promise<MainMenuData> {
 async function fetchNewsList(baseUrl: string): Promise<NewsItem[]> {
   const url = `${baseUrl}/jsonapi/node/bai-viet`
     + '?filter[status][value]=1'               // Published
+    // Note: We'll filter out featured events on frontend side for simplicity
     + '&sort=-created'                         // Newest first
-    + '&page[limit]=4'                         // 4 articles
-    + '&include=field_anh_dai_dien.field_media_image';
+    + '&page[limit]=8'                         // 8 articles (filter to 4 regular news)
+    + '&include=field_anh_dai_dien.field_media_image,field_chuyen_muc'; // Include featured images for homepage
 
   const response = await fetch(url, {
     headers: {
@@ -195,28 +196,43 @@ async function fetchNewsList(baseUrl: string): Promise<NewsItem[]> {
 
   const data = await response.json();
 
-  return data.data?.map((item: any) => ({
-    id: item.id,                 // JSON:API id is UUID
-    title: item.attributes.title,
-    summary: item.attributes.body?.summary || item.attributes.body?.value?.substring(0, 200) + '...' || '',
-    published_date: item.attributes.created,
-    featured_image: extractImageUrl(item.relationships.field_anh_dai_dien, data.included),
-    category: 'bai-viet',
-  })) || [];
+  return data.data
+    ?.filter((item: any) => !item.attributes.field_su_kien_tieu_bieu) // Exclude featured events from news
+    ?.map((item: any) => {
+      // Get category name from included data
+      let categoryName = 'Tin tức';
+      if (item.relationships?.field_chuyen_muc?.data?.length > 0 && data.included) {
+        const categoryId = item.relationships.field_chuyen_muc.data[0].id;
+        const categoryItem = data.included.find((inc: any) => 
+          inc.type === 'taxonomy_term--news_category' && inc.id === categoryId
+        );
+        if (categoryItem) {
+          categoryName = categoryItem.attributes.name;
+        }
+      }
+
+      return {
+        id: item.id,                 // JSON:API id is UUID
+        title: item.attributes.title,
+        summary: item.attributes.body?.summary || item.attributes.body?.value?.substring(0, 200) + '...' || '',
+        published_date: item.attributes.created,
+        featured_image: extractImageUrl(item.relationships.field_anh_dai_dien, data.included), // Restore featured images for homepage
+        category: categoryName,
+      };
+    })
+    ?.slice(0, 4) || []; // Take only first 4 after filtering
 }
 
 /**
  * Fetch featured events from JSON:API
  */
 async function fetchFeaturedEvents(baseUrl: string): Promise<Event[]> {
-  const url = `${baseUrl}/jsonapi/node/su-kien`
+  const url = `${baseUrl}/jsonapi/node/bai-viet`
     + '?filter[status][value]=1'
-    + '&filter[field_start_date][value][condition][operator]=>='
-    + `&filter[field_start_date][value][condition][value]=${new Date().toISOString()}`
-    + '&filter[field_featured][value]=1'       // Chỉ sự kiện gắn featured
-    + '&sort=field_start_date'
+    + '&filter[field_su_kien_tieu_bieu][value]=1'       // Chỉ bài viết được đánh dấu sự kiện tiêu điểm
+    + '&sort=-created'                                   // Sắp xếp theo ngày tạo mới nhất
     + '&page[limit]=4'
-    + '&include=field_featured_image.field_media_image';
+    + '&include=field_anh_dai_dien.field_media_image,field_chuyen_muc'; // Include featured images for homepage
 
   const response = await fetch(url, {
     headers: {
@@ -234,11 +250,11 @@ async function fetchFeaturedEvents(baseUrl: string): Promise<Event[]> {
   return data.data?.map((item: any) => ({
     id: item.id,
     title: item.attributes.title,
-    description: item.attributes.body?.value || item.attributes.field_description || '',
-    start_date: item.attributes.field_start_date,
-    end_date: item.attributes.field_end_date || undefined,
-    location: item.attributes.field_location || '',
-    featured_image: extractImageUrl(item.relationships?.field_featured_image, data.included),
+    description: item.attributes.body?.processed || item.attributes.body?.value || '',
+    start_date: item.attributes.created,                 // Sử dụng ngày tạo làm ngày sự kiện
+    end_date: undefined,
+    location: '',                                        // Bài viết không có địa điểm
+    featured_image: extractImageUrl(item.relationships?.field_anh_dai_dien, data.included), // Restore featured images for homepage
   })) || [];
 }
 

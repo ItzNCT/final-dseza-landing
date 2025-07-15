@@ -75,7 +75,7 @@ const EventCard = ({ id, image, date, title, titleEn, excerpt, excerptEn, featur
   
   return (
     <Link 
-      to={`/su-kien/${id}`}
+      to={`/bai-viet/${id}`}
       className={cn(
         "relative overflow-hidden rounded-xl group block", // Added 'block' for proper link display
         isFeature ? 'col-span-2 row-span-2' : ''

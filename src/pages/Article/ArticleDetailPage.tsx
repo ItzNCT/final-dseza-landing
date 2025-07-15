@@ -5,6 +5,7 @@ import DOMPurify from "dompurify";
 import { cn } from "@/lib/utils";
 import { useArticleDetail } from "@/api/hooks";
 import { extractImageUrl } from "@/utils/drupal";
+import { processRichTextContent, extractFirstImageFromRichText } from "@/utils/richTextProcessor";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
@@ -50,13 +51,168 @@ const ArticleDetailPage: React.FC = () => {
     }
   };
 
-  // Get featured image URL from included data
+  // Get featured image URL from included data or rich text
   const getFeaturedImageUrl = () => {
-    if (!data?.data?.relationships?.field_anh_dai_dien || !data?.included) {
+    // First try to get from field_anh_dai_dien
+    if (data?.data?.relationships?.field_anh_dai_dien?.data && data?.included) {
+      const imageUrl = extractImageUrl(data.data.relationships.field_anh_dai_dien, data.included);
+      if (imageUrl) return imageUrl;
+    }
+
+    // If no featured image field, try to extract from rich text content
+    const richTextContent = getRichTextContent();
+    if (richTextContent && data?.included) {
+      const firstImage = extractFirstImageFromRichText(richTextContent, data.included);
+      if (firstImage) return firstImage;
+    }
+
+    return null;
+  };
+
+  // Get raw rich text content for processing
+  const getRichTextContent = (): string => {
+    if (!data?.data?.relationships?.field_noi_dung_bai_viet?.data || !data?.included) {
+      return data?.data?.attributes?.body?.processed || data?.data?.attributes?.body?.value || '';
+    }
+    
+    const paragraphIds = data.data.relationships.field_noi_dung_bai_viet.data.map((rel: any) => rel.id);
+    const paragraphs = data.included
+      .filter((item: any) => paragraphIds.includes(item.id))
+      .sort((a: any, b: any) => {
+        const aIndex = paragraphIds.indexOf(a.id);
+        const bIndex = paragraphIds.indexOf(b.id);
+        return aIndex - bIndex;
+      });
+    
+    let content = '';
+    
+    paragraphs.forEach((paragraph: any) => {
+      if (paragraph.type === 'paragraph--rich_text_block') {
+        if (paragraph.attributes?.field_rich_text?.processed) {
+          content += paragraph.attributes.field_rich_text.processed;
+        } else if (paragraph.attributes?.field_text?.processed) {
+          content += paragraph.attributes.field_text.processed;
+        } else if (paragraph.attributes?.field_content?.processed) {
+          content += paragraph.attributes.field_content.processed;
+        } else if (paragraph.attributes?.field_body?.processed) {
+          content += paragraph.attributes.field_body.processed;
+        }
+      }
+    });
+    
+    return content;
+  };
+
+  // Get categories from included data
+  const getCategories = () => {
+    if (!data?.data?.relationships?.field_chuyen_muc?.data || !data?.included) {
+      return [];
+    }
+    
+    const categoryIds = data.data.relationships.field_chuyen_muc.data.map((rel: any) => rel.id);
+    const categories = data.included
+      .filter((item: any) => item.type === 'taxonomy_term--news_category' && categoryIds.includes(item.id))
+      .map((item: any) => ({
+        id: item.id,
+        name: item.attributes.name
+      }));
+    
+    return categories;
+  };
+
+  // Get meta description
+  const getMetaDescription = () => {
+    const metatags = data?.data?.attributes?.metatag || [];
+    const descriptionTag = metatags.find((tag: any) => tag.attributes?.name === 'description');
+    return descriptionTag?.attributes?.content || '';
+  };
+
+  // Check if article is featured event
+  const isFeaturedEvent = () => {
+    return data?.data?.attributes?.field_su_kien_tieu_bieu || false;
+  };
+
+  // Get paragraphs content or fallback to body
+  const getArticleContent = () => {
+    if (!data?.data?.relationships?.field_noi_dung_bai_viet?.data || !data?.included) {
+      // No paragraphs available - use body field if available
+      const bodyContent = data?.data?.attributes?.body?.processed || data?.data?.attributes?.body?.value || '';
+      if (bodyContent) {
+        return processRichTextContent(bodyContent, data?.included);
+      }
+      return '<p class="text-muted-foreground italic">Nội dung bài viết đang được cập nhật...</p>';
+    }
+    
+    const paragraphIds = data.data.relationships.field_noi_dung_bai_viet.data.map((rel: any) => rel.id);
+    const paragraphs = data.included
+      .filter((item: any) => paragraphIds.includes(item.id))
+      .sort((a: any, b: any) => {
+        // Sort by the order in the relationships
+        const aIndex = paragraphIds.indexOf(a.id);
+        const bIndex = paragraphIds.indexOf(b.id);
+        return aIndex - bIndex;
+      });
+    
+    let content = '';
+    
+    paragraphs.forEach((paragraph: any) => {
+      switch (paragraph.type) {
+        case 'paragraph--rich_text_block':
+          // Get raw rich text content
+          let richTextContent = '';
+          if (paragraph.attributes?.field_rich_text?.processed) {
+            richTextContent = paragraph.attributes.field_rich_text.processed;
+          } else if (paragraph.attributes?.field_text?.processed) {
+            richTextContent = paragraph.attributes.field_text.processed;
+          } else if (paragraph.attributes?.field_content?.processed) {
+            richTextContent = paragraph.attributes.field_content.processed;
+          } else if (paragraph.attributes?.field_body?.processed) {
+            richTextContent = paragraph.attributes.field_body.processed;
+          } else {
+            // Log all available attributes for debugging
+            console.log('Rich text paragraph attributes:', Object.keys(paragraph.attributes || {}));
+          }
+          
+          // Process rich text content with image handling
+          if (richTextContent) {
+            content += processRichTextContent(richTextContent, data.included);
+          }
+          break;
+          
+        case 'paragraph--image_block':
+          // Handle image blocks with proper image extraction
+          const imageUrl = getImageFromParagraph(paragraph);
+          if (imageUrl) {
+            const imageCaption = paragraph.attributes?.field_caption || paragraph.attributes?.field_alt_text || '';
+            content += `
+              <figure class="my-6 text-center">
+                <img src="${imageUrl}" alt="${imageCaption}" class="max-w-full h-auto rounded-lg shadow-md mx-auto" loading="lazy" />
+                ${imageCaption ? `<figcaption class="text-sm text-gray-600 mt-2 italic">${imageCaption}</figcaption>` : ''}
+              </figure>
+            `;
+          } else {
+            content += '<div class="image-block-placeholder my-4 p-4 bg-gray-100 text-center text-gray-600 rounded border-2 border-dashed">[Hình ảnh đang được tải...]</div>';
+          }
+          break;
+          
+        default:
+          // Handle other paragraph types as needed
+          console.log('Unknown paragraph type:', paragraph.type, 'attributes:', Object.keys(paragraph.attributes || {}));
+          content += `<div class="unknown-paragraph-type my-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm">[Nội dung ${paragraph.type}]</div>`;
+          break;
+      }
+    });
+    
+    return content || '<p class="text-muted-foreground italic">Nội dung paragraphs trống.</p>';
+  };
+
+  // Helper function to extract image from paragraph
+  const getImageFromParagraph = (paragraph: any): string | null => {
+    if (!paragraph.relationships?.field_image?.data || !data?.included) {
       return null;
     }
     
-    return extractImageUrl(data.data.relationships.field_anh_dai_dien, data.included);
+    return extractImageUrl(paragraph.relationships.field_image, data.included);
   };
 
   // Format date
@@ -219,8 +375,12 @@ const ArticleDetailPage: React.FC = () => {
     );
   }
 
-  const article = data.data;
-  const featuredImageUrl = getFeaturedImageUrl();
+      const article = data.data;
+    const featuredImageUrl = getFeaturedImageUrl();
+    const categories = getCategories();
+    const metaDescription = getMetaDescription();
+    const isFeatured = isFeaturedEvent();
+    const articleContent = getArticleContent();
 
   return (
     <div className="min-h-screen bg-background">
@@ -240,7 +400,7 @@ const ArticleDetailPage: React.FC = () => {
               </a>
               <ChevronRight className="h-4 w-4" />
               <a href="/tin-tuc" className="hover:text-primary transition-colors">
-                Tin tức
+                {isFeatured ? 'Tin tức' : (categories.length > 0 ? categories[0].name : 'Tin tức')}
               </a>
               <ChevronRight className="h-4 w-4" />
               <span className="text-foreground font-medium line-clamp-1">
@@ -259,38 +419,49 @@ const ArticleDetailPage: React.FC = () => {
                 {article.attributes.title}
               </h1>
               
+              {/* Featured Badge */}
+              {isFeatured && (
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium mb-4">
+                  <span>✨ Sự kiện tiêu điểm</span>
+                </div>
+              )}
+              
+              {/* Meta Description */}
+              {metaDescription && (
+                <p className="text-lg text-muted-foreground mb-4 italic">
+                  {metaDescription}
+                </p>
+              )}
+              
               {/* Meta Information */}
               <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-6">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   <span>Ngày đăng: {formatDate(article.attributes.created)}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Tag className="h-4 w-4" />
-                  <span>Chuyên mục: Tin tức</span>
-                </div>
+                {categories.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    <span>Chuyên mục: </span>
+                    <div className="flex gap-1">
+                      {categories.map((category, index) => (
+                        <Badge key={category.id} variant="secondary" className="text-xs">
+                          {category.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </header>
 
-            {/* Featured Image */}
-            {featuredImageUrl && (
-              <div className="mb-8">
-                <img
-                  src={featuredImageUrl}
-                  alt={article.attributes.title}
-                  className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
-                />
-                <p className="text-sm text-muted-foreground mt-2 text-center italic">
-                  {article.attributes.title}
-                </p>
-              </div>
-            )}
+            {/* Images are now handled within paragraphs content */}
 
             {/* Article Content */}
             <div className="prose prose-lg max-w-none mt-8">
               <div
                 dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(article.attributes.body.processed)
+                  __html: DOMPurify.sanitize(articleContent)
                 }}
               />
             </div>

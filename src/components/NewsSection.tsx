@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "@/utils/translations";
 import { useLanguage } from "@/context/LanguageContext";
 import { useHomepageData } from "@/hooks/useHomepageData";
+import { useNewsCategories, type NewsCategory } from "@/hooks/useNewsCategories";
+import { useAllNews } from "@/hooks/useAllNews";
 import { getImageWithFallback } from "@/utils/drupal";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -105,12 +107,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ date, title, titleEn, excerpt, exce
   );
 };
 
-// Interface for categories
-interface NewsCategory {
-  id: string;
-  name: string;
-  nameEn?: string;
-}
+
 
 /**
  * News section with category filters
@@ -120,7 +117,8 @@ const NewsSection: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { data, isLoading, isError } = useHomepageData();
+  const { data: allNewsData, isLoading: newsLoading, isError: newsError } = useAllNews();
+  const { data: categoriesData, isLoading: categoriesLoading, isError: categoriesError } = useNewsCategories();
 
   // Theme-specific styles
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
@@ -130,24 +128,40 @@ const NewsSection: React.FC = () => {
   const buttonBorder = theme === "dark" ? "border-[#19DBCF]" : "border-[#416628]";
   const buttonHoverBg = theme === "dark" ? "hover:bg-[#19DBCF]/10" : "hover:bg-[#416628]/10";
 
-  // Categories for filtering
+  // Build categories array with "All News" plus dynamic categories from API
   const categories: NewsCategory[] = [
     {
       id: "all",
-      name: "Tất cả tin tức",
-      nameEn: "All News"
+      name: "Tất cả tin tức", 
+      nameEn: "All News",
+      tid: 0,
+      weight: -1
     },
-    {
-      id: "bai-viet",
-      name: "Tin tức chung",
-      nameEn: "General News"
-    }
+    ...(categoriesData || [])
   ];
 
   // Filter news based on selected category
-  const filteredNews = data?.news?.filter(article => 
-    activeCategory === "all" || article.category === activeCategory
-  ) || [];
+  const filteredNews = React.useMemo(() => {
+    if (!allNewsData) return [];
+    if (activeCategory === "all") return allNewsData;
+    
+    // Find the selected category
+    const selectedCategory = categories.find(cat => cat.id === activeCategory);
+    if (!selectedCategory) return [];
+    
+    // Filter by checking if the selected category name exists in any of the article's categories
+    return allNewsData.filter(article => {
+      // Check both primary category and all categories
+      const primaryMatch = article.category?.trim() === selectedCategory.name?.trim();
+      const allCategoriesMatch = article.all_categories?.some(cat => 
+        cat?.trim() === selectedCategory.name?.trim()
+      );
+      
+      return primaryMatch || allCategoriesMatch;
+    });
+  }, [allNewsData, activeCategory, categories]);
+
+
 
   return (
     <section className={cn(
@@ -164,24 +178,33 @@ const NewsSection: React.FC = () => {
 
         {/* Category Tabs */}
         <div className="flex flex-wrap justify-start mb-8 gap-2">
-          {categories.map(category => (
-            <button
-              key={category.id}
-              className={cn(
-                "px-4 py-2 rounded-md transition-colors duration-200 font-inter text-sm sm:text-base",
-                activeCategory === category.id ? accentColor : secondaryTextColor,
-                activeCategory === category.id ? "font-medium" : "font-normal",
-                "hover:text-opacity-90"
-              )}
-              onClick={() => setActiveCategory(category.id)}
-            >
-              {language === 'en' && category.nameEn ? category.nameEn : category.name}
-            </button>
-          ))}
+          {categoriesLoading ? (
+            // Show skeleton for category tabs while loading
+            <>
+              <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-8 w-28" />
+            </>
+          ) : (
+            categories.map(category => (
+              <button
+                key={category.id}
+                className={cn(
+                  "px-4 py-2 rounded-md transition-colors duration-200 font-inter text-sm sm:text-base",
+                  activeCategory === category.id ? accentColor : secondaryTextColor,
+                  activeCategory === category.id ? "font-medium" : "font-normal",
+                  "hover:text-opacity-90"
+                )}
+                onClick={() => setActiveCategory(category.id)}
+              >
+                {language === 'en' && category.nameEn ? category.nameEn : category.name}
+              </button>
+            ))
+          )}
         </div>
 
         {/* Loading State */}
-        {isLoading && (
+        {(newsLoading || categoriesLoading) && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Large news card skeleton */}
             <div className="lg:col-span-2">
@@ -196,7 +219,7 @@ const NewsSection: React.FC = () => {
         )}
 
         {/* Error State */}
-        {isError && (
+        {(newsError || categoriesError) && (
           <div className="text-center py-12">
             <p className={cn("text-lg", textColor)}>
               {t('common.errorLoading') || 'Có lỗi xảy ra khi tải dữ liệu tin tức.'}
@@ -205,7 +228,7 @@ const NewsSection: React.FC = () => {
         )}
 
         {/* Data State */}
-        {filteredNews.length > 0 && !isLoading && !isError && (
+        {filteredNews.length > 0 && !newsLoading && !newsError && !categoriesLoading && !categoriesError && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Large news card */}
             <div className="lg:col-span-2">
@@ -241,7 +264,7 @@ const NewsSection: React.FC = () => {
         )}
 
         {/* No Data State */}
-        {data && filteredNews.length === 0 && !isLoading && !isError && (
+        {allNewsData && filteredNews.length === 0 && !newsLoading && !newsError && !categoriesLoading && !categoriesError && (
           <div className="text-center py-12">
             <p className={cn("text-lg", textColor)}>
               {t('news.noNews') || 'Chưa có tin tức nào được đăng tải.'}
@@ -250,7 +273,7 @@ const NewsSection: React.FC = () => {
         )}
 
         {/* View All Button - Only show when there are articles */}
-        {filteredNews.length > 0 && !isLoading && !isError && (
+        {filteredNews.length > 0 && !newsLoading && !newsError && !categoriesLoading && !categoriesError && (
           <div className="flex justify-center mt-8">
             <a
               href={`#view-more-${activeCategory}`}
