@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { HelpCircle, Search, Plus, User, Calendar } from "lucide-react";
+import { HelpCircle, Search, Plus, User, Calendar, ChevronRight } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
+import TopBar from "@/components/hero/TopBar";
+import LogoSearchBar from "@/components/hero/LogoSearchBar";
+import NavigationBar from "@/components/hero/NavigationBar";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +29,7 @@ import {
  * QnAListPage component for displaying Q&A list with filters and pagination
  */
 const QnAListPage: React.FC = () => {
+  const { theme } = useTheme();
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
     content: "",
@@ -106,263 +112,316 @@ const QnAListPage: React.FC = () => {
   const totalPages = Math.ceil(totalQuestions / questionsPerPage);
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        
-        {/* Header Action Area */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Danh sách câu hỏi đáp</h1>
-          <Button onClick={handleCreateQuestion} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Tạo câu hỏi
-          </Button>
+    <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+      {/* Header - Complete header structure */}
+      <TopBar />
+      <LogoSearchBar />
+      <NavigationBar />
+      
+      {/* Main Content */}
+      <main className="flex-1 pt-52">
+        {/* Breadcrumb */}
+        <div className={`py-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
+          <div className="container mx-auto px-4">
+            <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+              <a 
+                href="/" 
+                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
+                Trang chủ
+              </a>
+              <ChevronRight className="h-4 w-4" />
+              <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                Hỏi đáp
+              </span>
+            </nav>
+          </div>
         </div>
 
-        {/* Filter Area */}
-        <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            {/* Content Search */}
-            <div className="space-y-2">
-              <Label htmlFor="content">Nội dung tìm</Label>
-              <Input
-                id="content"
-                placeholder="Nhập từ khóa tìm kiếm"
-                value={filters.content}
-                onChange={(e) => handleFilterChange("content", e.target.value)}
-              />
-            </div>
-
-            {/* Category Filter */}
-            <div className="space-y-2">
-              <Label htmlFor="category">Lĩnh vực</Label>
-              <Select onValueChange={(value) => handleFilterChange("category", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn lĩnh vực" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả</SelectItem>
-                  <SelectItem value="thu-tuc-hanh-chinh">Thủ tục hành chính</SelectItem>
-                  <SelectItem value="chinh-sach-uu-dai">Chính sách ưu đãi</SelectItem>
-                  <SelectItem value="quy-hoach-xay-dung">Quy hoạch xây dựng</SelectItem>
-                  <SelectItem value="chinh-sach-lao-dong">Chính sách lao động</SelectItem>
-                  <SelectItem value="giay-phep-kinh-doanh">Giấy phép kinh doanh</SelectItem>
-                  <SelectItem value="ho-tro-khoi-nghiep">Hỗ trợ khởi nghiệp</SelectItem>
-                  <SelectItem value="ha-tang-ky-thuat">Hạ tầng kỹ thuật</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Date From */}
-            <div className="space-y-2">
-              <Label htmlFor="dateFrom">Thời gian từ ngày</Label>
-              <Input
-                id="dateFrom"
-                type="date"
-                value={filters.dateFrom}
-                onChange={(e) => handleFilterChange("dateFrom", e.target.value)}
-              />
-            </div>
-
-            {/* Date To */}
-            <div className="space-y-2">
-              <Label htmlFor="dateTo">Đến ngày</Label>
-              <Input
-                id="dateTo"
-                type="date"
-                value={filters.dateTo}
-                onChange={(e) => handleFilterChange("dateTo", e.target.value)}
-              />
-            </div>
-
-          </div>
-
-          {/* Search Button */}
-          <div className="mt-6 flex justify-center">
-            <Button onClick={handleSearch} className="px-8">
-              <Search className="h-4 w-4 mr-2" />
-              Tìm kiếm
+        {/* QnA Content */}
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          
+          {/* Header Action Area */}
+          <div className="flex justify-between items-center mb-8">
+            <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+              Danh sách câu hỏi đáp
+            </h1>
+            <Button 
+              onClick={handleCreateQuestion} 
+              className={`flex items-center gap-2 ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'}`}
+            >
+              <Plus className="h-4 w-4" />
+              Tạo câu hỏi
             </Button>
           </div>
-        </div>
 
-        {/* Questions List */}
-        <div className="space-y-6">
-          
-          {/* Questions Title */}
-          <h2 className="text-2xl font-semibold mb-6">CÂU HỎI</h2>
-
-          {/* Results Count */}
-          <div className="text-sm text-muted-foreground mb-4">
-            Hiển thị {totalQuestions} câu hỏi
-          </div>
-
-          {/* Questions Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {qaData.map((qa) => (
-              <div 
-                key={qa.id} 
-                className="p-4 flex items-start gap-4 bg-gray-100 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow"
-              >
-                <div className="flex-shrink-0">
-                  <HelpCircle className="h-6 w-6 text-primary mt-1" />
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  {/* Question Link */}
-                  <a 
-                    href={`/qna/${qa.id}`}
-                    className="font-bold text-foreground hover:text-primary transition-colors block mb-2 leading-tight"
-                  >
-                    {qa.question}
-                  </a>
-
-                  {/* Category Badge */}
-                  <div className="mb-2">
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                      {qa.category}
-                    </span>
-                  </div>
-
-                  {/* Sender and Date Info */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <User className="h-3 w-3" />
-                      <span>Người gửi: {qa.sender}</span>
-                    </div>
-                    <span className="hidden sm:inline">|</span>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      <span>Ngày gửi: {qa.sendDate}</span>
-                    </div>
-                  </div>
-
-                  {/* Status */}
-                  <div className="mt-2">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      qa.status === "Đã trả lời" 
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                        : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                    }`}>
-                      {qa.status}
-                    </span>
-                  </div>
-                </div>
+          {/* Filter Area */}
+          <div className={`p-6 rounded-lg mb-8 ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg' : 'bg-dseza-light-secondary-bg'}`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              {/* Content Search */}
+              <div className="space-y-2">
+                <Label htmlFor="content" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
+                  Nội dung tìm
+                </Label>
+                <Input
+                  id="content"
+                  placeholder="Nhập từ khóa tìm kiếm"
+                  value={filters.content}
+                  onChange={(e) => handleFilterChange("content", e.target.value)}
+                  className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                />
               </div>
-            ))}
+
+              {/* Category Filter */}
+              <div className="space-y-2">
+                <Label htmlFor="category" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
+                  Lĩnh vực
+                </Label>
+                <Select onValueChange={(value) => handleFilterChange("category", value)}>
+                  <SelectTrigger className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'}`}>
+                    <SelectValue placeholder="Chọn lĩnh vực" />
+                  </SelectTrigger>
+                  <SelectContent className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'}`}>
+                    <SelectItem value="all">Tất cả</SelectItem>
+                    <SelectItem value="thu-tuc-hanh-chinh">Thủ tục hành chính</SelectItem>
+                    <SelectItem value="chinh-sach-uu-dai">Chính sách ưu đãi</SelectItem>
+                    <SelectItem value="quy-hoach-xay-dung">Quy hoạch xây dựng</SelectItem>
+                    <SelectItem value="chinh-sach-lao-dong">Chính sách lao động</SelectItem>
+                    <SelectItem value="giay-phep-kinh-doanh">Giấy phép kinh doanh</SelectItem>
+                    <SelectItem value="ho-tro-khoi-nghiep">Hỗ trợ khởi nghiệp</SelectItem>
+                    <SelectItem value="ha-tang-ky-thuat">Hạ tầng kỹ thuật</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Date From */}
+              <div className="space-y-2">
+                <Label htmlFor="dateFrom" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
+                  Thời gian từ ngày
+                </Label>
+                <Input
+                  id="dateFrom"
+                  type="date"
+                  value={filters.dateFrom}
+                  onChange={(e) => handleFilterChange("dateFrom", e.target.value)}
+                  className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'}`}
+                />
+              </div>
+
+              {/* Date To */}
+              <div className="space-y-2">
+                <Label htmlFor="dateTo" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
+                  Đến ngày
+                </Label>
+                <Input
+                  id="dateTo"
+                  type="date"
+                  value={filters.dateTo}
+                  onChange={(e) => handleFilterChange("dateTo", e.target.value)}
+                  className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'}`}
+                />
+              </div>
+
+            </div>
+
+            {/* Search Button */}
+            <div className="mt-6 flex justify-center">
+              <Button 
+                onClick={handleSearch} 
+                className={`px-8 ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'}`}
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Tìm kiếm
+              </Button>
+            </div>
           </div>
 
-          {/* Pagination */}
-          <div className="flex justify-center mt-8">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    href="#" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (currentPage > 1) setCurrentPage(currentPage - 1);
-                    }}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-                
-                <PaginationItem>
-                  <PaginationLink 
-                    href="#" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setCurrentPage(1);
-                    }}
-                    isActive={currentPage === 1}
-                  >
-                    1
-                  </PaginationLink>
-                </PaginationItem>
-                
-                {totalPages > 1 && (
+          {/* Questions List */}
+          <div className="space-y-6">
+            
+            {/* Questions Title */}
+            <h2 className={`text-2xl font-semibold mb-6 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+              CÂU HỎI
+            </h2>
+
+            {/* Results Count */}
+            <div className={`text-sm mb-4 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+              Hiển thị {totalQuestions} câu hỏi
+            </div>
+
+            {/* Questions Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {qaData.map((qa) => (
+                <div 
+                  key={qa.id} 
+                  className={`p-4 flex items-start gap-4 rounded-lg hover:shadow-md transition-shadow ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg' : 'bg-dseza-light-secondary-bg'}`}
+                >
+                  <div className="flex-shrink-0">
+                    <HelpCircle className={`h-6 w-6 mt-1 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    {/* Question Link */}
+                    <a 
+                      href={`/qna/${qa.id}`}
+                      className={`font-bold block mb-2 leading-tight transition-colors ${theme === 'dark' ? 'text-dseza-dark-main-text hover:text-dseza-dark-primary' : 'text-dseza-light-main-text hover:text-dseza-light-primary'}`}
+                    >
+                      {qa.question}
+                    </a>
+
+                    {/* Category Badge */}
+                    <div className="mb-2">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${theme === 'dark' ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-100 text-blue-800'}`}>
+                        {qa.category}
+                      </span>
+                    </div>
+
+                    {/* Sender and Date Info */}
+                    <div className={`flex flex-col sm:flex-row sm:items-center gap-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      <div className="flex items-center gap-1">
+                        <User className="h-3 w-3" />
+                        <span>Người gửi: {qa.sender}</span>
+                      </div>
+                      <span className="hidden sm:inline">|</span>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        <span>Ngày gửi: {qa.sendDate}</span>
+                      </div>
+                    </div>
+
+                    {/* Status */}
+                    <div className="mt-2">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        qa.status === "Đã trả lời" 
+                          ? (theme === 'dark' ? 'bg-green-900/50 text-green-300' : 'bg-green-100 text-green-800')
+                          : (theme === 'dark' ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-800')
+                      }`}>
+                        {qa.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <div className="flex justify-center mt-8">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      href="#" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage > 1) setCurrentPage(currentPage - 1);
+                      }}
+                      className={`${currentPage === 1 ? 'pointer-events-none opacity-50' : ''} ${theme === 'dark' ? 'text-dseza-dark-main-text hover:text-dseza-dark-primary' : 'text-dseza-light-main-text hover:text-dseza-light-primary'}`}
+                    />
+                  </PaginationItem>
+                  
                   <PaginationItem>
                     <PaginationLink 
                       href="#" 
                       onClick={(e) => {
                         e.preventDefault();
-                        setCurrentPage(2);
+                        setCurrentPage(1);
                       }}
-                      isActive={currentPage === 2}
+                      isActive={currentPage === 1}
+                      className={`${currentPage === 1 ? (theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-bg' : 'bg-dseza-light-primary text-white') : (theme === 'dark' ? 'text-dseza-dark-main-text hover:text-dseza-dark-primary' : 'text-dseza-light-main-text hover:text-dseza-light-primary')}`}
                     >
-                      2
+                      1
                     </PaginationLink>
                   </PaginationItem>
-                )}
-                
-                {totalPages > 2 && (
-                  <>
-                    <PaginationItem>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                    
+                  
+                  {totalPages > 1 && (
                     <PaginationItem>
                       <PaginationLink 
                         href="#" 
                         onClick={(e) => {
                           e.preventDefault();
-                          setCurrentPage(totalPages);
+                          setCurrentPage(2);
                         }}
-                        isActive={currentPage === totalPages}
+                        isActive={currentPage === 2}
+                        className={`${currentPage === 2 ? (theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-bg' : 'bg-dseza-light-primary text-white') : (theme === 'dark' ? 'text-dseza-dark-main-text hover:text-dseza-dark-primary' : 'text-dseza-light-main-text hover:text-dseza-light-primary')}`}
                       >
-                        {totalPages}
+                        2
                       </PaginationLink>
                     </PaginationItem>
-                  </>
-                )}
-                
-                <PaginationItem>
-                  <PaginationNext 
-                    href="#" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-                    }}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+                  )}
+                  
+                  {totalPages > 2 && (
+                    <>
+                      <PaginationItem>
+                        <PaginationEllipsis className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} />
+                      </PaginationItem>
+                      
+                      <PaginationItem>
+                        <PaginationLink 
+                          href="#" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(totalPages);
+                          }}
+                          isActive={currentPage === totalPages}
+                          className={`${currentPage === totalPages ? (theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-bg' : 'bg-dseza-light-primary text-white') : (theme === 'dark' ? 'text-dseza-dark-main-text hover:text-dseza-dark-primary' : 'text-dseza-light-main-text hover:text-dseza-light-primary')}`}
+                        >
+                          {totalPages}
+                        </PaginationLink>
+                      </PaginationItem>
+                    </>
+                  )}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      href="#" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                      }}
+                      className={`${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''} ${theme === 'dark' ? 'text-dseza-dark-main-text hover:text-dseza-dark-primary' : 'text-dseza-light-main-text hover:text-dseza-light-primary'}`}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
 
-          {/* Statistics Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-              <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
-                Tổng câu hỏi
-              </h3>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {totalQuestions}
-              </p>
-            </div>
-            
-            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-              <h3 className="font-semibold text-green-800 dark:text-green-200 mb-2">
-                Đã trả lời
-              </h3>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {qaData.filter(qa => qa.status === "Đã trả lời").length}
-              </p>
-            </div>
-            
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
-              <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
-                Đang xử lý
-              </h3>
-              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                {qaData.filter(qa => qa.status === "Đang xử lý").length}
-              </p>
+            {/* Statistics Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
+                <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-blue-300' : 'text-blue-800'}`}>
+                  Tổng câu hỏi
+                </h3>
+                <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                  {totalQuestions}
+                </p>
+              </div>
+              
+              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'}`}>
+                <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-green-300' : 'text-green-800'}`}>
+                  Đã trả lời
+                </h3>
+                <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
+                  {qaData.filter(qa => qa.status === "Đã trả lời").length}
+                </p>
+              </div>
+              
+              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-yellow-900/20' : 'bg-yellow-50'}`}>
+                <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-800'}`}>
+                  Đang xử lý
+                </h3>
+                <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                  {qaData.filter(qa => qa.status === "Đang xử lý").length}
+                </p>
+              </div>
             </div>
           </div>
         </div>
+      </main>
 
-      </div>
-    </main>
+      {/* Footer */}
+      <Footer />
+    </div>
   );
 };
 

@@ -3,6 +3,7 @@ import { ChevronRight, Calendar, MapPin, Share2, Facebook, Twitter, Mail, Copy }
 import { useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/context/ThemeContext";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
@@ -17,6 +18,7 @@ import { useEventDetail } from "@/api/hooks";
  */
 const EventDetailPage: React.FC = () => {
   const { toast } = useToast();
+  const { theme } = useTheme();
   const { uuid } = useParams<{ uuid: string }>();
   const { data, isLoading, isError, error } = useEventDetail(uuid!);
 
@@ -67,15 +69,15 @@ const EventDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
         {/* Header */}
         <TopBar />
         <LogoSearchBar />
         <NavigationBar />
         
-        <main className="pt-52">
+        <main className="flex-1 pt-52">
           {/* Breadcrumb Skeleton */}
-          <div className="bg-muted/30 py-4">
+          <div className={`py-4 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
             <div className="container mx-auto px-4">
               <Skeleton className="h-4 w-96" />
             </div>
@@ -116,22 +118,25 @@ const EventDetailPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
         {/* Header */}
         <TopBar />
         <LogoSearchBar />
         <NavigationBar />
         
-        <main className="pt-52">
+        <main className="flex-1 pt-52">
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl font-bold mb-4 text-destructive">
+              <h1 className={`text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
                 Không thể tải sự kiện
               </h1>
-              <p className="text-muted-foreground mb-8">
+              <p className={`mb-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                 {error?.message || "Đã có lỗi xảy ra khi tải sự kiện. Vui lòng thử lại sau."}
               </p>
-              <Button onClick={() => window.history.back()}>
+              <Button 
+                onClick={() => window.history.back()}
+                className={theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80'}
+              >
                 Quay lại
               </Button>
             </div>
@@ -145,32 +150,35 @@ const EventDetailPage: React.FC = () => {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
         {/* Header */}
         <TopBar />
         <LogoSearchBar />
         <NavigationBar />
         
-        <main className="pt-52">
+        <main className="flex-1 pt-52">
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl font-bold mb-4">
+              <h1 className={`text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 Không tìm thấy sự kiện
               </h1>
-              <p className="text-muted-foreground mb-8">
+              <p className={`mb-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                 Sự kiện bạn tìm kiếm không tồn tại hoặc đã bị xóa.
               </p>
               {/* Debug: Show current UUID */}
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                 Event UUID: {uuid}
               </p>
               <div className="space-y-4">
-                <Button onClick={() => window.history.back()}>
+                <Button 
+                  onClick={() => window.history.back()}
+                  className={theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80'}
+                >
                   Quay lại
                 </Button>
                 
                 {/* Debug: API Information */}
-                <div className="text-sm text-muted-foreground border p-4 rounded-lg bg-muted/50">
+                <div className={`text-sm border p-4 rounded-lg ${theme === 'dark' ? 'text-dseza-dark-secondary-text border-dseza-dark-border bg-dseza-dark-secondary-bg/50' : 'text-dseza-light-secondary-text border-dseza-light-border bg-dseza-light-secondary-bg/50'}`}>
                   <p className="font-semibold mb-2">Debug Information:</p>
                   <p>Base URL: https://dseza-backend.lndo.site</p>
                   <p>Full URL: https://dseza-backend.lndo.site/jsonapi/node/bai-viet/{uuid}</p>
@@ -180,7 +188,7 @@ const EventDetailPage: React.FC = () => {
                       href="https://dseza-backend.lndo.site/jsonapi/node/bai-viet?filter[field_su_kien_tieu_bieu][value]=1" 
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline block"
+                      className={`block transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
                     >
                       📋 Danh sách sự kiện tiêu điểm
                     </a>
@@ -188,7 +196,7 @@ const EventDetailPage: React.FC = () => {
                       href={`https://dseza-backend.lndo.site/jsonapi/node/bai-viet/${uuid}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline block"
+                      className={`block transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
                     >
                       🔍 Chi tiết bài viết UUID: {uuid}
                     </a>
@@ -206,27 +214,33 @@ const EventDetailPage: React.FC = () => {
 
   // TODO: Implement event detail rendering when data is available
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header */}
       <TopBar />
       <LogoSearchBar />
       <NavigationBar />
       
       {/* Main Content */}
-      <main className="pt-52">
+      <main className="flex-1 pt-52">
         {/* Breadcrumb */}
-        <div className="bg-muted/30 py-4">
+        <div className={`py-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
           <div className="container mx-auto px-4">
-            <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <a href="/" className="hover:text-primary transition-colors">
+            <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+              <a 
+                href="/" 
+                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
                 Trang chủ
               </a>
               <ChevronRight className="h-4 w-4" />
-              <a href="/su-kien" className="hover:text-primary transition-colors">
+              <a 
+                href="/su-kien" 
+                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
                 Sự kiện
               </a>
               <ChevronRight className="h-4 w-4" />
-              <span className="text-foreground font-medium line-clamp-1">
+              <span className={`font-medium line-clamp-1 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 {eventTitle || "Sự kiện"}
               </span>
             </nav>
@@ -238,18 +252,18 @@ const EventDetailPage: React.FC = () => {
           <article className="max-w-4xl mx-auto">
             {/* Event Header */}
             <header className="mb-8">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
+              <h1 className={`text-3xl md:text-4xl font-bold mb-4 leading-tight ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 {eventTitle || "Chi tiết sự kiện"}
               </h1>
               
               {eventFeatured && (
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium mb-4">
+                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium mb-4 ${theme === 'dark' ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-800'}`}>
                   <span>✨ Sự kiện nổi bật</span>
                 </div>
               )}
               
               {/* Meta Information */}
-              <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-6">
+              <div className={`flex flex-wrap items-center gap-4 mb-6 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                 {eventDate && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
@@ -264,17 +278,19 @@ const EventDetailPage: React.FC = () => {
             </header>
 
             {/* Event Content */}
-            <div className="prose prose-lg max-w-none mt-8">
+            <div className={`prose prose-lg max-w-none mt-8 ${theme === 'dark' ? 'prose-invert' : ''}`}>
               {eventContent ? (
                 <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(eventContent) }} />
               ) : (
-                <p>Nội dung sự kiện đang được cập nhật...</p>
+                <p className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
+                  Nội dung sự kiện đang được cập nhật...
+                </p>
               )}
             </div>
 
             {/* Share Section */}
-            <div className="mt-12 pt-8 border-t">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <div className={`mt-12 pt-8 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+              <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 <Share2 className="h-5 w-5" />
                 Chia sẻ sự kiện:
               </h3>
@@ -283,7 +299,7 @@ const EventDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => handleShare('facebook')}
-                  className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300"
+                  className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-blue-900/20 hover:border-blue-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-blue-50 hover:border-blue-300'}`}
                 >
                   <Facebook className="h-4 w-4 text-blue-600" />
                   Facebook
@@ -292,7 +308,7 @@ const EventDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => handleShare('twitter')}
-                  className="flex items-center gap-2 hover:bg-sky-50 hover:border-sky-300"
+                  className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-sky-900/20 hover:border-sky-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-sky-50 hover:border-sky-300'}`}
                 >
                   <Twitter className="h-4 w-4 text-sky-500" />
                   Twitter
@@ -301,7 +317,7 @@ const EventDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => handleShare('email')}
-                  className="flex items-center gap-2 hover:bg-gray-50 hover:border-gray-300"
+                  className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-gray-700/20 hover:border-gray-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-gray-50 hover:border-gray-300'}`}
                 >
                   <Mail className="h-4 w-4 text-gray-600" />
                   Email
@@ -310,7 +326,7 @@ const EventDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => handleShare('copy')}
-                  className="flex items-center gap-2 hover:bg-green-50 hover:border-green-300"
+                  className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-green-900/20 hover:border-green-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-green-50 hover:border-green-300'}`}
                 >
                   <Copy className="h-4 w-4 text-green-600" />
                   Sao chép link

@@ -468,3 +468,167 @@ export type { DocumentFilters };
 
 // Export the fetch function for potential standalone use
 export { fetchDocuments }; 
+
+/**
+ * Interface for enterprise search filters
+ */
+interface EnterpriseFilters {
+  keyword?: string;
+  industry?: string;
+  location?: string;
+  country?: string;
+  foundedYear?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+/**
+ * Fetch enterprises from Drupal JSON:API with filters
+ * @param params - Object containing queryKey from useQuery
+ * @returns Promise containing the enterprises data
+ */
+async function fetchEnterprises({ queryKey }: { queryKey: readonly unknown[] }): Promise<any> {
+  try {
+    const filters = queryKey[1] as EnterpriseFilters;
+    const queryParams = new URLSearchParams();
+    
+    // Build query parameters based on filters using JSON:API format
+    if (filters.keyword) {
+      queryParams.append('filter[title][operator]', 'CONTAINS');
+      queryParams.append('filter[title][value]', filters.keyword);
+    }
+    
+    if (filters.location && filters.location !== 'all') {
+      // Map location values to proper taxonomy term names
+      const locationMap: { [key: string]: string } = {
+        'khu-cong-nghe-cao': 'Khu Công nghệ cao',
+        'kcn-hoa-khanh': 'KCN Hòa Khánh',
+        'kcn-lien-chieu': 'KCN Liên Chiểu',
+        'kcn-da-nang': 'KCN Đà Nẵng',
+        'kdt-an-don': 'KĐT An Đồn'
+      };
+      
+      const locationName = locationMap[filters.location] || filters.location;
+      queryParams.append('filter[field_khu_hanh_chinh.name]', locationName);
+    }
+    
+    if (filters.country && filters.country !== 'all') {
+      // Map country values to proper country names
+      const countryMap: { [key: string]: string } = {
+        'viet-nam': 'Việt Nam',
+        'han-quoc': 'Hàn Quốc',
+        'nhat-ban': 'Nhật Bản',
+        'hoa-ky': 'Hoa Kỳ',
+        'dai-loan': 'Đài Loan',
+        'duc': 'Đức',
+        'singapore': 'Singapore',
+        'trung-quoc': 'Trung Quốc'
+      };
+      
+      const countryName = countryMap[filters.country] || filters.country;
+      queryParams.append('filter[field_quoc_gia][operator]', 'CONTAINS');
+      queryParams.append('filter[field_quoc_gia][value]', countryName);
+    }
+    
+    if (filters.industry && filters.industry !== 'all') {
+      // Map industry values to proper industry names
+      const industryMap: { [key: string]: string } = {
+        'dien-tu-vien-thong': 'Điện tử viễn thông',
+        'cong-nghe-thong-tin': 'Công nghệ thông tin',
+        'hoa-chat-nhua': 'Hóa chất - Nhựa',
+        'oto-co-khi': 'Ô tô - Cơ khí',
+        'det-may': 'Dệt may',
+        'thuc-pham': 'Thực phẩm',
+        'xay-dung': 'Xây dựng',
+        'logistics': 'Logistics'
+      };
+      
+      const industryName = industryMap[filters.industry] || filters.industry;
+      queryParams.append('filter[field_linh_vuc_hoat_dong.name]', industryName);
+    }
+    
+    // Pagination - JSON:API format
+    const page = filters.page || 1;
+    const pageSize = filters.pageSize || 10;
+    const offset = (page - 1) * pageSize;
+    
+    queryParams.append('page[limit]', pageSize.toString());
+    queryParams.append('page[offset]', offset.toString());
+    
+    // Sort by creation date (newest first)
+    queryParams.append('sort', '-created');
+    
+    // Include related taxonomy terms
+    queryParams.append('include', 'field_khu_hanh_chinh,field_linh_vuc_hoat_dong');
+    
+    const url = `${JSON_API_BASE_URL}/jsonapi/node/listed_enterprise?${queryParams.toString()}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/vnd.api+json',
+        'Accept': 'application/vnd.api+json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+
+    const data = await response.json();
+    
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to fetch enterprises: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Custom hook to fetch and manage enterprises data using TanStack Query
+ * 
+ * @param filters - Object containing enterprise search filters
+ * @returns {Object} Object containing:
+ *   - data: The enterprises data from the API
+ *   - isLoading: Boolean indicating if the request is in progress
+ *   - isError: Boolean indicating if an error occurred
+ *   - error: The error object if an error occurred
+ *   - isSuccess: Boolean indicating if the request was successful
+ *   - refetch: Function to manually refetch the data
+ */
+export const useEnterprises = (filters: EnterpriseFilters = {}) => {
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+  } = useQuery({
+    queryKey: ['enterprises', filters],
+    queryFn: fetchEnterprises,
+    staleTime: 2 * 60 * 1000, // 2 minutes - enterprise search results can be cached briefly
+    gcTime: 5 * 60 * 1000, // 5 minutes cache time
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+  });
+
+  return {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+    // Additional convenience properties
+    enterprises: data?.data || [],
+    totalResults: data?.data?.length || 0,
+    hasEnterprises: !!data?.data?.length,
+  };
+};
+
+// Export types for external use
+export type { EnterpriseFilters };
+
+// Export the fetch function for potential standalone use
+export { fetchEnterprises }; 

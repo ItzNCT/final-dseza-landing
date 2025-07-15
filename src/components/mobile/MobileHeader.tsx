@@ -119,7 +119,7 @@ const mobileMenuData: MobileMenuItem[] = [
         heading: "Xem thêm",
         links: [
           { title: "Thủ tục | Hồ sơ | Dữ liệu môi trường", url: "https://dseza.danang.gov.vn/danh-sach-tin-tuc/doanh-nghiep/thu-tuc-ho-so-du-lieu-moi-truong/" },
-          { title: "Thống kê doanh nghiệp", url: "https://dseza.danang.gov.vn/thong-ke-doanh-nghiep/" },
+          { title: "Thống kê doanh nghiệp", url: "/doanh-nghiep/thong-tin-doanh-nghiep/thong-ke-doanh-nghiep" },
           { title: "Tuyển dụng", url: "https://dseza.danang.gov.vn/danh-sach-tin-tuc/doanh-nghiep/tuyen-dung/" }
         ]
       }

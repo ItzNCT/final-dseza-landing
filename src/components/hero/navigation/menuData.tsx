@@ -280,7 +280,7 @@ export const getNavigationMenuItems = (): MenuItem[] => {
               {
                 title: "Thống kê doanh nghiệp",
                 titleEn: "Business Statistics",
-                url: "https://dseza.danang.gov.vn/thong-ke-doanh-nghiep/",
+                url: "/doanh-nghiep/thong-tin-doanh-nghiep/thong-ke-doanh-nghiep",
                 iconName: "private-debt"
               },
               {

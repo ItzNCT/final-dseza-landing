@@ -3,13 +3,19 @@ import {
   MapPin, 
   Phone, 
   Mail, 
-  Fax, 
+  Printer, 
   Send, 
   User,
   Building,
   Clock,
-  Users
+  Users,
+  ChevronRight
 } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
+import TopBar from "@/components/hero/TopBar";
+import LogoSearchBar from "@/components/hero/LogoSearchBar";
+import NavigationBar from "@/components/hero/NavigationBar";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +34,7 @@ import { useToast } from "@/hooks/use-toast";
  */
 const ContactPage: React.FC = () => {
   const { toast } = useToast();
+  const { theme } = useTheme();
   const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
@@ -119,278 +126,315 @@ const ContactPage: React.FC = () => {
   ];
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        {/* Page Title */}
-        <h1 className="text-3xl md:text-4xl font-bold text-center mb-12">
-          Thông tin Liên hệ
-        </h1>
-
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Left Column - Contact Info & Map */}
-          <div className="lg:col-span-1 space-y-8">
-            
-            {/* General Contact Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building className="h-5 w-5 text-primary" />
-                  Thông tin chung
-                </CardTitle>
-                <CardDescription>
-                  Liên hệ trực tiếp với Ban Quản lý Khu Kinh tế Đà Nẵng
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-foreground">Địa chỉ</p>
-                    <p className="text-muted-foreground text-sm">
-                      Số 36 Bach Dang, Quận Hải Châu,<br />
-                      Thành phố Đà Nẵng, Việt Nam
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-foreground">Điện thoại</p>
-                    <p className="text-muted-foreground text-sm">0236.3666.117</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-primary flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-foreground">Email</p>
-                    <p className="text-muted-foreground text-sm">dseza@danang.gov.vn</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Fax className="h-5 w-5 text-primary flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-foreground">Fax</p>
-                    <p className="text-muted-foreground text-sm">0236.3666.100</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Clock className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-foreground">Giờ làm việc</p>
-                    <p className="text-muted-foreground text-sm">
-                      Thứ 2 - Thứ 6: 7:30 - 11:30, 13:30 - 17:00<br />
-                      Thứ 7: 7:30 - 11:30
-                    </p>
-                  </div>
-                </div>
-
-              </CardContent>
-            </Card>
-
-            {/* Google Map Simulation */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  Bản đồ
-                </CardTitle>
-                <CardDescription>
-                  Vị trí Ban Quản lý Khu Kinh tế Đà Nẵng
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-muted rounded-lg h-64 flex items-center justify-center border-2 border-dashed border-border">
-                  <div className="text-center text-muted-foreground">
-                    <MapPin className="h-12 w-12 mx-auto mb-3 text-primary" />
-                    <p className="font-medium">Google Map</p>
-                    <p className="text-sm">Số 36 Bach Dang, Hải Châu, Đà Nẵng</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-          </div>
-
-          {/* Right Column - Forms & Information */}
-          <div className="lg:col-span-2 space-y-8">
-            
-            {/* Contact Form */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Send className="h-5 w-5 text-primary" />
-                  Gửi Email Liên hệ
-                </CardTitle>
-                <CardDescription>
-                  Để lại thông tin, chúng tôi sẽ phản hồi bạn sớm nhất
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Họ và tên *</Label>
-                      <Input
-                        id="name"
-                        placeholder="Nhập họ và tên của bạn"
-                        value={contactForm.name}
-                        onChange={(e) => handleInputChange("name", e.target.value)}
-                        required
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="example@email.com"
-                        value={contactForm.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Tiêu đề *</Label>
-                    <Input
-                      id="subject"
-                      placeholder="Nhập tiêu đề email"
-                      value={contactForm.subject}
-                      onChange={(e) => handleInputChange("subject", e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Nội dung *</Label>
-                    <Textarea
-                      id="message"
-                      placeholder="Nhập nội dung chi tiết..."
-                      rows={6}
-                      value={contactForm.message}
-                      onChange={(e) => handleInputChange("message", e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full md:w-auto">
-                    <Send className="h-4 w-4 mr-2" />
-                    Gửi đi
-                  </Button>
-
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Leadership Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5 text-primary" />
-                  Lãnh đạo Ban Quản lý
-                </CardTitle>
-                <CardDescription>
-                  Thông tin liên hệ trực tiếp với lãnh đạo
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {leaders.map((leader) => (
-                    <Card key={leader.id} className="bg-muted/30">
-                      <CardContent className="p-4">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          {leader.name}
-                        </h4>
-                        <p className="text-sm text-primary font-medium mb-3">
-                          {leader.position}
-                        </p>
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-muted-foreground">{leader.phone}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-muted-foreground">{leader.email}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Departments Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  Các phòng ban chuyên môn
-                </CardTitle>
-                <CardDescription>
-                  Thông tin liên hệ với các phòng ban chuyên môn
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {departments.map((dept) => (
-                    <Card key={dept.id} className="bg-muted/30">
-                      <CardContent className="p-4">
-                        <h4 className="font-semibold text-foreground mb-2">
-                          {dept.name}
-                        </h4>
-                        
-                        <div className="space-y-2 mb-3">
-                          <p className="text-sm">
-                            <span className="font-medium">Trưởng phòng:</span>{" "}
-                            <span className="text-muted-foreground">{dept.head}</span>
-                          </p>
-                          
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-muted-foreground">{dept.phone}</span>
-                          </div>
-                          
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-muted-foreground">{dept.email}</span>
-                          </div>
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-medium mb-1">Chức năng chính:</p>
-                          <ul className="text-xs text-muted-foreground space-y-0.5">
-                            {dept.functions.map((func, index) => (
-                              <li key={index} className="flex items-center gap-1">
-                                <span className="w-1 h-1 bg-primary rounded-full flex-shrink-0"></span>
-                                {func}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
+    <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+      {/* Header - Complete header structure */}
+      <TopBar />
+      <LogoSearchBar />
+      <NavigationBar />
+      
+      {/* Main Content */}
+      <main className="flex-1 pt-52">
+        {/* Breadcrumb */}
+        <div className={`py-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
+          <div className="container mx-auto px-4">
+            <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+              <a 
+                href="/" 
+                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
+                Trang chủ
+              </a>
+              <ChevronRight className="h-4 w-4" />
+              <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                Liên hệ
+              </span>
+            </nav>
           </div>
         </div>
-      </div>
-    </main>
+
+        {/* Contact Content */}
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          {/* Page Title */}
+          <h1 className={`text-3xl md:text-4xl font-bold text-center mb-12 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+            Thông tin Liên hệ
+          </h1>
+
+          {/* Main Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* Left Column - Contact Info & Map */}
+            <div className="lg:col-span-1 space-y-8">
+              
+              {/* General Contact Information */}
+              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                <CardHeader>
+                  <CardTitle className={`flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    <Building className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                    Thông tin chung
+                  </CardTitle>
+                  <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
+                    Liên hệ trực tiếp với Ban Quản lý Khu Kinh tế Đà Nẵng
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  
+                  <div className="flex items-start gap-3">
+                    <MapPin className={`h-5 w-5 mt-0.5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                    <div>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Địa chỉ</p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                        Số 36 Bach Dang, Quận Hải Châu,<br />
+                        Thành phố Đà Nẵng, Việt Nam
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Phone className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                    <div>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Điện thoại</p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>0236.3666.117</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Mail className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                    <div>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Email</p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>dseza@danang.gov.vn</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Printer className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                    <div>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Fax</p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>0236.3666.100</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <Clock className={`h-5 w-5 mt-0.5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                    <div>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Giờ làm việc</p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                        Thứ 2 - Thứ 6: 7:30 - 11:30, 13:30 - 17:00<br />
+                        Thứ 7: 7:30 - 11:30
+                      </p>
+                    </div>
+                  </div>
+
+                </CardContent>
+              </Card>
+
+              {/* Google Map Simulation */}
+              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                <CardHeader>
+                  <CardTitle className={`flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    <MapPin className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                    Bản đồ
+                  </CardTitle>
+                  <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
+                    Vị trí Ban Quản lý Khu Kinh tế Đà Nẵng
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className={`rounded-lg h-64 flex items-center justify-center border-2 border-dashed ${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border' : 'bg-dseza-light-main-bg border-dseza-light-border'}`}>
+                    <div className={`text-center ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      <MapPin className={`h-12 w-12 mx-auto mb-3 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                      <p className="font-medium">Google Map</p>
+                      <p className="text-sm">Số 36 Bach Dang, Hải Châu, Đà Nẵng</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+            </div>
+
+            {/* Right Column - Forms & Information */}
+            <div className="lg:col-span-2 space-y-8">
+              
+              {/* Contact Form */}
+              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                <CardHeader>
+                  <CardTitle className={`flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    <Send className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                    Gửi Email Liên hệ
+                  </CardTitle>
+                  <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
+                    Để lại thông tin, chúng tôi sẽ phản hồi bạn sớm nhất
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Họ và tên *</Label>
+                        <Input
+                          id="name"
+                          placeholder="Nhập họ và tên của bạn"
+                          value={contactForm.name}
+                          onChange={(e) => handleInputChange("name", e.target.value)}
+                          className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Email *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="example@email.com"
+                          value={contactForm.email}
+                          onChange={(e) => handleInputChange("email", e.target.value)}
+                          className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="subject" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Tiêu đề *</Label>
+                      <Input
+                        id="subject"
+                        placeholder="Nhập tiêu đề email"
+                        value={contactForm.subject}
+                        onChange={(e) => handleInputChange("subject", e.target.value)}
+                        className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="message" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Nội dung *</Label>
+                      <Textarea
+                        id="message"
+                        placeholder="Nhập nội dung chi tiết..."
+                        rows={6}
+                        value={contactForm.message}
+                        onChange={(e) => handleInputChange("message", e.target.value)}
+                        className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                        required
+                      />
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      className={`w-full md:w-auto ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'}`}
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Gửi đi
+                    </Button>
+
+                  </form>
+                </CardContent>
+              </Card>
+
+              {/* Leadership Information */}
+              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                <CardHeader>
+                  <CardTitle className={`flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    <User className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                    Lãnh đạo Ban Quản lý
+                  </CardTitle>
+                  <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
+                    Thông tin liên hệ trực tiếp với lãnh đạo
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {leaders.map((leader) => (
+                      <Card key={leader.id} className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg/50 border-dseza-dark-border' : 'bg-dseza-light-main-bg/50 border-dseza-light-border'}`}>
+                        <CardContent className="p-4">
+                          <h4 className={`font-semibold mb-1 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                            {leader.name}
+                          </h4>
+                          <p className={`text-sm font-medium mb-3 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>
+                            {leader.position}
+                          </p>
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className={`h-3 w-3 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} />
+                              <span className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>{leader.phone}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <Mail className={`h-3 w-3 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} />
+                              <span className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>{leader.email}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Departments Information */}
+              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                <CardHeader>
+                  <CardTitle className={`flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                    Các phòng ban chuyên môn
+                  </CardTitle>
+                  <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
+                    Thông tin liên hệ với các phòng ban chuyên môn
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {departments.map((dept) => (
+                      <Card key={dept.id} className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg/50 border-dseza-dark-border' : 'bg-dseza-light-main-bg/50 border-dseza-light-border'}`}>
+                        <CardContent className="p-4">
+                          <h4 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                            {dept.name}
+                          </h4>
+                          
+                          <div className="space-y-2 mb-3">
+                            <p className="text-sm">
+                              <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Trưởng phòng:</span>{" "}
+                              <span className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>{dept.head}</span>
+                            </p>
+                            
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className={`h-3 w-3 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} />
+                              <span className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>{dept.phone}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 text-sm">
+                              <Mail className={`h-3 w-3 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} />
+                              <span className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>{dept.email}</span>
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Chức năng chính:</p>
+                            <ul className={`text-xs space-y-0.5 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                              {dept.functions.map((func, index) => (
+                                <li key={index} className="flex items-center gap-1">
+                                  <span className={`w-1 h-1 rounded-full flex-shrink-0 ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></span>
+                                  {func}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <Footer />
+    </div>
   );
 };
 

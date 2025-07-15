@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ArticleDetailPage from "@/pages/Article/ArticleDetailPage";
 import DocumentSearchPage from "@/pages/Document/DocumentSearchPage";
+import EnterpriseListPage from "@/pages/Enterprise/EnterpriseListPage";
 import MobileLayout from "./components/mobile/MobileLayout";
 
 // Create a client
@@ -31,6 +32,7 @@ const App: React.FC = () => (
                   <Route path="/bai-viet/:uuid" element={<ArticleDetailPage />} />
                   <Route path="/su-kien/:uuid" element={<ArticleDetailPage />} />
                   <Route path="/van-ban" element={<DocumentSearchPage />} />
+                  <Route path="/doanh-nghiep/thong-tin-doanh-nghiep/thong-ke-doanh-nghiep" element={<EnterpriseListPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

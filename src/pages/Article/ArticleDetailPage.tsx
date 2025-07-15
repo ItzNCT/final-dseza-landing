@@ -3,6 +3,7 @@ import { ChevronRight, Calendar, Tag, Share2, Facebook, Twitter, Mail, Copy } fr
 import { useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/context/ThemeContext";
 import { useArticleDetail } from "@/api/hooks";
 import { extractImageUrl } from "@/utils/drupal";
 import { processRichTextContent, extractFirstImageFromRichText } from "@/utils/richTextProcessor";
@@ -20,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
  */
 const ArticleDetailPage: React.FC = () => {
   const { toast } = useToast();
+  const { theme } = useTheme();
   const { uuid } = useParams<{ uuid: string }>();
   const { data, isLoading, isError, error } = useArticleDetail(uuid || '');
 
@@ -140,7 +142,7 @@ const ArticleDetailPage: React.FC = () => {
       if (bodyContent) {
         return processRichTextContent(bodyContent, data?.included);
       }
-      return '<p class="text-muted-foreground italic">Nội dung bài viết đang được cập nhật...</p>';
+      return `<p class="${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} italic">Nội dung bài viết đang được cập nhật...</p>`;
     }
     
     const paragraphIds = data.data.relationships.field_noi_dung_bai_viet.data.map((rel: any) => rel.id);
@@ -187,23 +189,23 @@ const ArticleDetailPage: React.FC = () => {
             content += `
               <figure class="my-6 text-center">
                 <img src="${imageUrl}" alt="${imageCaption}" class="max-w-full h-auto rounded-lg shadow-md mx-auto" loading="lazy" />
-                ${imageCaption ? `<figcaption class="text-sm text-gray-600 mt-2 italic">${imageCaption}</figcaption>` : ''}
+                ${imageCaption ? `<figcaption class="text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} mt-2 italic">${imageCaption}</figcaption>` : ''}
               </figure>
             `;
           } else {
-            content += '<div class="image-block-placeholder my-4 p-4 bg-gray-100 text-center text-gray-600 rounded border-2 border-dashed">[Hình ảnh đang được tải...]</div>';
+            content += `<div class="image-block-placeholder my-4 p-4 ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg' : 'bg-dseza-light-secondary-bg'} text-center ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} rounded border-2 border-dashed ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}">[Hình ảnh đang được tải...]</div>`;
           }
           break;
           
         default:
           // Handle other paragraph types as needed
           console.log('Unknown paragraph type:', paragraph.type, 'attributes:', Object.keys(paragraph.attributes || {}));
-          content += `<div class="unknown-paragraph-type my-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm">[Nội dung ${paragraph.type}]</div>`;
+          content += `<div class="unknown-paragraph-type my-2 p-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50' : 'bg-dseza-light-secondary-bg'} ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'} rounded ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} text-sm">[Nội dung ${paragraph.type}]</div>`;
           break;
       }
     });
     
-    return content || '<p class="text-muted-foreground italic">Nội dung paragraphs trống.</p>';
+    return content || `<p class="${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} italic">Nội dung paragraphs trống.</p>`;
   };
 
   // Helper function to extract image from paragraph
@@ -227,15 +229,15 @@ const ArticleDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
         {/* Header */}
         <TopBar />
         <LogoSearchBar />
         <NavigationBar />
         
-        <main className="pt-52"> {/* Increased padding to accommodate full header */}
+        <main className="flex-1 pt-52"> {/* Added flex-1 and increased padding to accommodate full header */}
           {/* Breadcrumb Skeleton */}
-          <div className="bg-muted/30 py-4">
+          <div className={`py-4 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
             <div className="container mx-auto px-4">
               <Skeleton className="h-4 w-96" />
             </div>
@@ -276,22 +278,25 @@ const ArticleDetailPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
         {/* Header */}
         <TopBar />
         <LogoSearchBar />
         <NavigationBar />
         
-        <main className="pt-52"> {/* Increased padding to accommodate full header */}
+        <main className="flex-1 pt-52"> {/* Added flex-1 and increased padding to accommodate full header */}
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl font-bold mb-4 text-destructive">
+              <h1 className={`text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
                 Không thể tải bài viết
               </h1>
-              <p className="text-muted-foreground mb-8">
+              <p className={`mb-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                 {error?.message || "Đã có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau."}
               </p>
-              <Button onClick={() => window.history.back()}>
+              <Button 
+                onClick={() => window.history.back()}
+                className={theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80'}
+              >
                 Quay lại
               </Button>
             </div>
@@ -305,32 +310,35 @@ const ArticleDetailPage: React.FC = () => {
 
   if (!data?.data) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
         {/* Header */}
         <TopBar />
         <LogoSearchBar />
         <NavigationBar />
         
-        <main className="pt-52"> {/* Increased padding to accommodate full header */}
+        <main className="flex-1 pt-52"> {/* Added flex-1 and increased padding to accommodate full header */}
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl font-bold mb-4">
+              <h1 className={`text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 Không tìm thấy bài viết
               </h1>
-              <p className="text-muted-foreground mb-8">
+              <p className={`mb-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                 Bài viết bạn tìm kiếm không tồn tại hoặc đã bị xóa.
               </p>
               {/* Debug: Show current UUID */}
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                 Article UUID: {uuid}
               </p>
               <div className="space-y-4">
-                <Button onClick={() => window.history.back()}>
+                <Button 
+                  onClick={() => window.history.back()}
+                  className={theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80'}
+                >
                   Quay lại
                 </Button>
                 
                 {/* Debug: API Information */}
-                <div className="text-sm text-muted-foreground border p-4 rounded-lg bg-muted/50">
+                <div className={`text-sm border p-4 rounded-lg ${theme === 'dark' ? 'text-dseza-dark-secondary-text border-dseza-dark-border bg-dseza-dark-secondary-bg/50' : 'text-dseza-light-secondary-text border-dseza-light-border bg-dseza-light-secondary-bg/50'}`}>
                   <p className="font-semibold mb-2">Debug Information:</p>
                   <p>Base URL: https://dseza-backend.lndo.site</p>
                   <p>Full URL: https://dseza-backend.lndo.site/jsonapi/node/bai-viet/{uuid}</p>
@@ -340,7 +348,7 @@ const ArticleDetailPage: React.FC = () => {
                       href="https://dseza-backend.lndo.site/jsonapi/node/bai-viet" 
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline block"
+                      className={`block transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
                     >
                       📋 Danh sách tất cả bài viết
                     </a>
@@ -348,7 +356,7 @@ const ArticleDetailPage: React.FC = () => {
                       href={`https://dseza-backend.lndo.site/jsonapi/node/bai-viet/${uuid}?include=field_anh_dai_dien.field_media_image`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline block"
+                      className={`block transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
                     >
                       🔍 Chi tiết bài viết UUID: {uuid}
                     </a>
@@ -356,13 +364,13 @@ const ArticleDetailPage: React.FC = () => {
                 </div>
                 
                 {/* Debug: Test with sample IDs */}
-                <div className="text-sm text-muted-foreground">
+                <div className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                   <p>Thử test với các ID mẫu:</p>
                   <div className="flex gap-2 justify-center mt-2">
-                    <a href="/bai-viet/1" className="text-blue-600 hover:underline">ID: 1</a>
-                    <a href="/bai-viet/2" className="text-blue-600 hover:underline">ID: 2</a>
-                    <a href="/bai-viet/3" className="text-blue-600 hover:underline">ID: 3</a>
-                    <a href="/bai-viet/4" className="text-blue-600 hover:underline">ID: 4</a>
+                    <a href="/bai-viet/1" className={`transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}>ID: 1</a>
+                    <a href="/bai-viet/2" className={`transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}>ID: 2</a>
+                    <a href="/bai-viet/3" className={`transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}>ID: 3</a>
+                    <a href="/bai-viet/4" className={`transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}>ID: 4</a>
                   </div>
                 </div>
               </div>
@@ -375,35 +383,41 @@ const ArticleDetailPage: React.FC = () => {
     );
   }
 
-      const article = data.data;
-    const featuredImageUrl = getFeaturedImageUrl();
-    const categories = getCategories();
-    const metaDescription = getMetaDescription();
-    const isFeatured = isFeaturedEvent();
-    const articleContent = getArticleContent();
+  const article = data.data;
+  const featuredImageUrl = getFeaturedImageUrl();
+  const categories = getCategories();
+  const metaDescription = getMetaDescription();
+  const isFeatured = isFeaturedEvent();
+  const articleContent = getArticleContent();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}
       <TopBar />
       <LogoSearchBar />
       <NavigationBar />
       
       {/* Main Content */}
-      <main className="pt-52"> {/* Increased padding to accommodate full header */}
+      <main className="flex-1 pt-52"> {/* Added flex-1 and increased padding to accommodate full header */}
         {/* Breadcrumb */}
-        <div className="bg-muted/30 py-4">
+        <div className={`py-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
           <div className="container mx-auto px-4">
-            <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <a href="/" className="hover:text-primary transition-colors">
+            <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+              <a 
+                href="/" 
+                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
                 Trang chủ
               </a>
               <ChevronRight className="h-4 w-4" />
-              <a href="/tin-tuc" className="hover:text-primary transition-colors">
+              <a 
+                href="/tin-tuc" 
+                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
                 {isFeatured ? 'Tin tức' : (categories.length > 0 ? categories[0].name : 'Tin tức')}
               </a>
               <ChevronRight className="h-4 w-4" />
-              <span className="text-foreground font-medium line-clamp-1">
+              <span className={`font-medium line-clamp-1 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 {article.attributes.title}
               </span>
             </nav>
@@ -415,26 +429,26 @@ const ArticleDetailPage: React.FC = () => {
           <article className="max-w-4xl mx-auto">
             {/* Article Header */}
             <header className="mb-8">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
+              <h1 className={`text-3xl md:text-4xl font-bold mb-4 leading-tight ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 {article.attributes.title}
               </h1>
               
               {/* Featured Badge */}
               {isFeatured && (
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium mb-4">
+                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium mb-4 ${theme === 'dark' ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-800'}`}>
                   <span>✨ Sự kiện tiêu điểm</span>
                 </div>
               )}
               
               {/* Meta Description */}
               {metaDescription && (
-                <p className="text-lg text-muted-foreground mb-4 italic">
+                <p className={`text-lg mb-4 italic ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                   {metaDescription}
                 </p>
               )}
               
               {/* Meta Information */}
-              <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-6">
+              <div className={`flex flex-wrap items-center gap-4 mb-6 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   <span>Ngày đăng: {formatDate(article.attributes.created)}</span>
@@ -445,7 +459,11 @@ const ArticleDetailPage: React.FC = () => {
                     <span>Chuyên mục: </span>
                     <div className="flex gap-1">
                       {categories.map((category, index) => (
-                        <Badge key={category.id} variant="secondary" className="text-xs">
+                        <Badge 
+                          key={category.id} 
+                          variant="secondary" 
+                          className={`text-xs ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg text-dseza-dark-main-text' : 'bg-dseza-light-secondary-bg text-dseza-light-main-text'}`}
+                        >
                           {category.name}
                         </Badge>
                       ))}
@@ -458,7 +476,7 @@ const ArticleDetailPage: React.FC = () => {
             {/* Images are now handled within paragraphs content */}
 
             {/* Article Content */}
-            <div className="prose prose-lg max-w-none mt-8">
+            <div className={`prose prose-lg max-w-none mt-8 ${theme === 'dark' ? 'prose-invert' : ''}`}>
               <div
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(articleContent)
@@ -467,8 +485,8 @@ const ArticleDetailPage: React.FC = () => {
             </div>
 
             {/* Share Section */}
-            <div className="mt-12 pt-8 border-t">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <div className={`mt-12 pt-8 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+              <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 <Share2 className="h-5 w-5" />
                 Chia sẻ bài viết:
               </h3>
@@ -477,7 +495,7 @@ const ArticleDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => handleShare('facebook')}
-                  className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300"
+                  className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-blue-900/20 hover:border-blue-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-blue-50 hover:border-blue-300'}`}
                 >
                   <Facebook className="h-4 w-4 text-blue-600" />
                   Facebook
@@ -486,7 +504,7 @@ const ArticleDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => handleShare('twitter')}
-                  className="flex items-center gap-2 hover:bg-sky-50 hover:border-sky-300"
+                  className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-sky-900/20 hover:border-sky-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-sky-50 hover:border-sky-300'}`}
                 >
                   <Twitter className="h-4 w-4 text-sky-500" />
                   Twitter
@@ -495,7 +513,7 @@ const ArticleDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => handleShare('email')}
-                  className="flex items-center gap-2 hover:bg-gray-50 hover:border-gray-300"
+                  className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-gray-700/20 hover:border-gray-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-gray-50 hover:border-gray-300'}`}
                 >
                   <Mail className="h-4 w-4 text-gray-600" />
                   Email
@@ -504,7 +522,7 @@ const ArticleDetailPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => handleShare('copy')}
-                  className="flex items-center gap-2 hover:bg-green-50 hover:border-green-300"
+                  className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-green-900/20 hover:border-green-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-green-50 hover:border-green-300'}`}
                 >
                   <Copy className="h-4 w-4 text-green-600" />
                   Sao chép link

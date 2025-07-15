@@ -61,7 +61,7 @@ const DocumentSearchPage: React.FC = () => {
     endDate: "",
     documentType: "",
     page: 1,
-    pageSize: 10,
+    pageSize: 5, // Maximum 5 results per page
   });
   
   const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
@@ -323,17 +323,17 @@ const DocumentSearchPage: React.FC = () => {
     return (
       <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto ${
         theme === 'dark' 
-          ? 'bg-slate-800 text-white border-slate-700' 
-          : 'bg-white text-slate-900 border-slate-200'
+          ? 'bg-dseza-dark-secondary text-dseza-dark-main-text border-dseza-dark-border' 
+          : 'bg-dseza-light-main-bg text-dseza-light-main-text border-dseza-light-border'
       }`}>
         <DialogHeader>
           <DialogTitle className={`text-xl font-bold ${
-            theme === 'dark' ? 'text-white' : 'text-slate-900'
+            theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
           }`}>
             THUỘC TÍNH VĂN BẢN
           </DialogTitle>
           <p className={`text-sm mt-1 ${
-            theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+            theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
           }`}>
             {document.attributes?.field_so_ky_hieu || "N/A"}
           </p>
@@ -343,49 +343,49 @@ const DocumentSearchPage: React.FC = () => {
           {/* Document Information Table */}
           <div className={`p-4 rounded-lg border ${
             theme === 'dark' 
-              ? 'bg-slate-700 text-white border-slate-600' 
-              : 'bg-slate-50 text-slate-900 border-slate-200'
+              ? 'bg-dseza-dark-hover text-dseza-dark-main-text border-dseza-dark-border' 
+              : 'bg-dseza-light-secondary text-dseza-light-main-text border-dseza-light-border'
           }`}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
                   }`}>Số ký hiệu:</span>
                   <span className={`sm:text-right ${
-                    theme === 'dark' ? 'text-slate-200' : 'text-slate-700'
+                    theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{document.attributes?.field_so_ky_hieu || "N/A"}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
                   }`}>Người ký:</span>
                   <span className={`sm:text-right ${
-                    theme === 'dark' ? 'text-slate-200' : 'text-slate-700'
+                    theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{document.attributes?.field_nguoi_ky || "N/A"}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
                   }`}>Lĩnh vực:</span>
                   <span className={`sm:text-right ${
-                    theme === 'dark' ? 'text-slate-200' : 'text-slate-700'
+                    theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{getTaxonomyTermName(document.relationships?.field_linh_vuc?.data, data?.included)}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
                   }`}>Loại văn bản:</span>
                   <span className={`sm:text-right ${
-                    theme === 'dark' ? 'text-slate-200' : 'text-slate-700'
+                    theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{getTaxonomyTermName(document.relationships?.field_loai_van_ban?.data, data?.included)}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
                   }`}>Cấp ban hành:</span>
                   <span className={`sm:text-right ${
-                    theme === 'dark' ? 'text-slate-200' : 'text-slate-700'
+                    theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{getTaxonomyTermName(document.relationships?.field_cap_ban_hanh?.data, data?.included)}</span>
                 </div>
               </div>
@@ -393,34 +393,34 @@ const DocumentSearchPage: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
                   }`}>Ngày ban hành:</span>
                   <span className={`sm:text-right ${
-                    theme === 'dark' ? 'text-slate-200' : 'text-slate-700'
+                    theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{formatDate(document.attributes?.field_ngay_ban_hanh || "")}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
                   }`}>Ngày hiệu lực:</span>
                   <span className={`sm:text-right ${
-                    theme === 'dark' ? 'text-slate-200' : 'text-slate-700'
+                    theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{formatDate(document.attributes?.field_ngay_hieu_luc || "")}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
                   }`}>Ngày hết hiệu lực:</span>
                   <span className={`sm:text-right ${
-                    theme === 'dark' ? 'text-slate-200' : 'text-slate-700'
+                    theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{formatDate(document.attributes?.field_ngay_het_hieu_luc || "")}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
                   }`}>Cơ quan ban hành:</span>
                   <span className={`sm:text-right ${
-                    theme === 'dark' ? 'text-slate-200' : 'text-slate-700'
+                    theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{getTaxonomyTermName(document.relationships?.field_co_quan_ban_hanh?.data, data?.included)}</span>
                 </div>
               </div>
@@ -431,15 +431,15 @@ const DocumentSearchPage: React.FC = () => {
           <div className="space-y-4">
             <div>
               <h3 className={`font-semibold text-lg mb-2 ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
+                theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
               }`}>Nội dung:</h3>
               <div className={`p-4 rounded-lg border ${
                 theme === 'dark' 
-                  ? 'bg-slate-700 border-slate-600' 
-                  : 'bg-slate-50 border-slate-200'
+                  ? 'bg-dseza-dark-hover border-dseza-dark-border' 
+                  : 'bg-dseza-light-secondary border-dseza-light-border'
               }`}>
                 <p className={`leading-relaxed ${
-                  theme === 'dark' ? 'text-slate-200' : 'text-slate-700'
+                  theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                 }`}>
                   {getTextContent(document.attributes?.field_noi_dung) || 
                    getTextContent(document.attributes?.field_trich_yeu) || 
@@ -451,19 +451,23 @@ const DocumentSearchPage: React.FC = () => {
             {/* File Attachments */}
             <div>
               <h3 className={`font-semibold text-lg mb-2 ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
+                theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
               }`}>File đính kèm:</h3>
               <div className={`p-4 rounded-lg border ${
                 theme === 'dark' 
-                  ? 'bg-slate-700 border-slate-600' 
-                  : 'bg-slate-50 border-slate-200'
+                  ? 'bg-dseza-dark-hover border-dseza-dark-border' 
+                  : 'bg-dseza-light-secondary border-dseza-light-border'
               }`}>
                 <div className="flex gap-2">
                   {fileUrl ? (
                     <Button
                       onClick={() => handleDownload(document.id)}
                       disabled={downloadingIds.has(document.id)}
-                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+                      className={`flex items-center gap-2 ${
+                        theme === 'dark' 
+                          ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary-hover text-dseza-dark-main-text border-dseza-dark-primary' 
+                          : 'bg-dseza-light-primary hover:bg-dseza-light-primary-hover text-dseza-light-main-bg border-dseza-light-primary'
+                      }`}
                       size="sm"
                     >
                       {downloadingIds.has(document.id) ? (
@@ -476,8 +480,8 @@ const DocumentSearchPage: React.FC = () => {
                   ) : (
                     <Badge variant="secondary" className={`${
                       theme === 'dark' 
-                        ? 'bg-slate-600 text-slate-200 border-slate-500' 
-                        : 'bg-slate-200 text-slate-700 border-slate-300'
+                        ? 'bg-dseza-dark-secondary text-dseza-dark-secondary-text border-dseza-dark-border' 
+                        : 'bg-dseza-light-secondary text-dseza-light-secondary-text border-dseza-light-border'
                     }`}>
                       Không có file đính kèm
                     </Badge>
@@ -489,15 +493,15 @@ const DocumentSearchPage: React.FC = () => {
             {/* Related Documents Section */}
             <div>
               <h3 className={`font-semibold text-lg mb-2 ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
+                theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
               }`}>VĂN BẢN LIÊN QUAN THEO LĨNH VỰC</h3>
               <div className={`p-4 rounded-lg border ${
                 theme === 'dark' 
-                  ? 'bg-slate-700 border-slate-600' 
-                  : 'bg-slate-50 border-slate-200'
+                  ? 'bg-dseza-dark-hover border-dseza-dark-border' 
+                  : 'bg-dseza-light-secondary border-dseza-light-border'
               }`}>
                 <p className={`text-sm italic ${
-                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                  theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                 }`}>
                   Chức năng hiển thị văn bản liên quan sẽ được phát triển trong phiên bản tiếp theo.
                 </p>
@@ -508,15 +512,15 @@ const DocumentSearchPage: React.FC = () => {
         
         {/* Close Button */}
         <div className={`flex justify-end pt-4 border-t ${
-          theme === 'dark' ? 'border-slate-600' : 'border-slate-200'
+          theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'
         }`}>
           <Button 
             variant="outline" 
             onClick={() => setIsDetailDialogOpen(false)}
             className={`min-w-[100px] ${
               theme === 'dark' 
-                ? 'bg-slate-700 text-white border-slate-600 hover:bg-slate-600 hover:text-white' 
-                : 'bg-white text-slate-900 border-slate-300 hover:bg-slate-50 hover:text-slate-900'
+                ? 'bg-dseza-dark-secondary text-dseza-dark-main-text border-dseza-dark-border hover:bg-dseza-dark-hover hover:text-dseza-dark-main-text' 
+                : 'bg-dseza-light-main-bg text-dseza-light-main-text border-dseza-light-border hover:bg-dseza-light-hover hover:text-dseza-light-main-text'
             }`}
           >
             Đóng
@@ -528,9 +532,15 @@ const DocumentSearchPage: React.FC = () => {
 
   // Loading skeleton for table
   const TableSkeleton = () => (
-    <div className="rounded-md border">
+    <div className={`rounded-md border ${
+      theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'
+    }`}>
       <Table>
-        <TableHeader>
+        <TableHeader className={`${
+          theme === 'dark' 
+            ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
+            : 'bg-dseza-light-secondary border-dseza-light-border'
+        }`}>
           <TableRow>
             <TableHead className="w-[50px]">
               <Skeleton className="h-4 w-4" />
@@ -543,7 +553,9 @@ const DocumentSearchPage: React.FC = () => {
         </TableHeader>
         <TableBody>
           {[...Array(5)].map((_, index) => (
-            <TableRow key={index}>
+            <TableRow key={index} className={`${
+              theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'
+            }`}>
               <TableCell>
                 <Skeleton className="h-4 w-4" />
               </TableCell>
@@ -570,23 +582,34 @@ const DocumentSearchPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}
       <TopBar />
       <LogoSearchBar />
       <NavigationBar />
       
       {/* Main Content */}
-      <main className="pt-52"> {/* Increased padding to accommodate full header */}
+      <main className="flex-1 pt-52"> {/* Added flex-1 and increased padding to accommodate full header */}
         {/* Breadcrumb */}
-        <div className="bg-muted/30 py-4">
+        <div className={`py-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
           <div className="container mx-auto px-4">
-            <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <a href="/" className="hover:text-primary transition-colors">
+            <nav className={`flex items-center space-x-2 text-sm ${
+              theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
+            }`}>
+              <a 
+                href="/" 
+                className={`transition-colors ${
+                  theme === 'dark' 
+                    ? 'hover:text-dseza-dark-primary' 
+                    : 'hover:text-dseza-light-primary'
+                }`}
+              >
                 Trang chủ
               </a>
               <ChevronRight className="h-4 w-4" />
-              <span className="text-foreground font-medium">
+              <span className={`font-medium ${
+                theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+              }`}>
                 Tra cứu Văn bản Pháp quy
               </span>
             </nav>
@@ -596,73 +619,135 @@ const DocumentSearchPage: React.FC = () => {
         {/* Document Search Content */}
         <div className="container mx-auto px-4 py-8">
           {/* Page Title */}
-          <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+          <h1 className={`text-3xl md:text-4xl font-bold mb-8 text-center ${
+            theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+          }`}>
             Tra cứu Văn bản Pháp quy
           </h1>
 
           {/* Search Filters Section */}
-          <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg mb-8">
+          <div className={`p-6 rounded-lg mb-8 ${
+            theme === 'dark' 
+              ? 'bg-dseza-dark-secondary border border-dseza-dark-border' 
+              : 'bg-dseza-light-secondary border border-dseza-light-border'
+          }`}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Document Number/Symbol */}
               <div className="space-y-2">
-                <Label htmlFor="documentNumber">Số/Ký hiệu</Label>
+                <Label 
+                  htmlFor="documentNumber"
+                  className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
+                >
+                  Số/Ký hiệu
+                </Label>
                 <Input
                   id="documentNumber"
                   name="documentNumber"
                   placeholder="Nhập số/ký hiệu văn bản"
                   value={filters.documentNumber || ""}
                   onChange={(e) => handleInputChange("documentNumber", e.target.value)}
+                  className={`${
+                    theme === 'dark' 
+                      ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' 
+                      : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'
+                  }`}
                 />
               </div>
 
               {/* Summary */}
               <div className="space-y-2">
-                <Label htmlFor="summary">Trích yếu</Label>
+                <Label 
+                  htmlFor="summary"
+                  className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
+                >
+                  Trích yếu
+                </Label>
                 <Input
                   id="summary"
                   name="summary"
                   placeholder="Nhập từ khóa trích yếu"
                   value={filters.summary || ""}
                   onChange={(e) => handleInputChange("summary", e.target.value)}
+                  className={`${
+                    theme === 'dark' 
+                      ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' 
+                      : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'
+                  }`}
                 />
               </div>
 
               {/* Date From */}
               <div className="space-y-2">
-                <Label htmlFor="startDate">Ngày ban hành từ</Label>
+                <Label 
+                  htmlFor="startDate"
+                  className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
+                >
+                  Ngày ban hành từ
+                </Label>
                 <Input
                   id="startDate"
                   name="startDate"
                   type="date"
                   value={filters.startDate || ""}
                   onChange={(e) => handleInputChange("startDate", e.target.value)}
+                  className={`${
+                    theme === 'dark' 
+                      ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' 
+                      : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'
+                  }`}
                 />
               </div>
 
               {/* Date To */}
               <div className="space-y-2">
-                <Label htmlFor="endDate">Ngày ban hành đến</Label>
+                <Label 
+                  htmlFor="endDate"
+                  className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
+                >
+                  Ngày ban hành đến
+                </Label>
                 <Input
                   id="endDate"
                   name="endDate"
                   type="date"
                   value={filters.endDate || ""}
                   onChange={(e) => handleInputChange("endDate", e.target.value)}
+                  className={`${
+                    theme === 'dark' 
+                      ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' 
+                      : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'
+                  }`}
                 />
               </div>
 
-                            {/* Document Type */}
+              {/* Document Type */}
               <div className="space-y-2">
-                <Label htmlFor="documentType">Loại văn bản</Label>
+                <Label 
+                  htmlFor="documentType"
+                  className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
+                >
+                  Loại văn bản
+                </Label>
                 <Select 
                   value={filters.documentType || "all"} 
                   onValueChange={(value) => handleInputChange("documentType", value === "all" ? "" : value)}
                   name="documentType"
                 >
-                  <SelectTrigger id="documentType">
+                  <SelectTrigger 
+                    id="documentType"
+                    className={`${
+                      theme === 'dark' 
+                        ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' 
+                        : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'
+                    }`}
+                  >
                     <SelectValue placeholder="Chọn loại văn bản" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className={`${
+                    theme === 'dark' 
+                      ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
+                      : 'bg-dseza-light-main-bg border-dseza-light-border'
+                  }`}>
                     <SelectItem value="all">Tất cả</SelectItem>
                     <SelectItem value="quyet-dinh">Quyết định</SelectItem>
                     <SelectItem value="nghi-dinh">Nghị định</SelectItem>
@@ -678,7 +763,11 @@ const DocumentSearchPage: React.FC = () => {
               <div className="space-y-2 lg:col-span-3 flex items-end">
                 <Button 
                   onClick={handleSearch}
-                  className="w-full md:w-auto px-8"
+                  className={`w-full md:w-auto px-8 ${
+                    theme === 'dark' 
+                      ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary-hover' 
+                      : 'bg-dseza-light-primary text-dseza-light-main-bg hover:bg-dseza-light-primary-hover'
+                  }`}
                   size="default"
                   disabled={isLoading}
                 >
@@ -693,7 +782,9 @@ const DocumentSearchPage: React.FC = () => {
           <div className="space-y-6">
             {/* Results Count and Statistics */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <div className="text-sm text-muted-foreground">
+              <div className={`text-sm ${
+                theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
+              }`}>
                 {isLoading ? (
                   <Skeleton className="h-4 w-48" />
                 ) : (
@@ -705,7 +796,14 @@ const DocumentSearchPage: React.FC = () => {
               {!isLoading && documents.length > 0 && (
                 <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge 
+                      variant="secondary" 
+                      className={`text-xs ${
+                        theme === 'dark' 
+                          ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary border-dseza-dark-primary/30' 
+                          : 'bg-dseza-light-primary/20 text-dseza-light-primary border-dseza-light-primary/30'
+                      }`}
+                    >
                       {(() => {
                         return documents.filter(doc => {
                           const termData = doc.relationships?.field_loai_van_ban?.data;
@@ -722,7 +820,14 @@ const DocumentSearchPage: React.FC = () => {
                         }).length;
                       })()} Quyết định
                     </Badge>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge 
+                      variant="secondary" 
+                      className={`text-xs ${
+                        theme === 'dark' 
+                          ? 'bg-dseza-dark-secondary-accent/20 text-dseza-dark-secondary-accent border-dseza-dark-secondary-accent/30' 
+                          : 'bg-dseza-light-secondary-accent/20 text-dseza-light-secondary-accent border-dseza-light-secondary-accent/30'
+                      }`}
+                    >
                       {(() => {
                         return documents.filter(doc => {
                           const termData = doc.relationships?.field_loai_van_ban?.data;
@@ -739,7 +844,14 @@ const DocumentSearchPage: React.FC = () => {
                         }).length;
                       })()} Thông tư
                     </Badge>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge 
+                      variant="secondary" 
+                      className={`text-xs ${
+                        theme === 'dark' 
+                          ? 'bg-dseza-dark-accent/20 text-dseza-dark-accent border-dseza-dark-accent/30' 
+                          : 'bg-dseza-light-accent/20 text-dseza-light-accent border-dseza-light-accent/30'
+                      }`}
+                    >
                       {documents.filter(doc => getDocumentFileUrl(doc, data?.included)).length} Có file đính kèm
                     </Badge>
                   </div>
@@ -748,7 +860,14 @@ const DocumentSearchPage: React.FC = () => {
                   <div className="flex gap-2 items-center">
                     {selectedDocuments.size > 0 && (
                       <>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${
+                            theme === 'dark' 
+                              ? 'border-dseza-dark-border text-dseza-dark-main-text' 
+                              : 'border-dseza-light-border text-dseza-light-main-text'
+                          }`}
+                        >
                           {selectedDocuments.size} đã chọn
                         </Badge>
                         <Button 
@@ -756,7 +875,11 @@ const DocumentSearchPage: React.FC = () => {
                           variant="outline"
                           onClick={handleBulkDownload}
                           disabled={downloadingIds.size > 0}
-                          className="text-xs"
+                          className={`text-xs ${
+                            theme === 'dark' 
+                              ? 'bg-dseza-dark-secondary text-dseza-dark-main-text border-dseza-dark-border hover:bg-dseza-dark-hover' 
+                              : 'bg-dseza-light-secondary text-dseza-light-main-text border-dseza-light-border hover:bg-dseza-light-hover'
+                          }`}
                         >
                           <Download className="h-3 w-3 mr-1" />
                           Tải xuống đã chọn
@@ -771,11 +894,19 @@ const DocumentSearchPage: React.FC = () => {
             {/* Error State */}
             {isError && (
               <div className="text-center py-8">
-                <div className="text-destructive mb-4">
+                <div className={`mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
                   <p className="text-lg font-semibold">Có lỗi xảy ra khi tìm kiếm</p>
                   <p className="text-sm">{error?.message || "Vui lòng thử lại sau"}</p>
                 </div>
-                <Button onClick={() => window.location.reload()} variant="outline">
+                <Button 
+                  onClick={() => window.location.reload()} 
+                  variant="outline"
+                  className={`${
+                    theme === 'dark' 
+                      ? 'bg-dseza-dark-secondary text-dseza-dark-main-text border-dseza-dark-border hover:bg-dseza-dark-hover' 
+                      : 'bg-dseza-light-secondary text-dseza-light-main-text border-dseza-light-border hover:bg-dseza-light-hover'
+                  }`}
+                >
                   Tải lại trang
                 </Button>
               </div>
@@ -785,50 +916,88 @@ const DocumentSearchPage: React.FC = () => {
             {isLoading ? (
               <TableSkeleton />
             ) : (
-              <div className="rounded-md border">
+              <div className={`rounded-md border ${
+                theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'
+              }`}>
                 <Table>
-                  <TableHeader>
+                  <TableHeader className={`${
+                    theme === 'dark' 
+                      ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
+                      : 'bg-dseza-light-secondary border-dseza-light-border'
+                  }`}>
                     <TableRow>
                       <TableHead className="w-[50px]">
                         <Checkbox 
                           checked={selectedDocuments.size > 0 && selectedDocuments.size === documents.filter(doc => getDocumentFileUrl(doc, data?.included)).length}
                           onCheckedChange={handleSelectAll}
                           aria-label="Chọn tất cả"
+                          className={`${
+                            theme === 'dark' 
+                              ? 'border-dseza-dark-border data-[state=checked]:bg-dseza-dark-primary data-[state=checked]:border-dseza-dark-primary' 
+                              : 'border-dseza-light-border data-[state=checked]:bg-dseza-light-primary data-[state=checked]:border-dseza-light-primary'
+                          }`}
                         />
                       </TableHead>
-                      <TableHead className="w-[200px]">Số/Ký hiệu</TableHead>
-                      <TableHead>Trích yếu</TableHead>
-                      <TableHead className="w-[150px]">Ngày ban hành</TableHead>
-                      <TableHead className="w-[100px] text-center">Tải về</TableHead>
+                      <TableHead className={`w-[200px] ${
+                        theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                      }`}>Số/Ký hiệu</TableHead>
+                      <TableHead className={`${
+                        theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                      }`}>Trích yếu</TableHead>
+                      <TableHead className={`w-[150px] ${
+                        theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                      }`}>Ngày ban hành</TableHead>
+                      <TableHead className={`w-[100px] text-center ${
+                        theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                      }`}>Tải về</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {documents.length > 0 ? (
                       documents.map((doc: any) => (
-                        <TableRow key={doc.id}>
+                        <TableRow key={doc.id} className={`${
+                          theme === 'dark' 
+                            ? 'border-dseza-dark-border hover:bg-dseza-dark-hover/50' 
+                            : 'border-dseza-light-border hover:bg-dseza-light-hover/50'
+                        }`}>
                           <TableCell>
                             <Checkbox 
                               checked={selectedDocuments.has(doc.id)}
                               onCheckedChange={(checked) => handleSelectDocument(doc.id, !!checked)}
                               disabled={!getDocumentFileUrl(doc, data?.included)}
                               aria-label={`Chọn văn bản ${doc.attributes?.field_so_ky_hieu || doc.attributes?.field_document_number || doc.id}`}
+                              className={`${
+                                theme === 'dark' 
+                                  ? 'border-dseza-dark-border data-[state=checked]:bg-dseza-dark-primary data-[state=checked]:border-dseza-dark-primary' 
+                                  : 'border-dseza-light-border data-[state=checked]:bg-dseza-light-primary data-[state=checked]:border-dseza-light-primary'
+                              }`}
                             />
                           </TableCell>
                           <TableCell className="font-medium">
                             <button
                               onClick={() => handleDocumentClick(doc)}
-                              className="text-primary hover:text-primary/80 hover:underline transition-colors cursor-pointer text-left font-medium"
+                              className={`font-medium transition-colors cursor-pointer text-left ${
+                                theme === 'dark' 
+                                  ? 'text-dseza-dark-primary hover:text-dseza-dark-primary-hover hover:underline' 
+                                  : 'text-dseza-light-primary hover:text-dseza-light-primary-hover hover:underline'
+                              }`}
                               title="Xem chi tiết văn bản"
                             >
                               {doc.attributes?.field_so_ky_hieu || "N/A"}
                             </button>
                           </TableCell>
                           <TableCell>
-                                                          <div className="max-w-md">
-                                <p className="truncate" title={getTextContent(doc.attributes?.field_trich_yeu) || getTextContent(doc.attributes?.title) || "N/A"}>
-                                  {getTextContent(doc.attributes?.field_trich_yeu) || getTextContent(doc.attributes?.title) || "N/A"}
-                                </p>
-                              <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded mt-1 inline-block">
+                            <div className="max-w-md">
+                              <p className={`truncate ${
+                                theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                              }`} title={getTextContent(doc.attributes?.field_trich_yeu) || getTextContent(doc.attributes?.title) || "N/A"}>
+                                {getTextContent(doc.attributes?.field_trich_yeu) || getTextContent(doc.attributes?.title) || "N/A"}
+                              </p>
+                              <span className={`text-xs px-2 py-1 rounded mt-1 inline-block ${
+                                theme === 'dark' 
+                                  ? 'bg-dseza-dark-secondary text-dseza-dark-secondary-text' 
+                                  : 'bg-dseza-light-secondary text-dseza-light-secondary-text'
+                              }`}>
                                 {/* Get taxonomy term name from relationships */}
                                 {(() => {
                                   const termData = doc.relationships?.field_loai_van_ban?.data;
@@ -846,7 +1015,9 @@ const DocumentSearchPage: React.FC = () => {
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className={`${
+                            theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                          }`}>
                             {formatDate(doc.attributes?.field_ngay_ban_hanh || doc.attributes?.created)}
                           </TableCell>
                           <TableCell className="text-center">
@@ -855,7 +1026,11 @@ const DocumentSearchPage: React.FC = () => {
                               size="sm"
                               onClick={() => handleDownload(doc.id)}
                               disabled={downloadingIds.has(doc.id)}
-                              className="hover:bg-primary hover:text-primary-foreground"
+                              className={`${
+                                theme === 'dark' 
+                                  ? 'bg-dseza-dark-secondary text-dseza-dark-main-text border-dseza-dark-border hover:bg-dseza-dark-primary hover:text-dseza-dark-main-text hover:border-dseza-dark-primary' 
+                                  : 'bg-dseza-light-secondary text-dseza-light-main-text border-dseza-light-border hover:bg-dseza-light-primary hover:text-dseza-light-main-bg hover:border-dseza-light-primary'
+                              }`}
                             >
                               {downloadingIds.has(doc.id) ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -868,8 +1043,10 @@ const DocumentSearchPage: React.FC = () => {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-8">
-                          <div className="text-muted-foreground">
+                        <TableCell colSpan={5} className="text-center py-8">
+                          <div className={`${
+                            theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
+                          }`}>
                             <p className="text-lg font-semibold mb-2">Không tìm thấy kết quả</p>
                             <p className="text-sm">Vui lòng thử lại với từ khóa khác</p>
                           </div>
@@ -893,7 +1070,11 @@ const DocumentSearchPage: React.FC = () => {
                           e.preventDefault();
                           if (currentPage > 1) handlePageChange(currentPage - 1);
                         }}
-                        className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                        className={`${currentPage === 1 ? "pointer-events-none opacity-50" : ""} ${
+                          theme === 'dark' 
+                            ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
+                            : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
+                        }`}
                       />
                     </PaginationItem>
                     
@@ -918,6 +1099,11 @@ const DocumentSearchPage: React.FC = () => {
                                 handlePageChange(1);
                               }}
                               isActive={currentPage === 1}
+                              className={`${
+                                theme === 'dark' 
+                                  ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
+                                  : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
+                              } ${currentPage === 1 ? (theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-text' : 'bg-dseza-light-primary text-dseza-light-main-bg') : ''}`}
                             >
                               1
                             </PaginationLink>
@@ -927,7 +1113,9 @@ const DocumentSearchPage: React.FC = () => {
                         if (startPage > 2) {
                           pages.push(
                             <PaginationItem key="ellipsis1">
-                              <PaginationEllipsis />
+                              <PaginationEllipsis className={`${
+                                theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
+                              }`} />
                             </PaginationItem>
                           );
                         }
@@ -944,6 +1132,11 @@ const DocumentSearchPage: React.FC = () => {
                                   handlePageChange(i);
                                 }}
                                 isActive={currentPage === i}
+                                className={`${
+                                  theme === 'dark' 
+                                    ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
+                                    : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
+                                } ${currentPage === i ? (theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-text' : 'bg-dseza-light-primary text-dseza-light-main-bg') : ''}`}
                               >
                                 {i}
                               </PaginationLink>
@@ -956,7 +1149,9 @@ const DocumentSearchPage: React.FC = () => {
                         if (endPage < totalPages - 1) {
                           pages.push(
                             <PaginationItem key="ellipsis2">
-                              <PaginationEllipsis />
+                              <PaginationEllipsis className={`${
+                                theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
+                              }`} />
                             </PaginationItem>
                           );
                         }
@@ -970,6 +1165,11 @@ const DocumentSearchPage: React.FC = () => {
                                 handlePageChange(totalPages);
                               }}
                               isActive={currentPage === totalPages}
+                              className={`${
+                                theme === 'dark' 
+                                  ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
+                                  : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
+                              } ${currentPage === totalPages ? (theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-text' : 'bg-dseza-light-primary text-dseza-light-main-bg') : ''}`}
                             >
                               {totalPages}
                             </PaginationLink>
@@ -987,7 +1187,11 @@ const DocumentSearchPage: React.FC = () => {
                           e.preventDefault();
                           if (currentPage < totalPages) handlePageChange(currentPage + 1);
                         }}
-                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                        className={`${currentPage === totalPages ? "pointer-events-none opacity-50" : ""} ${
+                          theme === 'dark' 
+                            ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
+                            : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
+                        }`}
                       />
                     </PaginationItem>
                   </PaginationContent>
