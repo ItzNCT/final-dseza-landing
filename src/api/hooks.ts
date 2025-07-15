@@ -632,3 +632,239 @@ export type { EnterpriseFilters };
 
 // Export the fetch function for potential standalone use
 export { fetchEnterprises }; 
+
+/**
+ * Fetch work schedule from Drupal JSON:API with week range filter
+ * @param weekRange - The week range in format 'YYYY-MM-DD_YYYY-MM-DD' (e.g., '2025-07-07_2025-07-13')
+ * @returns Promise containing the work schedule data
+ */
+async function fetchWorkSchedule(weekRange: string): Promise<any> {
+  try {
+    // Parse week range to get start and end dates
+    const [startDate, endDate] = weekRange.split('_');
+    
+    // Build JSON:API query parameters for date range filtering
+    const queryParams = new URLSearchParams();
+    
+    // Simple approach: filter by start date with >= operator
+    queryParams.append('filter[field_ngay][value]', startDate);
+    queryParams.append('filter[field_ngay][operator]', '>=');
+    
+    // For now, let's get all items from start date onwards and filter in frontend
+    // This is more reliable than complex date range filtering
+    
+    // Sort by date and time
+    queryParams.append('sort', 'field_ngay,field_thoi_gian');
+    
+    const url = `${JSON_API_BASE_URL}/jsonapi/node/schedule_item?${queryParams.toString()}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: jsonApiHeaders,
+    });
+
+    if (!response.ok) {
+      // If filtering fails, try without any filters as fallback
+      if (response.status === 500) {
+        console.warn('Date filtering failed, fetching all schedule items');
+        const fallbackUrl = `${JSON_API_BASE_URL}/jsonapi/node/schedule_item?sort=field_ngay,field_thoi_gian`;
+        const fallbackResponse = await fetch(fallbackUrl, {
+          method: 'GET',
+          headers: jsonApiHeaders,
+        });
+        
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          // Filter data in frontend
+          if (fallbackData.data) {
+            const startDateObj = new Date(startDate);
+            const endDateObj = new Date(endDate);
+            
+            fallbackData.data = fallbackData.data.filter((item: any) => {
+              const itemDate = new Date(item.attributes.field_ngay);
+              return itemDate >= startDateObj && itemDate <= endDateObj;
+            });
+          }
+          return fallbackData;
+        }
+      }
+      
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+
+    const data = await response.json();
+    
+    // Apply end date filtering in frontend to ensure we only get items in the week range
+    if (data.data && endDate) {
+      const endDateObj = new Date(endDate);
+      data.data = data.data.filter((item: any) => {
+        const itemDate = new Date(item.attributes.field_ngay);
+        return itemDate <= endDateObj;
+      });
+    }
+    
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to fetch work schedule: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Custom hook to fetch and manage work schedule data using TanStack Query
+ * 
+ * @param weekRange - The week range in format 'YYYY-MM-DD_YYYY-MM-DD'
+ * @returns {Object} Object containing:
+ *   - data: The work schedule data from the API
+ *   - isLoading: Boolean indicating if the request is in progress
+ *   - isError: Boolean indicating if an error occurred
+ *   - error: The error object if an error occurred
+ *   - isSuccess: Boolean indicating if the request was successful
+ *   - refetch: Function to manually refetch the data
+ */
+export const useWorkSchedule = (weekRange: string) => {
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+  } = useQuery({
+    queryKey: ['schedule', weekRange],
+    queryFn: () => fetchWorkSchedule(weekRange),
+    enabled: !!weekRange,
+    staleTime: 5 * 60 * 1000, // 5 minutes - schedule data is relatively static
+    gcTime: 15 * 60 * 1000, // 15 minutes cache time
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+  });
+
+  return {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+    // Additional convenience properties for Drupal JSON:API structure
+    scheduleItems: data?.data || [],
+    hasScheduleData: !!data?.data?.length,
+  };
+};
+
+// Export the fetch function for potential standalone use
+export { fetchWorkSchedule }; 
+
+/**
+ * Interface for question search filters
+ */
+interface QuestionFilters {
+  keyword?: string;
+  topic?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+/**
+ * Fetch questions from Drupal JSON:API with filters
+ * @param params - Object containing queryKey from useQuery
+ * @returns Promise containing the questions data
+ */
+async function fetchQuestions({ queryKey }: { queryKey: readonly unknown[] }): Promise<any> {
+  try {
+    const filters = queryKey[1] as QuestionFilters;
+    const queryParams = new URLSearchParams();
+    
+    // Build query parameters based on filters using JSON:API format
+    if (filters.keyword) {
+      queryParams.append('filter[title][operator]', 'CONTAINS');
+      queryParams.append('filter[title][value]', filters.keyword);
+    }
+    
+    if (filters.topic && filters.topic !== 'all') {
+      queryParams.append('filter[field_linh_vuc.name]', filters.topic);
+    }
+    
+    // Pagination - JSON:API format
+    const page = filters.page || 1;
+    const pageSize = filters.pageSize || 10;
+    const offset = (page - 1) * pageSize;
+    
+    queryParams.append('page[limit]', pageSize.toString());
+    queryParams.append('page[offset]', offset.toString());
+    
+    // Sort by creation date (newest first)
+    queryParams.append('sort', '-created');
+    
+    // Include related taxonomy terms if needed
+    queryParams.append('include', 'field_linh_vuc');
+    
+    const url = `${JSON_API_BASE_URL}/jsonapi/node/question?${queryParams.toString()}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: jsonApiHeaders,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+
+    const data = await response.json();
+    
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to fetch questions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Custom hook to fetch and manage questions data using TanStack Query
+ * 
+ * @param filters - Object containing question search filters
+ * @returns {Object} Object containing:
+ *   - data: The questions data from the API
+ *   - isLoading: Boolean indicating if the request is in progress
+ *   - isError: Boolean indicating if an error occurred
+ *   - error: The error object if an error occurred
+ *   - isSuccess: Boolean indicating if the request was successful
+ *   - refetch: Function to manually refetch the data
+ */
+export const useQuestions = (filters: QuestionFilters = {}) => {
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+  } = useQuery({
+    queryKey: ['questions', filters],
+    queryFn: fetchQuestions,
+    staleTime: 2 * 60 * 1000, // 2 minutes - question search results can be cached briefly
+    gcTime: 5 * 60 * 1000, // 5 minutes cache time
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+  });
+
+  return {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+    // Additional convenience properties for Drupal JSON:API structure
+    questions: data?.data || [],
+    totalResults: data?.data?.length || 0,
+    hasQuestions: !!data?.data?.length,
+  };
+};
+
+// Export types for external use
+export type { QuestionFilters };
+
+// Export the fetch function for potential standalone use
+export { fetchQuestions }; 

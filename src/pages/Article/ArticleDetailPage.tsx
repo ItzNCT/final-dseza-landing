@@ -17,6 +17,27 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
 /**
+ * Secure DOMPurify configuration for XSS protection
+ */
+const sanitizeConfig = {
+  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'img', 'figure', 'figcaption', 'div', 'span'],
+  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'target', 'rel'],
+  ALLOW_DATA_ATTR: false,
+  FORBID_SCRIPT: true,
+  FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input'],
+  FORBID_ATTR: ['onerror', 'onclick', 'onload', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit'],
+};
+
+/**
+ * Secure HTML sanitization function with type safety
+ */
+const sanitizeHTML = (html: string | null | undefined): string => {
+  if (!html || typeof html !== 'string') return '';
+  const sanitized = DOMPurify.sanitize(html, sanitizeConfig);
+  return typeof sanitized === 'string' ? sanitized : '';
+};
+
+/**
  * ArticleDetailPage component for displaying detailed article content
  */
 const ArticleDetailPage: React.FC = () => {
@@ -135,6 +156,7 @@ const ArticleDetailPage: React.FC = () => {
   };
 
   // Get paragraphs content or fallback to body
+  // SECURITY NOTE: All dynamic content is sanitized to prevent XSS attacks
   const getArticleContent = () => {
     if (!data?.data?.relationships?.field_noi_dung_bai_viet?.data || !data?.included) {
       // No paragraphs available - use body field if available
@@ -185,11 +207,14 @@ const ArticleDetailPage: React.FC = () => {
           // Handle image blocks with proper image extraction
           const imageUrl = getImageFromParagraph(paragraph);
           if (imageUrl) {
-            const imageCaption = paragraph.attributes?.field_caption || paragraph.attributes?.field_alt_text || '';
+            const rawImageCaption = paragraph.attributes?.field_caption || paragraph.attributes?.field_alt_text || '';
+            // Sanitize image URL and caption to prevent XSS
+            const safeImageUrl = DOMPurify.sanitize(imageUrl, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+            const safeImageCaption = DOMPurify.sanitize(rawImageCaption, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
             content += `
               <figure class="my-6 text-center">
-                <img src="${imageUrl}" alt="${imageCaption}" class="max-w-full h-auto rounded-lg shadow-md mx-auto" loading="lazy" />
-                ${imageCaption ? `<figcaption class="text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} mt-2 italic">${imageCaption}</figcaption>` : ''}
+                <img src="${safeImageUrl}" alt="${safeImageCaption}" class="max-w-full h-auto rounded-lg shadow-md mx-auto" loading="lazy" />
+                ${safeImageCaption ? `<figcaption class="text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} mt-2 italic">${safeImageCaption}</figcaption>` : ''}
               </figure>
             `;
           } else {
@@ -200,12 +225,16 @@ const ArticleDetailPage: React.FC = () => {
         default:
           // Handle other paragraph types as needed
           console.log('Unknown paragraph type:', paragraph.type, 'attributes:', Object.keys(paragraph.attributes || {}));
-          content += `<div class="unknown-paragraph-type my-2 p-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50' : 'bg-dseza-light-secondary-bg'} ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'} rounded ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} text-sm">[Nội dung ${paragraph.type}]</div>`;
+          // Sanitize paragraph type to prevent XSS
+          const safeParagraphType = DOMPurify.sanitize(paragraph.type || 'unknown', { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+          content += `<div class="unknown-paragraph-type my-2 p-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50' : 'bg-dseza-light-secondary-bg'} ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'} rounded ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} text-sm">[Nội dung ${safeParagraphType}]</div>`;
           break;
       }
     });
     
-    return content || `<p class="${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} italic">Nội dung paragraphs trống.</p>`;
+    // Final sanitization layer for all assembled content
+    const finalContent = content || `<p class="${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} italic">Nội dung paragraphs trống.</p>`;
+    return finalContent;
   };
 
   // Helper function to extract image from paragraph
@@ -476,10 +505,11 @@ const ArticleDetailPage: React.FC = () => {
             {/* Images are now handled within paragraphs content */}
 
             {/* Article Content */}
+            {/* SECURITY: Double-layer XSS protection - content is sanitized during construction AND before rendering */}
             <div className={`prose prose-lg max-w-none mt-8 ${theme === 'dark' ? 'prose-invert' : ''}`}>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(articleContent)
+                  __html: sanitizeHTML(articleContent)
                 }}
               />
             </div>

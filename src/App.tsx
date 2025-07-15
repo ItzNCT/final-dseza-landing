@@ -12,6 +12,9 @@ import NotFound from "./pages/NotFound";
 import ArticleDetailPage from "@/pages/Article/ArticleDetailPage";
 import DocumentSearchPage from "@/pages/Document/DocumentSearchPage";
 import EnterpriseListPage from "@/pages/Enterprise/EnterpriseListPage";
+import WorkSchedulePage from "@/pages/Schedule/WorkSchedulePage";
+import QnAListPage from "@/pages/QnA/QnAListPage";
+import CreateQuestionPage from "@/pages/QnA/CreateQuestionPage";
 import MobileLayout from "./components/mobile/MobileLayout";
 
 // Create a client
@@ -33,6 +36,9 @@ const App: React.FC = () => (
                   <Route path="/su-kien/:uuid" element={<ArticleDetailPage />} />
                   <Route path="/van-ban" element={<DocumentSearchPage />} />
                   <Route path="/doanh-nghiep/thong-tin-doanh-nghiep/thong-ke-doanh-nghiep" element={<EnterpriseListPage />} />
+                  <Route path="/tin-tuc/lich-cong-tac" element={<WorkSchedulePage />} />
+                  <Route path="/tien-ich/hoi-dap" element={<QnAListPage />} />
+                  <Route path="/tien-ich/hoi-dap/tao-moi" element={<CreateQuestionPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
