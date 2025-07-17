@@ -1,10 +1,10 @@
 import React from "react";
-import { ChevronRight, Calendar, Tag, Share2, Facebook, Twitter, Mail, Copy } from "lucide-react";
+import { ChevronRight, Calendar, Tag, Share2, Facebook, Twitter, Mail, Copy, Eye } from "lucide-react";
 import { useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/context/ThemeContext";
-import { useArticleDetail } from "@/api/hooks";
+import { useArticleDetail, useArticleViewCount } from "@/api/hooks";
 import { extractImageUrl } from "@/utils/drupal";
 import { processRichTextContent, extractFirstImageFromRichText } from "@/utils/richTextProcessor";
 import TopBar from "@/components/hero/TopBar";
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import CommentSection from "@/components/comments/CommentSection";
 
 /**
  * Secure DOMPurify configuration for XSS protection
@@ -45,9 +46,13 @@ const ArticleDetailPage: React.FC = () => {
   const { theme } = useTheme();
   const { uuid } = useParams<{ uuid: string }>();
   const { data, isLoading, isError, error } = useArticleDetail(uuid || '');
+  
+  // Get node ID from article data for view count
+  const nodeId = data?.data?.attributes?.drupal_internal__nid?.toString() || '';
+  const { viewCount, isLoading: viewCountLoading } = useArticleViewCount(nodeId);
 
   // Debug logging
-  // console.log('ArticleDetailPage Debug:', { uuid, isLoading, isError, error, data });
+  // console.log('ArticleDetailPage Debug:', { uuid, nodeId, viewCount, isLoading, isError, error, data });
 
   const handleShare = (platform: string) => {
     const url = window.location.href;
@@ -282,6 +287,7 @@ const ArticleDetailPage: React.FC = () => {
                 <div className="flex gap-4 mb-6">
                   <Skeleton className="h-5 w-32" />
                   <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-5 w-20" />
                 </div>
               </header>
 
@@ -482,6 +488,19 @@ const ArticleDetailPage: React.FC = () => {
                   <Calendar className="h-4 w-4" />
                   <span>Ngày đăng: {formatDate(article.attributes.created)}</span>
                 </div>
+                
+                {/* View Count */}
+                <div className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  <span>
+                    Lượt xem: {viewCountLoading ? (
+                      <span className="inline-block w-8 h-4 bg-gray-300 rounded animate-pulse"></span>
+                    ) : (
+                      viewCount.toLocaleString('vi-VN')
+                    )}
+                  </span>
+                </div>
+                
                 {categories.length > 0 && (
                   <div className="flex items-center gap-2">
                     <Tag className="h-4 w-4" />
@@ -521,33 +540,62 @@ const ArticleDetailPage: React.FC = () => {
                 Chia sẻ bài viết:
               </h3>
               <div className="flex flex-wrap gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleShare('facebook')}
-                  className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-blue-900/20 hover:border-blue-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-blue-50 hover:border-blue-300'}`}
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  <Facebook className="h-4 w-4 text-blue-600" />
-                  Facebook
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleShare('twitter')}
-                  className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-sky-900/20 hover:border-sky-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-sky-50 hover:border-sky-300'}`}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-blue-900/20 hover:border-blue-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-blue-50 hover:border-blue-300'}`}
+                  >
+                    <Facebook className="h-4 w-4 text-blue-600" />
+                    Facebook
+                  </Button>
+                </a>
+                <a
+                  href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(article.attributes.title)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  <Twitter className="h-4 w-4 text-sky-500" />
-                  Twitter
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleShare('email')}
-                  className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-gray-700/20 hover:border-gray-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-gray-50 hover:border-gray-300'}`}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-sky-900/20 hover:border-sky-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-sky-50 hover:border-sky-300'}`}
+                  >
+                    <Twitter className="h-4 w-4 text-sky-500" />
+                    Twitter
+                  </Button>
+                </a>
+                <a
+                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  <Mail className="h-4 w-4 text-gray-600" />
-                  Email
-                </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-blue-900/20 hover:border-blue-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-blue-50 hover:border-blue-300'}`}
+                  >
+                    <svg className="h-4 w-4 text-blue-700" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                    LinkedIn
+                  </Button>
+                </a>
+                <a
+                  href={`mailto:?subject=${encodeURIComponent(article.attributes.title)}&body=${encodeURIComponent(`Xem bài viết này: ${window.location.href}`)}`}
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-gray-700/20 hover:border-gray-500' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-gray-50 hover:border-gray-300'}`}
+                  >
+                    <Mail className="h-4 w-4 text-gray-600" />
+                    Email
+                  </Button>
+                </a>
                 <Button
                   variant="outline"
                   size="sm"
@@ -559,6 +607,9 @@ const ArticleDetailPage: React.FC = () => {
                 </Button>
               </div>
             </div>
+
+            {/* Comments Section */}
+            <CommentSection articleId={uuid || ''} />
           </article>
         </div>
       </main>

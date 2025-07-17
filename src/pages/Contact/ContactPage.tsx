@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   MapPin, 
   Phone, 
@@ -9,7 +9,8 @@ import {
   Building,
   Clock,
   Users,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import TopBar from "@/components/hero/TopBar";
@@ -28,6 +29,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useSubmitContactForm } from "@/api/hooks";
 
 /**
  * ContactPage component with comprehensive contact information and forms
@@ -36,11 +38,14 @@ const ContactPage: React.FC = () => {
   const { toast } = useToast();
   const { theme } = useTheme();
   const [contactForm, setContactForm] = useState({
-    name: "",
+    hoTen: "",
     email: "",
-    subject: "",
-    message: "",
+    tieuDe: "",
+    noiDung: "",
   });
+
+  // Use the contact form submission hook
+  const { mutate, isPending, isSuccess, isError, error, reset } = useSubmitContactForm();
 
   const handleInputChange = (field: string, value: string) => {
     setContactForm(prev => ({
@@ -51,20 +56,43 @@ const ContactPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Contact form submitted:", contactForm);
-    toast({
-      title: "Email đã được gửi!",
-      description: "Chúng tôi sẽ phản hồi bạn trong vòng 24h.",
-    });
     
-    // Reset form
-    setContactForm({
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    });
+    // Submit the contact form using the hook
+    mutate(contactForm);
   };
+
+  // Handle successful submission
+  useEffect(() => {
+    if (isSuccess) {
+      toast({
+        title: "Email đã được gửi thành công!",
+        description: "Chúng tôi sẽ phản hồi bạn trong vòng 24 giờ.",
+        variant: "default",
+      });
+      
+      // Reset form
+      setContactForm({
+        hoTen: "",
+        email: "",
+        tieuDe: "",
+        noiDung: "",
+      });
+      
+      // Reset mutation state
+      reset();
+    }
+  }, [isSuccess, toast, reset]);
+
+  // Handle submission error
+  useEffect(() => {
+    if (isError) {
+      toast({
+        title: "Có lỗi xảy ra!",
+        description: error?.message || "Vui lòng thử lại sau.",
+        variant: "destructive",
+      });
+    }
+  }, [isError, error, toast]);
 
   const leaders = [
     {
@@ -270,13 +298,14 @@ const ContactPage: React.FC = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="name" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Họ và tên *</Label>
+                        <Label htmlFor="hoTen" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Họ và tên *</Label>
                         <Input
-                          id="name"
+                          id="hoTen"
                           placeholder="Nhập họ và tên của bạn"
-                          value={contactForm.name}
-                          onChange={(e) => handleInputChange("name", e.target.value)}
+                          value={contactForm.hoTen}
+                          onChange={(e) => handleInputChange("hoTen", e.target.value)}
                           className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                          disabled={isPending}
                           required
                         />
                       </div>
@@ -290,32 +319,35 @@ const ContactPage: React.FC = () => {
                           value={contactForm.email}
                           onChange={(e) => handleInputChange("email", e.target.value)}
                           className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                          disabled={isPending}
                           required
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="subject" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Tiêu đề *</Label>
+                      <Label htmlFor="tieuDe" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Tiêu đề *</Label>
                       <Input
-                        id="subject"
+                        id="tieuDe"
                         placeholder="Nhập tiêu đề email"
-                        value={contactForm.subject}
-                        onChange={(e) => handleInputChange("subject", e.target.value)}
+                        value={contactForm.tieuDe}
+                        onChange={(e) => handleInputChange("tieuDe", e.target.value)}
                         className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                        disabled={isPending}
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="message" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Nội dung *</Label>
+                      <Label htmlFor="noiDung" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Nội dung *</Label>
                       <Textarea
-                        id="message"
+                        id="noiDung"
                         placeholder="Nhập nội dung chi tiết..."
                         rows={6}
-                        value={contactForm.message}
-                        onChange={(e) => handleInputChange("message", e.target.value)}
+                        value={contactForm.noiDung}
+                        onChange={(e) => handleInputChange("noiDung", e.target.value)}
                         className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                        disabled={isPending}
                         required
                       />
                     </div>
@@ -323,9 +355,19 @@ const ContactPage: React.FC = () => {
                     <Button 
                       type="submit" 
                       className={`w-full md:w-auto ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'}`}
+                      disabled={isPending}
                     >
-                      <Send className="h-4 w-4 mr-2" />
-                      Gửi đi
+                      {isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Đang gửi...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          Gửi đi
+                        </>
+                      )}
                     </Button>
 
                   </form>

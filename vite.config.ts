@@ -34,6 +34,12 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
+        // Proxy cho custom API endpoints
+        '/api': {
+          target: API_TARGET,
+          changeOrigin: true,
+          secure: false,
+        },
         // (tuỳ chọn) proxy luôn cả OAuth, REST khác…
         '/oauth': {
           target: API_TARGET,

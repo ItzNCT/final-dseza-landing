@@ -1,13 +1,18 @@
 // src/components/hero/LogoSearchBar.tsx
 import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "@/context/ThemeContext";
-import { Search } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Search, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/utils/translations";
+import { Button } from "@/components/ui/button";
 
 const LogoSearchBar: React.FC = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
   const placeholderColor = theme === "dark" ? "placeholder-dseza-dark-secondary-text" : "placeholder-dseza-light-secondary-text";
@@ -16,6 +21,12 @@ const LogoSearchBar: React.FC = () => {
   const focusShadow = theme === "dark" ? "focus:shadow-[0_0_0_2px_rgba(25,219,207,0.2)]" : "focus:shadow-[0_0_0_2px_rgba(65,102,40,0.2)]";
   
   const logoSrc = theme === "dark" ? "/media/darklogo3.png" : "/media/lightlogo3.png";
+
+  // Handle logout function
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   // Sử dụng lớp glass-initial đã chuẩn hóa
   // z-index được đặt là 20 để nằm dưới TopBar (z-40) và trên NavigationBar ban đầu (nếu Nav có z-index thấp hơn khi chưa sticky)
@@ -63,8 +74,48 @@ const LogoSearchBar: React.FC = () => {
           />
         </div>
         
-        <div className={`${textColor} flex items-center`}>
-          <a href="#" className={`${textColor} ${hoverColor} transition-colors duration-300`}>{t('logoSearchBar.login')}</a>
+        <div className={`${textColor} flex items-center space-x-4`}>
+          {user ? (
+            // User is logged in - show user name, profile link, and logout button
+            <>
+              <Link 
+                to="/ho-so" 
+                className={cn(
+                  "text-sm transition-colors duration-300",
+                  textColor, 
+                  hoverColor
+                )}
+              >
+                Chào, <span className="font-medium">{user.name}</span>
+              </Link>
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "transition-all duration-300",
+                  theme === "dark" 
+                    ? "bg-dseza-dark-secondary-bg/60 border-dseza-dark-border/50 text-dseza-dark-main-text hover:bg-dseza-dark-primary-accent hover:text-white hover:border-dseza-dark-primary-accent" 
+                    : "bg-white/60 border-gray-300/50 text-dseza-light-main-text hover:bg-dseza-light-primary-accent hover:text-white hover:border-dseza-light-primary-accent"
+                )}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Đăng xuất
+              </Button>
+            </>
+          ) : (
+            // User is not logged in - show login link
+            <Link 
+              to="/dang-nhap" 
+              className={cn(
+                "transition-colors duration-300 font-medium",
+                textColor, 
+                hoverColor
+              )}
+            >
+              {t('logoSearchBar.login')}
+            </Link>
+          )}
         </div>
       </div>
     </div>

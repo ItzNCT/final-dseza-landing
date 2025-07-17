@@ -235,6 +235,44 @@ const viTranslations: TranslationObject = {
     login: "Đăng nhập",
   },
 
+  // Authentication
+  auth: {
+    login: {
+      title: "Đăng nhập",
+      description: "Nhập tài khoản hoặc email và mật khẩu để tiếp tục",
+      email: "Email",
+      emailPlaceholder: "ten@example.com",
+      usernameOrEmail: "Tài khoản hoặc Email",
+      usernameOrEmailPlaceholder: "admin hoặc ten@example.com",
+      password: "Mật khẩu",
+      passwordPlaceholder: "Nhập mật khẩu",
+      forgotPassword: "Quên mật khẩu?",
+      submitButton: "Đăng nhập",
+      noAccount: "Chưa có tài khoản?",
+      registerLink: "Đăng ký ngay",
+      validation: {
+        usernameOrEmailRequired: "Vui lòng nhập tài khoản hoặc email",
+        passwordRequired: "Vui lòng nhập mật khẩu",
+        invalidFormat: "Tài khoản không hợp lệ hoặc email sai định dạng",
+      },
+    },
+    register: {
+      title: "Tạo tài khoản",
+      description: "Điền thông tin bên dưới để đăng ký tài khoản mới",
+      fullName: "Tên người dùng",
+      fullNamePlaceholder: "Nguyễn Văn A",
+      email: "Địa chỉ Email",
+      emailPlaceholder: "ten@example.com",
+      password: "Mật khẩu",
+      passwordPlaceholder: "Ít nhất 6 ký tự",
+      confirmPassword: "Xác nhận mật khẩu",
+      confirmPasswordPlaceholder: "Nhập lại mật khẩu",
+      submitButton: "Đăng ký",
+      hasAccount: "Đã có tài khoản?",
+      loginLink: "Đăng nhập",
+    },
+  },
+
   // Language Switcher & Theme Toggle
   languageSwitcher: {
     vietnamese: "Tiếng Việt",
@@ -473,6 +511,41 @@ const enTranslations: TranslationObject = {
     searchPlaceholder: "Search...",
     register: "Register",
     login: "Login",
+  },
+
+  // Authentication
+  auth: {
+    login: {
+      title: "Login",
+      description: "Enter your username or email and password to continue",
+      usernameOrEmail: "Username or Email",
+      usernameOrEmailPlaceholder: "admin or name@example.com",
+      password: "Password",
+      forgotPassword: "Forgot password?",
+      submitButton: "Login",
+      noAccount: "Don't have an account?",
+      registerLink: "Register now",
+      validation: {
+        usernameOrEmailRequired: "Please enter username or email",
+        passwordRequired: "Please enter password",
+        invalidFormat: "Invalid username or email format",
+      },
+    },
+    register: {
+      title: "Create Account",
+      description: "Fill in the details below to register a new account",
+      fullName: "Full Name",
+      fullNamePlaceholder: "John Doe",
+      email: "Email Address",
+      emailPlaceholder: "john.doe@example.com",
+      password: "Password",
+      passwordPlaceholder: "At least 6 characters",
+      confirmPassword: "Confirm Password",
+      confirmPasswordPlaceholder: "Re-enter password",
+      submitButton: "Register",
+      hasAccount: "Already have an account?",
+      loginLink: "Login",
+    },
   },
 
   // Language Switcher & Theme Toggle

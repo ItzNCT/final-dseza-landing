@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, Send } from "lucide-react";
+import { ChevronRight, Send, Loader2 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useTheme } from "@/context/ThemeContext";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
@@ -17,6 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { submitQuestion, QuestionSubmissionData } from "@/utils/api";
+
+// Interface cho dữ liệu form
+interface QuestionFormData {
+  fullName: string;
+  address: string;
+  phoneNumber: string;
+  email: string;
+  category: string;
+  title: string;
+  content: string;
+}
 
 /**
  * CreateQuestionPage component for submitting new questions
@@ -25,7 +39,7 @@ const CreateQuestionPage: React.FC = () => {
   const { theme } = useTheme();
   
   // Form state management
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<QuestionFormData>({
     fullName: "",
     address: "",
     phoneNumber: "",
@@ -35,19 +49,107 @@ const CreateQuestionPage: React.FC = () => {
     content: "",
   });
 
+  // Validation errors state
+  const [errors, setErrors] = useState<Partial<QuestionFormData>>({});
+
+  // Mutation để gửi câu hỏi
+  const submitQuestionMutation = useMutation({
+    mutationFn: submitQuestion,
+    onSuccess: (data) => {
+      toast.success("Gửi câu hỏi thành công!", {
+        description: "Câu hỏi của bạn đã được gửi và đang chờ được duyệt.",
+      });
+      // Reset form
+      setFormData({
+        fullName: "",
+        address: "",
+        phoneNumber: "",
+        email: "",
+        category: "",
+        title: "",
+        content: "",
+      });
+      setErrors({});
+    },
+    onError: (error: Error) => {
+      toast.error("Gửi câu hỏi thất bại!", {
+        description: error.message,
+      });
+    },
+  });
+
   // Handle form field changes
-  const handleInputChange = (field: keyof typeof formData, value: string) => {
+  const handleInputChange = (field: keyof QuestionFormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: undefined
+      }));
+    }
+  };
+
+  // Validate form
+  const validateForm = (): boolean => {
+    const newErrors: Partial<QuestionFormData> = {};
+
+    // Required fields
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Họ và tên là bắt buộc";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email là bắt buộc";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Email không hợp lệ";
+    }
+
+    if (!formData.title.trim()) {
+      newErrors.title = "Tiêu đề là bắt buộc";
+    }
+
+    if (!formData.content.trim()) {
+      newErrors.content = "Nội dung câu hỏi là bắt buộc";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // TODO: Implement form submission logic
+    
+    if (!validateForm()) {
+      toast.error("Vui lòng kiểm tra lại thông tin!", {
+        description: "Có một số trường bắt buộc chưa được điền đầy đủ.",
+      });
+      return;
+    }
+
+    // Transform form data to API format
+    const apiData: QuestionSubmissionData = {
+      hoTen: formData.fullName.trim(),
+      email: formData.email.trim(),
+      tieuDe: formData.title.trim(),
+      noiDung: formData.content.trim(),
+    };
+
+    // Add optional fields
+    if (formData.phoneNumber.trim()) {
+      apiData.dienThoai = formData.phoneNumber.trim();
+    }
+
+    if (formData.address.trim()) {
+      apiData.congTy = formData.address.trim(); // Using address as company field
+    }
+
+    submitQuestionMutation.mutate(apiData);
   };
 
   return (
@@ -109,8 +211,11 @@ const CreateQuestionPage: React.FC = () => {
                   value={formData.fullName}
                   onChange={(e) => handleInputChange("fullName", e.target.value)}
                   required
-                  className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                  className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'} ${errors.fullName ? 'border-red-500' : ''}`}
                 />
+                {errors.fullName && (
+                  <p className="text-red-500 text-sm">{errors.fullName}</p>
+                )}
               </div>
 
               {/* Address */}
@@ -144,7 +249,7 @@ const CreateQuestionPage: React.FC = () => {
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Email
+                  Email<span className="text-red-500 ml-1">*</span>
                 </Label>
                 <Input
                   id="email"
@@ -152,8 +257,12 @@ const CreateQuestionPage: React.FC = () => {
                   placeholder="Nhập email của bạn"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                  required
+                  className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'} ${errors.email ? 'border-red-500' : ''}`}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email}</p>
+                )}
               </div>
 
               {/* Category */}
@@ -181,30 +290,38 @@ const CreateQuestionPage: React.FC = () => {
               {/* Title - Spans 2 columns */}
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="title" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Tiêu đề
+                  Tiêu đề<span className="text-red-500 ml-1">*</span>
                 </Label>
                 <Input
                   id="title"
                   placeholder="Nhập tiêu đề câu hỏi"
                   value={formData.title}
                   onChange={(e) => handleInputChange("title", e.target.value)}
-                  className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                  required
+                  className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'} ${errors.title ? 'border-red-500' : ''}`}
                 />
+                {errors.title && (
+                  <p className="text-red-500 text-sm">{errors.title}</p>
+                )}
               </div>
 
               {/* Content - Spans 2 columns */}
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="content" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Nội dung câu hỏi
+                  Nội dung câu hỏi<span className="text-red-500 ml-1">*</span>
                 </Label>
                 <Textarea
                   id="content"
                   placeholder="Nhập nội dung chi tiết câu hỏi của bạn..."
                   value={formData.content}
                   onChange={(e) => handleInputChange("content", e.target.value)}
+                  required
                   rows={6}
-                  className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                  className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'} ${errors.content ? 'border-red-500' : ''}`}
                 />
+                {errors.content && (
+                  <p className="text-red-500 text-sm">{errors.content}</p>
+                )}
               </div>
 
             </div>
@@ -213,10 +330,15 @@ const CreateQuestionPage: React.FC = () => {
             <div className="mt-8 flex justify-end">
               <Button 
                 type="submit"
-                className={`flex items-center gap-2 px-8 ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'}`}
+                disabled={submitQuestionMutation.isPending}
+                className={`flex items-center gap-2 px-8 ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'} ${submitQuestionMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <Send className="h-4 w-4" />
-                Gửi câu hỏi
+                {submitQuestionMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+                {submitQuestionMutation.isPending ? 'Đang gửi...' : 'Gửi câu hỏi'}
               </Button>
             </div>
 

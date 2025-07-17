@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/api/client';
 
 // Define TypeScript interfaces for the menu data structure
@@ -208,6 +208,92 @@ async function fetchArticleById(uuid: string): Promise<any> {
     throw new Error(`Failed to fetch article details: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
+
+/**
+ * Fetch article view count from Statistics module
+ * @param nid - The node ID of the article
+ * @returns Promise containing the view count data
+ */
+async function fetchArticleViewCount(nid: string): Promise<{ totalcount: number; uuid: string; nid: string }> {
+  try {
+    const url = `${JSON_API_BASE_URL}/api/view-count/${encodeURIComponent(nid)}?_format=json`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      // If view count fails, return default values instead of throwing error
+      console.warn(`Failed to fetch view count for nid ${nid}: ${response.status}`);
+      return {
+        nid,
+        totalcount: 0,
+        uuid: '',
+      };
+    }
+
+    const data = await response.json();
+    
+    // API returns an array, get the first item
+    const viewData = Array.isArray(data) && data.length > 0 ? data[0] : null;
+    
+    if (!viewData) {
+      return {
+        nid,
+        totalcount: 0,
+        uuid: '',
+      };
+    }
+
+    return {
+      nid: viewData.nid || nid,
+      totalcount: parseInt(viewData.totalcount || '0', 10),
+      uuid: viewData.uuid || '',
+    };
+  } catch (error) {
+    // Don't throw error for view count - just log and return defaults
+    console.warn(`Error fetching view count for nid ${nid}:`, error);
+    return {
+      nid,
+      totalcount: 0,
+      uuid: '',
+    };
+  }
+}
+
+/**
+ * Custom hook to fetch article view count data
+ * 
+ * @param nid - The node ID of the article
+ * @returns {Object} Object containing view count data and loading states
+ */
+export const useArticleViewCount = (nid: string) => {
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['articleViewCount', nid],
+    queryFn: () => fetchArticleViewCount(nid),
+    enabled: !!nid,
+    staleTime: 2 * 60 * 1000, // 2 minutes - view count can change frequently
+    gcTime: 10 * 60 * 1000, // 10 minutes cache time
+    retry: 1, // Only retry once for view count
+    retryDelay: 1000, // Quick retry for view count
+  });
+
+  return {
+    viewCount: data?.totalcount || 0,
+    viewData: data,
+    isLoading,
+    isError,
+    error,
+  };
+};
 
 /**
  * Custom hook to fetch and manage article detail data using TanStack Query
@@ -868,3 +954,272 @@ export type { QuestionFilters };
 
 // Export the fetch function for potential standalone use
 export { fetchQuestions }; 
+
+/**
+ * Interface for contact form data
+ */
+interface ContactFormData {
+  hoTen: string;
+  email: string;
+  tieuDe: string;
+  noiDung: string;
+}
+
+/**
+ * Interface for contact form API response
+ */
+interface ContactFormResponse {
+  status: 'success' | 'error';
+  message: string;
+}
+
+/**
+ * Submit contact form data to Drupal API
+ * @param formData - The contact form data to submit
+ * @returns Promise containing the API response
+ */
+async function submitContactForm(formData: ContactFormData): Promise<ContactFormResponse> {
+  try {
+    const url = `${JSON_API_BASE_URL}/api/v1/submit-contact-form`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to submit contact form: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Custom hook to submit contact form using TanStack Query mutation
+ * 
+ * @returns {Object} Object containing:
+ *   - mutate: Function to trigger the contact form submission
+ *   - isPending: Boolean indicating if the request is in progress
+ *   - isSuccess: Boolean indicating if the request was successful
+ *   - isError: Boolean indicating if an error occurred
+ *   - error: The error object if an error occurred
+ *   - data: The response data if successful
+ *   - reset: Function to reset the mutation state
+ */
+export const useSubmitContactForm = () => {
+  const {
+    mutate,
+    isPending,
+    isSuccess,
+    isError,
+    error,
+    data,
+    reset,
+  } = useMutation({
+    mutationFn: submitContactForm,
+    retry: 1, // Retry once on failure
+    retryDelay: 1000, // Wait 1 second before retry
+  });
+
+  return {
+    mutate,
+    isPending,
+    isSuccess,
+    isError,
+    error,
+    data,
+    reset,
+  };
+};
+
+// Registration Form Types
+interface RegistrationFormData {
+  name: string;
+  email: string;
+  password: string;
+  password_confirm: string;
+}
+
+interface RegistrationResponse {
+  success: boolean;
+  message: string;
+  user_id?: string;
+  access_token?: string;
+  user_name?: string;
+  user_role?: string;
+}
+
+/**
+ * Submit registration form data to Drupal API
+ * @param formData - The registration form data to submit
+ * @returns Promise containing the API response
+ */
+async function submitRegistrationForm(formData: RegistrationFormData): Promise<RegistrationResponse> {
+  try {
+    const url = `${JSON_API_BASE_URL}/api/v1/user/register`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to register user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Custom hook to register user using TanStack Query mutation
+ * 
+ * @returns {Object} Object containing:
+ *   - mutate: Function to trigger the user registration
+ *   - isPending: Boolean indicating if the request is in progress
+ *   - isSuccess: Boolean indicating if the request was successful
+ *   - isError: Boolean indicating if an error occurred
+ *   - error: The error object if an error occurred
+ *   - data: The response data if successful
+ *   - reset: Function to reset the mutation state
+ */
+export const useRegisterUser = () => {
+  const {
+    mutate,
+    isPending,
+    isSuccess,
+    isError,
+    error,
+    data,
+    reset,
+  } = useMutation({
+    mutationFn: submitRegistrationForm,
+    retry: 1, // Retry once on failure
+    retryDelay: 1000, // Wait 1 second before retry
+  });
+
+  return {
+    mutate,
+    isPending,
+    isSuccess,
+    isError,
+    error,
+    data,
+    reset,
+  };
+};
+
+// Change Password Form Types
+interface ChangePasswordFormData {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+interface ChangePasswordResponse {
+  success: boolean;
+  message: string;
+  user_id?: string;
+  timestamp?: number;
+}
+
+/**
+ * Submit change password form data to Drupal API
+ * @param formData - The change password form data to submit
+ * @param token - Authentication token
+ * @returns Promise containing the API response
+ */
+async function submitChangePasswordForm(formData: ChangePasswordFormData, token?: string): Promise<ChangePasswordResponse> {
+  try {
+    const url = `${JSON_API_BASE_URL}/api/v1/user/change-password`;
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add authentication token if provided
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(formData),
+      credentials: 'include', // Include cookies for session-based auth
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to change password: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Custom hook to change user password using TanStack Query mutation
+ * 
+ * @returns {Object} Object containing:
+ *   - mutate: Function to trigger the password change
+ *   - isPending: Boolean indicating if the request is in progress
+ *   - isSuccess: Boolean indicating if the request was successful
+ *   - isError: Boolean indicating if an error occurred
+ *   - error: The error object if an error occurred
+ *   - data: The response data if successful
+ *   - reset: Function to reset the mutation state
+ */
+export const useChangePassword = () => {
+  const {
+    mutate,
+    isPending,
+    isSuccess,
+    isError,
+    error,
+    data,
+    reset,
+  } = useMutation({
+    mutationFn: (formData: ChangePasswordFormData) => {
+      // Get token from localStorage if available
+      const token = localStorage.getItem('authToken');
+      return submitChangePasswordForm(formData, token);
+    },
+    retry: 1, // Retry once on failure
+    retryDelay: 1000, // Wait 1 second before retry
+  });
+
+  return {
+    mutate,
+    isPending,
+    isSuccess,
+    isError,
+    error,
+    data,
+    reset,
+  };
+};
+
+// Export types for external use
+export type { ContactFormData, ContactFormResponse, RegistrationFormData, RegistrationResponse, ChangePasswordFormData, ChangePasswordResponse };
+
+// Export the fetch function for potential standalone use
+export { submitContactForm, submitRegistrationForm, submitChangePasswordForm }; 
