@@ -21,6 +21,16 @@ import ContactPage from "@/pages/Contact/ContactPage";
 import LoginPage from "@/pages/Auth/LoginPage";
 import RegisterPage from "@/pages/Auth/RegisterPage";
 import ProfilePage from "@/pages/Auth/ProfilePage";
+import ManagementBoardOverviewPage from "./pages/Introduction/ManagementBoardOverviewPage";
+import { FunctionsDutiesPage } from "./pages/Introduction/FunctionsDutiesPage";
+import { DepartmentsPage } from "./pages/Introduction/DepartmentsPage";
+import { AffiliatedUnitsPage } from "./pages/Introduction/AffiliatedUnitsPage";
+import WelcomeLetterPage from "./pages/Introduction/WelcomeLetterPage";
+import DanangOverviewPage from "./pages/Introduction/DanangOverviewPage";
+import FunctionalZonesListPage from "./pages/Introduction/FunctionalZonesListPage";
+import InvestmentGuidePage from "./pages/Brochure/InvestmentGuidePage";
+import InvestmentPolicyPage from "./pages/Brochure/InvestmentPolicyPage";
+import BrochurePage from "./pages/Brochure/BrochurePage";
 import MobileLayout from "./components/mobile/MobileLayout";
 import AccessibilityPanel from "./components/AccessibilityPanel";
 
@@ -53,6 +63,16 @@ const App: React.FC = () => (
                       <Route path="/dang-nhap" element={<LoginPage />} />
                       <Route path="/dang-ky" element={<RegisterPage />} />
                       <Route path="/ho-so" element={<ProfilePage />} />
+                      <Route path="/gioi-thieu/gioi-thieu-chung/thu-ngo" element={<WelcomeLetterPage />} />
+                      <Route path="/gioi-thieu/gioi-thieu-chung/tong-quan-ve-da-nang" element={<DanangOverviewPage />} />
+                      <Route path="/gioi-thieu/gioi-thieu-chung/tong-quan-ve-ban-quan-ly" element={<ManagementBoardOverviewPage />} />
+                      <Route path="/gioi-thieu/gioi-thieu-chung/chuc-nang-nhiem-vu" element={<FunctionsDutiesPage />} />
+                      <Route path="/gioi-thieu/gioi-thieu-chung/co-cau-to-chuc" element={<DepartmentsPage />} />
+                      <Route path="/gioi-thieu/gioi-thieu-chung/don-vi-truc-thuoc" element={<AffiliatedUnitsPage />} />
+                      <Route path="/cam-nang-dau-tu" element={<InvestmentGuidePage />} />
+                      <Route path="/cam-nang-dau-tu/chinh-sach-uu-dai" element={<InvestmentPolicyPage />} />
+                      <Route path="/cam-nang-dau-tu/brochure" element={<BrochurePage />} />
+                      <Route path="/gioi-thieu/cac-khu-chuc-nang" element={<FunctionalZonesListPage />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

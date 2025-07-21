@@ -2,22 +2,75 @@
 import React, { useState } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import { cn } from "@/lib/utils";
-import { Image as ImageIcon, Video as VideoIcon, File as FileIcon } from "lucide-react";
+import { Image as ImageIcon, Video as VideoIcon, File as FileIcon, Play, Download, ExternalLink, X, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
 import { AspectRatio } from "./ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/utils/translations";
-import { useHomepageData } from "@/hooks/useHomepageData";
+import { useImages } from "@/hooks/useImages";
+import { useVideos } from "@/hooks/useVideos";
+import { useDocuments } from "@/hooks/useDocuments";
+import { useToast } from "@/hooks/use-toast";
 
-interface ResourceItem {
-  id: number;
+// Modal component for video playback
+const VideoModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  videoUrl: string;
   title: string;
-  titleEn?: string;
-  date: string;
-  imageUrl: string;
-  type: 'image' | 'video' | 'document';
-  url?: string;
-}
+}> = ({ isOpen, onClose, videoUrl, title }) => {
+  const { theme } = useTheme();
+  
+  if (!isOpen) return null;
+
+  // Extract video ID from YouTube URL for embedding
+  const getYouTubeEmbedUrl = (url: string) => {
+    const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+    if (videoIdMatch) {
+      return `https://www.youtube.com/embed/${videoIdMatch[1]}`;
+    }
+    return url;
+  };
+
+  const embedUrl = getYouTubeEmbedUrl(videoUrl);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-75">
+      <div className={cn(
+        "relative w-full max-w-4xl rounded-lg overflow-hidden",
+        theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-white"
+      )}>
+        <div className="flex items-center justify-between p-4 border-b">
+          <h3 className={cn(
+            "text-lg font-semibold",
+            theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text"
+          )}>
+            {title}
+          </h3>
+          <button
+            onClick={onClose}
+            className={cn(
+              "p-2 rounded hover:bg-opacity-10 hover:bg-gray-500",
+              theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text"
+            )}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="aspect-video">
+          <iframe
+            src={embedUrl}
+            title={title}
+            className="w-full h-full"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ResourceItemSkeleton component for loading state
 const ResourceItemSkeleton = () => {
@@ -39,14 +92,128 @@ const ResourceItemSkeleton = () => {
   );
 };
 
+// Error display component
+const ErrorDisplay: React.FC<{
+  title: string;
+  message: string;
+  onRetry?: () => void;
+  showDebug?: boolean;
+}> = ({ title, message, onRetry, showDebug = false }) => {
+  const { theme } = useTheme();
+  const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
+  const secondaryTextColor = theme === "dark" ? "text-dseza-dark-secondary-text" : "text-dseza-light-secondary-text";
+  const panelContentBg = theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-dseza-light-secondary-bg";
+
+  return (
+    <div className={cn("p-12 text-center rounded-lg border-2 border-dashed", 
+      panelContentBg,
+      theme === "dark" ? "border-red-800" : "border-red-200"
+    )}>
+      <AlertCircle className={cn("w-16 h-16 mx-auto mb-4", 
+        theme === "dark" ? "text-red-400" : "text-red-500"
+      )} />
+      <h3 className={cn("text-xl font-semibold mb-2", textColor)}>
+        {title}
+      </h3>
+      <p className={cn("text-base mb-4", secondaryTextColor)}>
+        {message}
+      </p>
+      
+      {onRetry && (
+        <Button
+          onClick={onRetry}
+          variant="outline"
+          className={cn(
+            "mb-4",
+            theme === "dark" ? "border-red-600 text-red-400 hover:bg-red-900/20" : "border-red-300 text-red-600 hover:bg-red-50"
+          )}
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Thử lại
+        </Button>
+      )}
+
+      {showDebug && (
+        <div className={cn("text-xs text-left border p-3 rounded mt-4", 
+          theme === "dark" ? "border-red-800 bg-red-900/10 text-red-300" : "border-red-200 bg-red-50 text-red-700"
+        )}>
+          <p className="font-semibold mb-2">🔍 Thông tin debug:</p>
+          <p>Base URL: {import.meta.env.VITE_DRUPAL_BASE_URL || 'https://dseza-backend.lndo.site'}</p>
+          <p>API Endpoint: /jsonapi/node/resource</p>
+          <p className="mt-2">Bạn có thể kiểm tra API trực tiếp tại:</p>
+          <div className="mt-2 space-y-1">
+            <a 
+              href="https://dseza-backend.lndo.site/jsonapi/node/resource" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn("block transition-colors underline",
+                theme === "dark" ? "text-red-400 hover:text-red-300" : "text-red-600 hover:text-red-800"
+              )}
+            >
+              📋 Danh sách tất cả tài nguyên
+            </a>
+            <a 
+              href="https://dseza-backend.lndo.site/jsonapi/node/resource/97c6db25-8859-4ef8-a9ef-a563eb6599fa"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn("block transition-colors underline",
+                theme === "dark" ? "text-red-400 hover:text-red-300" : "text-red-600 hover:text-red-800"
+              )}
+            >
+              🔍 Kiểm tra tài nguyên mẫu
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 /**
  * Resources section with tabbed interface for Images, Videos, and Documents
  */
 const ResourcesSection: React.FC = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'images' | 'videos' | 'documents'>('images');
-  const { data, isLoading, isError } = useHomepageData();
+  const [selectedVideo, setSelectedVideo] = useState<{url: string, title: string} | null>(null);
+
+  // Fetch data from all hooks
+  const { images, isLoading: imagesLoading, isError: imagesError, error: imagesErrorData, refetch: refetchImages } = useImages();
+  const { videos, isLoading: videosLoading, isError: videosError, error: videosErrorData, refetch: refetchVideos } = useVideos();
+  const { documents, isLoading: documentsLoading, isError: documentsError, error: documentsErrorData, refetch: refetchDocuments } = useDocuments();
+
+  // Show toast notifications for errors
+  React.useEffect(() => {
+    if (imagesError && imagesErrorData) {
+      toast({
+        title: "Lỗi tải hình ảnh",
+        description: imagesErrorData.message || "Không thể tải danh sách hình ảnh tài nguyên.",
+        variant: "destructive",
+      });
+    }
+  }, [imagesError, imagesErrorData, toast]);
+
+  React.useEffect(() => {
+    if (videosError && videosErrorData) {
+      toast({
+        title: "Lỗi tải video",
+        description: videosErrorData.message || "Không thể tải danh sách video tài nguyên.",
+        variant: "destructive",
+      });
+    }
+  }, [videosError, videosErrorData, toast]);
+
+  React.useEffect(() => {
+    if (documentsError && documentsErrorData) {
+      toast({
+        title: "Lỗi tải tài liệu",
+        description: documentsErrorData.message || "Không thể tải danh sách tài liệu tài nguyên.",
+        variant: "destructive",
+      });
+    }
+  }, [documentsError, documentsErrorData, toast]);
 
   // Theme-specific styles
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
@@ -66,63 +233,39 @@ const ResourcesSection: React.FC = () => {
   const viewAllButtonHoverText = `hover:${accentColor}`;
   const viewAllButtonBaseBorder = theme === "dark" ? "border-dseza-dark-border" : "border-dseza-light-border";
 
-  // Fallback resources data until API implements resources endpoint
-  const fallbackImageResources: ResourceItem[] = [
-    {
-      id: 1,
-      title: "Khu công nghệ cao Đà Nẵng",
-      titleEn: "Danang High-Tech Park",
-      date: "15/05/2023",
-      imageUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-      type: 'image',
-      url: "#resource-1"
-    },
-    {
-      id: 2,
-      title: "Lễ khởi công dự án mới",
-      titleEn: "New Project Groundbreaking Ceremony",
-      date: "08/07/2023",
-      imageUrl: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-      type: 'image',
-      url: "#resource-2"
-    },
-    {
-      id: 3,
-      title: "Hội thảo phát triển công nghệ cao",
-      titleEn: "High-Tech Development Conference",
-      date: "21/04/2023",
-      imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-      type: 'image',
-      url: "#resource-3"
-    },
-    {
-      id: 4,
-      title: "Khánh thành nhà máy sản xuất",
-      titleEn: "Manufacturing Plant Inauguration",
-      date: "03/03/2023",
-      imageUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-      type: 'image',
-      url: "#resource-4"
-    }
-  ];
-
-  // Get resources from API data (fallback to static data until API is ready)
-  // TODO: Replace with data?.resources when API implements this endpoint
-  const allResources = data?.news ? fallbackImageResources : [];
-  
-  // Filter resources by active tab
-  const currentResources = allResources.filter(resource => {
+  // Get current data based on active tab
+  const getCurrentData = () => {
     switch (activeTab) {
       case 'images':
-        return resource.type === 'image';
+        return { 
+          data: images, 
+          isLoading: imagesLoading, 
+          isError: imagesError, 
+          error: imagesErrorData,
+          refetch: refetchImages
+        };
       case 'videos':
-        return resource.type === 'video';
+        return { 
+          data: videos, 
+          isLoading: videosLoading, 
+          isError: videosError, 
+          error: videosErrorData,
+          refetch: refetchVideos
+        };
       case 'documents':
-        return resource.type === 'document';
+        return { 
+          data: documents, 
+          isLoading: documentsLoading, 
+          isError: documentsError, 
+          error: documentsErrorData,
+          refetch: refetchDocuments
+        };
       default:
-        return true;
+        return { data: [], isLoading: false, isError: false, error: null, refetch: () => {} };
     }
-  });
+  };
+
+  const { data: currentData, isLoading: currentLoading, isError: currentError, error: currentErrorData, refetch: currentRefetch } = getCurrentData();
 
   const renderTabButton = (tabName: 'images' | 'videos' | 'documents', IconComponent: React.ElementType, labelKey: string) => (
     <button
@@ -133,12 +276,62 @@ const ResourcesSection: React.FC = () => {
           : `${tabDefaultBg} ${secondaryTextColor} ${tabInactiveHoverBg} ${tabInactiveHoverTextColor}`
       )}
       onClick={() => setActiveTab(tabName)}
-      disabled={isLoading}
     >
       <IconComponent className="w-5 h-5 mr-2" />
       {t(labelKey)}
     </button>
   );
+
+  const handleVideoClick = (videoUrl: string, title: string) => {
+    if (!videoUrl) {
+      toast({
+        title: "Không có video",
+        description: "Video này chưa có URL để phát.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSelectedVideo({ url: videoUrl, title });
+  };
+
+  const handleImageClick = (imageUrl: string) => {
+    if (imageUrl === '/placeholder.svg') {
+      toast({
+        title: "Không có hình ảnh",
+        description: "Hình ảnh này chưa được tải lên.",
+        variant: "destructive",
+      });
+      return;
+    }
+    window.open(imageUrl, '_blank');
+  };
+
+  const handleDocumentClick = (fileUrl: string) => {
+    if (fileUrl === '#') {
+      toast({
+        title: "Không có tài liệu",
+        description: "Tài liệu này chưa có file để tải xuống.",
+        variant: "destructive",
+      });
+      return;
+    }
+    window.open(fileUrl, '_blank');
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
 
   return (
     <section className={cn(
@@ -164,7 +357,7 @@ const ResourcesSection: React.FC = () => {
         {/* Content Area based on active tab */}
         <div className="mb-8 min-h-[300px]">
           {/* Loading State */}
-          {isLoading && (
+          {currentLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {Array.from({ length: 4 }).map((_, index) => (
                 <ResourceItemSkeleton key={index} />
@@ -173,32 +366,45 @@ const ResourcesSection: React.FC = () => {
           )}
 
           {/* Error State */}
-          {isError && (
-            <div className="text-center py-12">
-              <p className={cn("text-lg", textColor)}>
-                {t('common.errorLoading') || 'Có lỗi xảy ra khi tải dữ liệu tài nguyên.'}
-              </p>
-            </div>
+          {currentError && (
+            <ErrorDisplay
+              title={`Lỗi tải ${activeTab === 'images' ? 'hình ảnh' : activeTab === 'videos' ? 'video' : 'tài liệu'}`}
+              message={currentErrorData?.message || `Có lỗi xảy ra khi tải dữ liệu ${activeTab === 'images' ? 'hình ảnh' : activeTab === 'videos' ? 'video' : 'tài liệu'} tài nguyên.`}
+              onRetry={currentRefetch}
+              showDebug={true}
+            />
           )}
 
-          {/* Images Tab - Data State */}
-          {activeTab === 'images' && !isLoading && !isError && (
+          {/* Images Tab */}
+          {activeTab === 'images' && !currentLoading && !currentError && (
             <>
-              {currentResources.length > 0 ? (
+              {currentData && currentData.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {currentResources.map((resource: ResourceItem) => (
-                    <a
-                      key={resource.id}
-                      href={resource.url || "#"}
-                      className="block group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 ease-in-out"
+                  {currentData.map((image) => (
+                    <div
+                      key={image.id}
+                      className="block group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer"
+                      onClick={() => handleImageClick(image.imageUrl)}
                     >
                       <div className="overflow-hidden">
                         <AspectRatio ratio={4/3} className="bg-gray-200 dark:bg-gray-700">
-                          <img
-                            src={resource.imageUrl}
-                            alt={resource.title}
-                            className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-                          />
+                          {image.imageUrl && image.imageUrl !== '/placeholder.svg' ? (
+                            <img
+                              src={image.imageUrl}
+                              alt={image.title}
+                              className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/placeholder.svg';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <ImageIcon className="w-12 h-12 text-gray-400" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                            <ExternalLink className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </div>
                         </AspectRatio>
                       </div>
                       <div className={cn(
@@ -210,17 +416,17 @@ const ResourcesSection: React.FC = () => {
                           textColor,
                           `group-hover:${accentColor}`
                         )}>
-                          {resource.title}
+                          {image.title}
                         </h3>
                         <p className={cn(
                           "font-inter text-sm transition-colors duration-300", 
                           secondaryTextColor,
                           `group-hover:${accentColor}`
                         )}>
-                          {t('resourcesSection.dateLabel')}: {resource.date}
+                          {t('resourcesSection.dateLabel')}: {formatDate(image.date)}
                         </p>
                       </div>
-                    </a>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -238,34 +444,131 @@ const ResourcesSection: React.FC = () => {
           )}
           
           {/* Videos Tab */}
-          {activeTab === 'videos' && !isLoading && !isError && (
-            <div className={cn("p-12 text-center rounded-lg", panelContentBg)}>
-              <VideoIcon className={cn("w-16 h-16 mx-auto mb-4", secondaryTextColor)} />
-              <h3 className={cn("text-xl font-semibold mb-2", textColor)}>
-                {t('resourcesSection.comingSoonTitle')}
-              </h3>
-              <p className={cn("text-base", secondaryTextColor)}>
-                {t('resourcesSection.comingSoonVideos')}
-              </p>
-            </div>
+          {activeTab === 'videos' && !currentLoading && !currentError && (
+            <>
+              {currentData && currentData.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {currentData.map((video) => (
+                    <div
+                      key={video.id}
+                      className="block group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer"
+                      onClick={() => handleVideoClick(video.videoUrl, video.title)}
+                    >
+                      <div className="overflow-hidden relative">
+                        <AspectRatio ratio={16/9} className="bg-gray-200 dark:bg-gray-700">
+                          {video.thumbnailUrl && video.thumbnailUrl !== '/placeholder.svg' ? (
+                            <img
+                              src={video.thumbnailUrl}
+                              alt={video.title}
+                              className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/placeholder.svg';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <VideoIcon className="w-12 h-12 text-gray-400" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
+                            <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </div>
+                        </AspectRatio>
+                      </div>
+                      <div className={cn(
+                        "p-4",
+                        theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-white"
+                      )}>
+                        <h3 className={cn(
+                          "font-inter font-semibold text-lg mb-1 transition-colors duration-300", 
+                          textColor,
+                          `group-hover:${accentColor}`
+                        )}>
+                          {video.title}
+                        </h3>
+                        <p className={cn(
+                          "font-inter text-sm transition-colors duration-300", 
+                          secondaryTextColor,
+                          `group-hover:${accentColor}`
+                        )}>
+                          {t('resourcesSection.dateLabel')}: {formatDate(video.date)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={cn("p-12 text-center rounded-lg", panelContentBg)}>
+                  <VideoIcon className={cn("w-16 h-16 mx-auto mb-4", secondaryTextColor)} />
+                  <h3 className={cn("text-xl font-semibold mb-2", textColor)}>
+                    {t('resourcesSection.noVideos') || 'Chưa có video nào'}
+                  </h3>
+                  <p className={cn("text-base", secondaryTextColor)}>
+                    {t('resourcesSection.noVideosDesc') || 'Chưa có video tài nguyên nào được đăng tải.'}
+                  </p>
+                </div>
+              )}
+            </>
           )}
           
           {/* Documents Tab */}
-          {activeTab === 'documents' && !isLoading && !isError && (
-            <div className={cn("p-12 text-center rounded-lg", panelContentBg)}>
-              <FileIcon className={cn("w-16 h-16 mx-auto mb-4", secondaryTextColor)} />
-              <h3 className={cn("text-xl font-semibold mb-2", textColor)}>
-                {t('resourcesSection.comingSoonTitle')}
-              </h3>
-              <p className={cn("text-base", secondaryTextColor)}>
-                {t('resourcesSection.comingSoonDocuments')}
-              </p>
-            </div>
+          {activeTab === 'documents' && !currentLoading && !currentError && (
+            <>
+              {currentData && currentData.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {currentData.map((document) => (
+                    <div
+                      key={document.id}
+                      className="block group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer"
+                      onClick={() => handleDocumentClick(document.fileUrl)}
+                    >
+                      <div className={cn(
+                        "p-6 text-center",
+                        theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-white"
+                      )}>
+                        <div className="mb-4">
+                          <FileIcon className={cn("w-16 h-16 mx-auto transition-colors duration-300", 
+                            secondaryTextColor, `group-hover:${accentColor}`)} />
+                        </div>
+                        <h3 className={cn(
+                          "font-inter font-semibold text-lg mb-2 transition-colors duration-300", 
+                          textColor,
+                          `group-hover:${accentColor}`
+                        )}>
+                          {document.title}
+                        </h3>
+                        <p className={cn(
+                          "font-inter text-sm mb-3 transition-colors duration-300", 
+                          secondaryTextColor,
+                          `group-hover:${accentColor}`
+                        )}>
+                          {t('resourcesSection.dateLabel')}: {formatDate(document.date)}
+                        </p>
+                        <div className="flex items-center justify-center text-sm">
+                          <Download className="w-4 h-4 mr-1" />
+                          <span>{t('resourcesSection.downloadLabel') || 'Tải xuống'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={cn("p-12 text-center rounded-lg", panelContentBg)}>
+                  <FileIcon className={cn("w-16 h-16 mx-auto mb-4", secondaryTextColor)} />
+                  <h3 className={cn("text-xl font-semibold mb-2", textColor)}>
+                    {t('resourcesSection.noDocuments') || 'Chưa có tài liệu nào'}
+                  </h3>
+                  <p className={cn("text-base", secondaryTextColor)}>
+                    {t('resourcesSection.noDocumentsDesc') || 'Chưa có tài liệu nào được đăng tải.'}
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
         
         {/* View All Resources button - Only show when there are resources and not loading */}
-        {currentResources.length > 0 && !isLoading && !isError && (
+        {currentData && currentData.length > 0 && !currentLoading && !currentError && (
           <div className="text-center">
             <Button
               variant="outline"
@@ -283,6 +586,14 @@ const ResourcesSection: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Video Modal */}
+      <VideoModal
+        isOpen={!!selectedVideo}
+        onClose={() => setSelectedVideo(null)}
+        videoUrl={selectedVideo?.url || ''}
+        title={selectedVideo?.title || ''}
+      />
     </section>
   );
 };

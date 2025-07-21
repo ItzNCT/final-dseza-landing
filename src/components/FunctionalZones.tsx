@@ -4,8 +4,9 @@ import { Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/utils/translations";
 import { useLanguage } from "@/context/LanguageContext";
-import { useHomepageData } from "@/hooks/useHomepageData";
+import { useFunctionalZones, type FunctionalZone } from "@/hooks/useFunctionalZones";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface ZoneData {
   id: number;
@@ -59,6 +60,20 @@ const ZoneThumbnailSkeleton = () => {
   );
 };
 
+// Helper function to map FunctionalZone to ZoneData
+const mapFunctionalZoneToZoneData = (zone: FunctionalZone, index: number): ZoneData => {
+  return {
+    id: parseInt(zone.id.split('-')[1]) || index + 1, // Extract numeric ID or use index
+    nameVi: zone.title,
+    nameEn: zone.title, // Using same title for both languages for now
+    enterprises: zone.enterprises,
+    occupancy: zone.occupancyRate, // Use occupancyRate instead of occupancy
+    area: zone.area || "Chưa cập nhật",
+    imageThumb: zone.thumbnailUrl || zone.imageUrl || zone.imageLarge || "/placeholder.svg",
+    imageLarge: zone.imageLarge || zone.imageUrl || "/placeholder.svg"
+  };
+};
+
 /**
  * Functional Zones section displaying Da Nang's industrial and high-tech zones
  */
@@ -67,7 +82,7 @@ const FunctionalZones: React.FC = () => {
   const [selectedZone, setSelectedZone] = useState<number>(1);
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { data, isLoading, isError } = useHomepageData();
+  const { data: functionalZonesData, isLoading, isError, error } = useFunctionalZones();
   
   // Theme-specific styles
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
@@ -78,7 +93,7 @@ const FunctionalZones: React.FC = () => {
     return language === 'vi' ? zone.nameVi : zone.nameEn;
   };
 
-  // Fallback zones data until API implements functionalZones
+  // Fallback zones data if API fails - using local images
   const fallbackZonesData: ZoneData[] = [
     { 
       id: 1, 
@@ -107,8 +122,8 @@ const FunctionalZones: React.FC = () => {
       enterprises: 45, 
       occupancy: 100, 
       area: "50.1 ha", 
-      imageThumb: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80", 
-      imageLarge: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
+      imageThumb: "/media/FunctionalZones/KCNC1.jpg", 
+      imageLarge: "/media/FunctionalZones/KCNC1.jpg" 
     },
     { 
       id: 4, 
@@ -117,8 +132,8 @@ const FunctionalZones: React.FC = () => {
       enterprises: 228, 
       occupancy: 100, 
       area: "394 ha", 
-      imageThumb: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80", 
-      imageLarge: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
+      imageThumb: "/media/FunctionalZones/HKMR.jpg", 
+      imageLarge: "/media/FunctionalZones/HKMR.jpg" 
     },
     { 
       id: 5, 
@@ -127,8 +142,8 @@ const FunctionalZones: React.FC = () => {
       enterprises: 36, 
       occupancy: 60.07, 
       area: "289.35 ha", 
-      imageThumb: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80", 
-      imageLarge: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
+      imageThumb: "/media/FunctionalZones/KCNC1.jpg", 
+      imageLarge: "/media/FunctionalZones/KCNC1.jpg" 
     },
     { 
       id: 6, 
@@ -137,8 +152,8 @@ const FunctionalZones: React.FC = () => {
       enterprises: 56, 
       occupancy: 100, 
       area: "50.63 ha", 
-      imageThumb: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80", 
-      imageLarge: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
+      imageThumb: "/media/FunctionalZones/HKMR.jpg", 
+      imageLarge: "/media/FunctionalZones/HKMR.jpg" 
     },
     { 
       id: 7, 
@@ -147,8 +162,8 @@ const FunctionalZones: React.FC = () => {
       enterprises: 81, 
       occupancy: 97.66, 
       area: "149.84 ha", 
-      imageThumb: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80", 
-      imageLarge: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
+      imageThumb: "/media/FunctionalZones/KCNC1.jpg", 
+      imageLarge: "/media/FunctionalZones/KCNC1.jpg" 
     },
     { 
       id: 8, 
@@ -157,14 +172,16 @@ const FunctionalZones: React.FC = () => {
       enterprises: 5, 
       occupancy: 31.82, 
       area: "131.1 ha", 
-      imageThumb: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80", 
-      imageLarge: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
+      imageThumb: "/media/FunctionalZones/HKMR.jpg", 
+      imageLarge: "/media/FunctionalZones/HKMR.jpg" 
     }
   ];
 
-  // Get functional zones from API data (fallback to static data until API is ready)
-  // TODO: Replace with data?.functionalZones when API implements this endpoint
-  const functionalZones = data?.news ? fallbackZonesData : [];
+  // Map API data to ZoneData format, with fallback to static data if no API data
+  const functionalZones: ZoneData[] = functionalZonesData 
+    ? functionalZonesData.map(mapFunctionalZoneToZoneData)
+    : (isError ? fallbackZonesData : []);
+  
   const currentZone = functionalZones.find((zone: ZoneData) => zone.id === selectedZone) || functionalZones[0];
   
   return (
@@ -183,6 +200,13 @@ const FunctionalZones: React.FC = () => {
         {/* Loading State */}
         {isLoading && (
           <>
+            <div className="flex justify-center items-center py-12">
+              <LoadingSpinner size="lg" className={textColor} />
+              <span className={cn("ml-3 text-lg", textColor)}>
+                {t('common.loading') || 'Đang tải dữ liệu khu chức năng...'}
+              </span>
+            </div>
+            
             <MainDisplaySkeleton />
             
             {/* Grid of zone thumbnail skeletons */}
@@ -197,24 +221,36 @@ const FunctionalZones: React.FC = () => {
         {/* Error State */}
         {isError && (
           <div className="text-center py-12">
-            <p className={cn("text-lg", textColor)}>
-              {t('common.errorLoading') || 'Có lỗi xảy ra khi tải dữ liệu khu chức năng.'}
+            <div className="flex justify-center items-center mb-4">
+              <div className={cn("p-3 rounded-full", theme === "dark" ? "bg-red-900/20" : "bg-red-100")}>
+                <Building2 className={cn("w-8 h-8", theme === "dark" ? "text-red-400" : "text-red-600")} />
+              </div>
+            </div>
+            <h3 className={cn("text-xl font-semibold mb-2", textColor)}>
+              {t('common.errorTitle') || 'Có lỗi xảy ra'}
+            </h3>
+            <p className={cn("text-lg mb-4", textColor)}>
+              {t('common.errorLoading') || 'Không thể tải dữ liệu khu chức năng từ server.'}
+            </p>
+            <p className={cn("text-sm opacity-70", textColor)}>
+              {error?.message || 'Đang hiển thị dữ liệu dự phòng.'}
             </p>
           </div>
         )}
 
         {/* Data State */}
-        {functionalZones.length > 0 && !isLoading && !isError && currentZone && (
+        {functionalZones.length > 0 && !isLoading && currentZone && (
           <>
             {/* Large interactive display panel */}
-            <div 
-              className="relative h-80 sm:h-96 md:h-[400px] rounded-2xl overflow-hidden mb-8" 
-              style={{
-                backgroundImage: `url(${currentZone.imageLarge})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}
-            >
+            <div className="relative h-80 sm:h-96 md:h-[400px] rounded-2xl overflow-hidden mb-8">
+              <img 
+                src={currentZone.imageLarge}
+                alt={getZoneName(currentZone)}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/placeholder.svg';
+                }}
+              />
               <div className="absolute inset-0 bg-black/40"></div>
               
               {/* Bottom left - Zone name and enterprise info */}
@@ -252,12 +288,15 @@ const FunctionalZones: React.FC = () => {
                     theme === "dark" ? "ring-dseza-dark-primary-accent" : "ring-dseza-light-primary-accent"
                   )}
                   onClick={() => setSelectedZone(zone.id)}
-                  style={{
-                    backgroundImage: `url(${zone.imageThumb})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center'
-                  }}
                 >
+                  <img 
+                    src={zone.imageThumb}
+                    alt={getZoneName(zone)}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    }}
+                  />
                   <div className="absolute bottom-0 left-0 right-0">
                     <div className={cn(
                       "px-3 py-2 font-montserrat font-medium text-white text-xs",
@@ -269,12 +308,29 @@ const FunctionalZones: React.FC = () => {
                 </div>
               ))}
             </div>
+            
+            {/* API Data Indicator */}
+            {functionalZonesData && (
+              <div className="mt-6 text-center">
+                <span className={cn("text-sm opacity-70", textColor)}>
+                  {t('functionalZones.dataSource') || 'Dữ liệu được cập nhật từ hệ thống'}
+                </span>
+              </div>
+            )}
           </>
         )}
 
         {/* No Data State */}
-        {data && functionalZones.length === 0 && !isLoading && !isError && (
+        {!isLoading && !isError && functionalZones.length === 0 && (
           <div className="text-center py-12">
+            <div className="flex justify-center items-center mb-4">
+              <div className={cn("p-3 rounded-full", theme === "dark" ? "bg-gray-800" : "bg-gray-100")}>
+                <Building2 className={cn("w-8 h-8", theme === "dark" ? "text-gray-400" : "text-gray-600")} />
+              </div>
+            </div>
+            <h3 className={cn("text-xl font-semibold mb-2", textColor)}>
+              {t('functionalZones.noDataTitle') || 'Chưa có dữ liệu'}
+            </h3>
             <p className={cn("text-lg", textColor)}>
               {t('functionalZones.noZones') || 'Chưa có thông tin về các khu chức năng.'}
             </p>
