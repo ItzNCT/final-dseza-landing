@@ -8,11 +8,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // Icon mapping for dynamic icons from API
 const iconMap: Record<string, JSX.Element> = {
-  briefcase: <Briefcase size={48} />,
-  fileText: <FileText size={48} />,
-  searchCheck: <SearchCheck size={48} />,
-  messageSquare: <MessageSquare size={48} />,
-  calendar: <Calendar size={48} />,
+  Briefcase: <Briefcase size={48} />,
+  FileText: <FileText size={48} />,
+  SearchCheck: <SearchCheck size={48} />,
+  MessageSquare: <MessageSquare size={48} />,
+  Calendar: <Calendar size={48} />,
 };
 
 /**

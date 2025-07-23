@@ -74,11 +74,54 @@ const extractDate = (htmlTime: string): string => {
 
 // Utility function to find category ID by name in included data
 const getCategoryIdFromName = (categoryName: string, included: any[]): string | null => {
-  const categoryTerm = included.find((item: any) => 
-    item.type === 'taxonomy_term--loai_tai_lieu_dn' && 
-    item.attributes?.name === categoryName
+  console.log('🔍 Looking for category:', categoryName);
+  console.log('📦 Available taxonomy terms:', included
+    .filter(item => item.type && item.type.startsWith('taxonomy_term'))
+    .map(item => ({ 
+      type: item.type, 
+      name: item.attributes?.name,
+      id: item.id 
+    }))
   );
-  return categoryTerm?.id || null;
+  
+  // Try different possible taxonomy types for document categories
+  const possibleTypes = [
+    'taxonomy_term--loai_tai_lieu_dn',
+    'taxonomy_term--loai_tai_lieu',
+    'taxonomy_term--document_category',
+    'taxonomy_term--enterprise_document_category'
+  ];
+  
+  for (const type of possibleTypes) {
+    const categoryTerm = included.find((item: any) => 
+      item.type === type && 
+      item.attributes?.name && 
+      item.attributes.name.trim() === categoryName.trim()
+    );
+    
+    if (categoryTerm) {
+      console.log('✅ Found category match:', { type, name: categoryTerm.attributes.name, id: categoryTerm.id });
+      return categoryTerm.id;
+    }
+  }
+  
+  // Try fuzzy matching as fallback
+  for (const type of possibleTypes) {
+    const categoryTerm = included.find((item: any) => 
+      item.type === type && 
+      item.attributes?.name && 
+      (item.attributes.name.toLowerCase().includes(categoryName.toLowerCase()) ||
+       categoryName.toLowerCase().includes(item.attributes.name.toLowerCase()))
+    );
+    
+    if (categoryTerm) {
+      console.log('✅ Found fuzzy category match:', { type, name: categoryTerm.attributes.name, id: categoryTerm.id });
+      return categoryTerm.id;
+    }
+  }
+  
+  console.warn('❌ No category match found for:', categoryName);
+  return null;
 };
 
 // Utility function to extract file URL from JSON:API response
@@ -224,6 +267,11 @@ export const useEnterpriseDocs = () => {
 
     const categoryName = categoryMapping[categoryParam] || categoryParam;
     
+    // Validate category mapping
+    if (!categoryMapping[categoryParam]) {
+      console.warn('⚠️ No explicit mapping found for category:', categoryParam, 'using as-is:', categoryName);
+    }
+    
     // Try JSON:API endpoint with category filtering
     const queryParams = new URLSearchParams();
     queryParams.append('filter[field_loai_tai_lieu.name]', categoryName);
@@ -234,7 +282,8 @@ export const useEnterpriseDocs = () => {
     const jsonApiEndpoint = `${DRUPAL_BASE_URL}/jsonapi/node/tai_lieu_doanh_nghiep?${queryParams.toString()}`;
     
     console.log('🔍 Trying JSON:API endpoint:', jsonApiEndpoint);
-    console.log('📂 Document category:', categoryParam, '→', categoryName);
+    console.log('🎯 URL category parameter:', categoryParam);
+    console.log('📂 Mapped category name:', categoryName);
     console.log('🔧 Include parameter:', 'field_loai_tai_lieu,field_file_dinh_kem,field_file_dinh_kem.field_media_document');
 
     try {
@@ -326,6 +375,10 @@ export const useEnterpriseDocs = () => {
               return categoryRelationship && categoryRelationship.id === categoryId;
             });
             console.log(`🔍 Filtered ${filteredDocuments.length} documents from ${documents.length} total for category: ${categoryName}`);
+          } else {
+            // If categoryId not found, return empty array instead of all documents
+            console.warn(`⚠️ Category ID not found for category: ${categoryName}, returning empty array`);
+            filteredDocuments = [];
           }
         }
 
@@ -373,18 +426,38 @@ export const useEnterpriseDocs = () => {
         documents = Array.isArray(data) ? data : [];
         console.log('📋 Custom API documents found:', documents.length);
         
-        // Client-side filtering by category name
+        // Improved client-side filtering by category name - more strict matching
         const filteredDocs = documents.filter((item: any) => {
-          const title = stripHtml(item.title || '').toLowerCase();
-          const category = categoryParam.replace(/-/g, ' ').toLowerCase();
+          // Check if the document has a category field that exactly matches our target category
+          if (item.field_loai_tai_lieu) {
+            const docCategoryName = stripHtml(item.field_loai_tai_lieu).trim();
+            // Exact match with the mapped category name
+            if (docCategoryName === categoryName) {
+              return true;
+            }
+          }
           
-          // Simple matching - you might need to improve this based on your data structure
-          return title.includes(category) || 
-                 title.includes(categoryName.toLowerCase()) ||
-                 (item.field_loai_tai_lieu && item.field_loai_tai_lieu.toLowerCase().includes(category));
+          // Fallback: check if the document has any category information that matches
+          // But make this more strict than before
+          const title = stripHtml(item.title || '').toLowerCase();
+          
+          // Only do title-based matching for specific well-known categories
+          // to avoid false positives
+          if (categoryName === 'Báo cáo giám sát và đánh giá đầu tư') {
+            return title.includes('giám sát') && title.includes('đánh giá') && title.includes('đầu tư');
+          } else if (categoryName === 'Mẫu bảng biểu báo cáo') {
+            return (title.includes('mẫu') || title.includes('biểu mẫu')) && title.includes('báo cáo');
+          } else if (categoryName === 'Thủ tục - Hồ sơ - Dữ liệu môi trường') {
+            return (title.includes('thủ tục') || title.includes('hồ sơ')) && title.includes('môi trường');
+          }
+          
+          // For other categories, be more conservative - only match if we have exact category field match
+          return false;
         });
         
         console.log('🔍 Filtered documents:', filteredDocs.length, 'out of', documents.length);
+        console.log('🔍 Filter criteria - Category:', categoryName);
+        console.log('🔍 Filtered document titles:', filteredDocs.map(doc => stripHtml(doc.title || '')));
         
         // Map custom API data structure with HTML processing
         const mappedDocuments = filteredDocs.map((item: any, index: number) => ({

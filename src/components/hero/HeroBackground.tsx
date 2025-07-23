@@ -68,12 +68,14 @@ const tabsData = [
 /**
  * Hero background component with dynamic image tabs and contrast overlay
  * Supports theme-aware images (different sets for dark and light modes)
+ * Auto-slides every 5 seconds with pause on hover
  */
 const HeroBackground: React.FC = () => {
   const [activeTab, setActiveTab] = useState(tabsData[0].id);
   const [activeImage, setActiveImage] = useState("");
   const [prevImage, setPrevImage] = useState("");
   const [transitioning, setTransitioning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const { theme } = useTheme();
   const { t } = useTranslation();
   
@@ -83,6 +85,21 @@ const HeroBackground: React.FC = () => {
     const initialTab = tabsData[0];
     setActiveImage(initialTab.images[currentTheme].main);
   }, []);
+
+  // Auto-slide functionality - changes tab every 5 seconds
+  useEffect(() => {
+    if (isPaused) return;
+
+    const interval = setInterval(() => {
+      setActiveTab(currentTab => {
+        const currentIndex = tabsData.findIndex(tab => tab.id === currentTab);
+        const nextIndex = (currentIndex + 1) % tabsData.length;
+        return tabsData[nextIndex].id;
+      });
+    }, 5000); // 5 seconds
+
+    return () => clearInterval(interval);
+  }, [isPaused]);
 
   // Handle image transition when tab or theme changes
   useEffect(() => {
@@ -102,11 +119,23 @@ const HeroBackground: React.FC = () => {
     }
   }, [activeTab, theme]);
 
+  // Handle manual tab click
+  const handleTabClick = (tabId: string) => {
+    setActiveTab(tabId);
+    // Temporarily pause auto-slide when user manually clicks
+    setIsPaused(true);
+    setTimeout(() => setIsPaused(false), 10000); // Resume after 10 seconds
+  };
+
   const activeTitle = t(tabsData.find(tab => tab.id === activeTab)?.titleKey || "");
   const currentTheme = theme === "dark" ? "dark" : "light";
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
+    <div 
+      className="relative h-screen w-screen overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       {/* Transition Background Images */}
       {transitioning && prevImage && (
         <div 
@@ -133,7 +162,7 @@ const HeroBackground: React.FC = () => {
         {tabsData.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => handleTabClick(tab.id)}
             className={cn(
               "w-36 transition-all duration-300 ease-in-out hover:scale-105 overflow-hidden rounded-md",
               tab.id === activeTab 

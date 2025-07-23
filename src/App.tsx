@@ -33,6 +33,19 @@ import { AffiliatedUnitsPage } from "./pages/Introduction/AffiliatedUnitsPage";
 import WelcomeLetterPage from "./pages/Introduction/WelcomeLetterPage";
 import DanangOverviewPage from "./pages/Introduction/DanangOverviewPage";
 import FunctionalZonesListPage from "./pages/Introduction/FunctionalZonesListPage";
+import FunctionalzoneDetailPage from "./pages/Functionalzone/FunctionalzoneDetailPage";
+import FunctionalzoneLayout from "./pages/Functionalzone/FunctionalzoneLayout";
+// Import 10 Industrial Zone Components
+import KhuCongNgheCaoDaNang from "./pages/Functionalzone/KhuCongNgheCaoDaNang";
+import KhuThuongMaiTuDoDaNang from "./pages/Functionalzone/KhuThuongMaiTuDoDaNang";
+import KhuCNTTTapTrung from "./pages/Functionalzone/KhuCNTTTapTrung";
+import KhuCongNghiepHoaKhanh from "./pages/Functionalzone/KhuCongNghiepHoaKhanh";
+import KhuCongNghiepHoaKhanhMoRong from "./pages/Functionalzone/KhuCongNghiepHoaKhanhMoRong";
+import KhuCongNghiepDaNang from "./pages/Functionalzone/KhuCongNghiepDaNang";
+import KhuCongNghiepDichVuThuySanDaNang from "./pages/Functionalzone/KhuCongNghiepDichVuThuySanDaNang";
+import KhuCongNghiepHoaCam from "./pages/Functionalzone/KhuCongNghiepHoaCam";
+import KhuCongNghiepLienChieu from "./pages/Functionalzone/KhuCongNghiepLienChieu";
+import KhuCongNghiepHoaNinh from "./pages/Functionalzone/KhuCongNghiepHoaNinh";
 import InvestmentGuidePage from "./pages/Brochure/InvestmentGuidePage";
 import InvestmentPolicyPage from "./pages/Brochure/InvestmentPolicyPage";
 import BrochurePage from "./pages/Brochure/BrochurePage";
@@ -91,6 +104,21 @@ const App: React.FC = () => (
                       <Route path="/cam-nang-dau-tu/chinh-sach-uu-dai" element={<InvestmentPolicyPage />} />
                       <Route path="/cam-nang-dau-tu/brochure" element={<BrochurePage />} />
                       <Route path="/gioi-thieu/cac-khu-chuc-nang" element={<FunctionalZonesListPage />} />
+                      
+                      {/* 10 Industrial Zone Specific Routes */}
+                      <Route path="/gioi-thieu/cac-khu-chuc-nang/khu-cong-nghe-cao-da-nang" element={<KhuCongNgheCaoDaNang />} />
+                      <Route path="/gioi-thieu/cac-khu-chuc-nang/khu-thuong-mai-tu-do-da-nang" element={<KhuThuongMaiTuDoDaNang />} />
+                      <Route path="/gioi-thieu/cac-khu-chuc-nang/khu-cntt-tap-trung" element={<KhuCNTTTapTrung />} />
+                      <Route path="/gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-khanh" element={<KhuCongNghiepHoaKhanh />} />
+                      <Route path="/gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-khanh-mo-rong" element={<KhuCongNghiepHoaKhanhMoRong />} />
+                      <Route path="/gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-da-nang" element={<KhuCongNghiepDaNang />} />
+                      <Route path="/gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-dich-vu-thuy-san-da-nang" element={<KhuCongNghiepDichVuThuySanDaNang />} />
+                      <Route path="/gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-cam" element={<KhuCongNghiepHoaCam />} />
+                      <Route path="/gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-lien-chieu" element={<KhuCongNghiepLienChieu />} />
+                      <Route path="/gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-ninh" element={<KhuCongNghiepHoaNinh />} />
+                      
+                      {/* Functional Zone Detail Pages */}
+                      <Route path="/functionalzone/:slug" element={<FunctionalzoneDetailPage />} />
                       <Route path="/doanh-nghiep/tai-lieu/chi-tiet/:docId" element={<DocumentViewerPage />} />
                       <Route path="/doanh-nghiep/tuyen-dung" element={<RecruitmentPage />} />
                       {/* ROUTE 1: Dành riêng cho trang "Thủ tục - Hồ sơ - Dữ liệu môi trường" */}

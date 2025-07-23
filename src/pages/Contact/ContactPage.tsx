@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Card,
   CardContent,
@@ -28,8 +29,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { useSubmitContactForm } from "@/api/hooks";
+import { useDepartmentsWithStaff } from "@/hooks/use-departments-with-staff";
 
 /**
  * ContactPage component with comprehensive contact information and forms
@@ -46,6 +54,9 @@ const ContactPage: React.FC = () => {
 
   // Use the contact form submission hook
   const { mutate, isPending, isSuccess, isError, error, reset } = useSubmitContactForm();
+  
+  // Use the departments with staff hook
+  const { data: departments, isLoading: isDepartmentsLoading, isError: isDepartmentsError } = useDepartmentsWithStaff();
 
   const handleInputChange = (field: string, value: string) => {
     setContactForm(prev => ({
@@ -118,40 +129,7 @@ const ContactPage: React.FC = () => {
     },
   ];
 
-  const departments = [
-    {
-      id: 1,
-      name: "Phòng Hành chính - Tổng hợp",
-      head: "Ông Phạm Văn D",
-      phone: "0236.3666.111",
-      email: "hanhchinh@dseza.danang.gov.vn",
-      functions: ["Quản lý hành chính", "Tổ chức nhân sự", "Tài chính kế toán"],
-    },
-    {
-      id: 2,
-      name: "Phòng Xúc tiến Đầu tư",
-      head: "Bà Nguyễn Thị E",
-      phone: "0236.3666.122",
-      email: "xuctien@dseza.danang.gov.vn", 
-      functions: ["Xúc tiến đầu tư", "Hỗ trợ nhà đầu tư", "Quan hệ đối tác"],
-    },
-    {
-      id: 3,
-      name: "Phòng Quy hoạch - Kiến trúc",
-      head: "Ông Hoàng Văn F",
-      phone: "0236.3666.133",
-      email: "quyhoach@dseza.danang.gov.vn",
-      functions: ["Quy hoạch tổng thể", "Thiết kế kiến trúc", "Phê duyệt dự án"],
-    },
-    {
-      id: 4,
-      name: "Phòng Hạ tầng Kỹ thuật",
-      head: "Ông Vũ Văn G",
-      phone: "0236.3666.144",
-      email: "hatang@dseza.danang.gov.vn",
-      functions: ["Quản lý hạ tầng", "Kỹ thuật công nghệ", "Bảo trì hệ thống"],
-    },
-  ];
+
 
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
@@ -201,7 +179,7 @@ const ContactPage: React.FC = () => {
                     Thông tin chung
                   </CardTitle>
                   <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
-                    Liên hệ trực tiếp với Ban Quản lý Khu Kinh tế Đà Nẵng
+                    Ban quản lý khu công nghệ cao và các khu công nghiệp Đà Nẵng
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -211,8 +189,8 @@ const ContactPage: React.FC = () => {
                     <div>
                       <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Địa chỉ</p>
                       <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                        Số 36 Bach Dang, Quận Hải Châu,<br />
-                        Thành phố Đà Nẵng, Việt Nam
+                      Lô A17, đường Trung tâm, Khu công nghệ cao,<br />
+                        xã Hòa Liên, huyện Hòa Vang, Thành phố Đà Nẵng, Việt Nam
                       </p>
                     </div>
                   </div>
@@ -221,7 +199,7 @@ const ContactPage: React.FC = () => {
                     <Phone className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
                     <div>
                       <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Điện thoại</p>
-                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>0236.3666.117</p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>0236 3666117</p>
                     </div>
                   </div>
 
@@ -237,7 +215,7 @@ const ContactPage: React.FC = () => {
                     <Printer className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
                     <div>
                       <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Fax</p>
-                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>0236.3666.100</p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>0236 383011</p>
                     </div>
                   </div>
 
@@ -267,12 +245,17 @@ const ContactPage: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className={`rounded-lg h-64 flex items-center justify-center border-2 border-dashed ${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border' : 'bg-dseza-light-main-bg border-dseza-light-border'}`}>
-                    <div className={`text-center ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                      <MapPin className={`h-12 w-12 mx-auto mb-3 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
-                      <p className="font-medium">Google Map</p>
-                      <p className="text-sm">Số 36 Bach Dang, Hải Châu, Đà Nẵng</p>
-                    </div>
+                  <div className="rounded-lg overflow-hidden">
+                    <iframe 
+                      src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3833.4418592568395!2d108.0822033!3d16.0944277!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31421f89a43bfb03%3A0x40f66e6ba7346b99!2zQmFuIHF14bqjbiBsw70gS2h1IGPDtG5nIG5naOG7hyBjYW8gdsOgIGPDoWMgS2h1IGPDtG5nIG5naGnhu4dwIMSQw6AgTuG6tW5n!5e0!3m2!1svi!2s!4v1736085791335!5m2!1svi!2s" 
+                      width="100%" 
+                      height="256" 
+                      style={{border: 0}} 
+                      allowFullScreen={true} 
+                      loading="lazy" 
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="Ban quản lý Khu công nghệ cao và các Khu công nghiệp Đà Nẵng"
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -374,98 +357,156 @@ const ContactPage: React.FC = () => {
                 </CardContent>
               </Card>
 
-              {/* Leadership Information */}
-              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
-                <CardHeader>
-                  <CardTitle className={`flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                    <User className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
-                    Lãnh đạo Ban Quản lý
-                  </CardTitle>
-                  <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
-                    Thông tin liên hệ trực tiếp với lãnh đạo
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {leaders.map((leader) => (
-                      <Card key={leader.id} className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg/50 border-dseza-dark-border' : 'bg-dseza-light-main-bg/50 border-dseza-light-border'}`}>
-                        <CardContent className="p-4">
-                          <h4 className={`font-semibold mb-1 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                            {leader.name}
-                          </h4>
-                          <p className={`text-sm font-medium mb-3 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>
-                            {leader.position}
-                          </p>
-                          
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-sm">
-                              <Phone className={`h-3 w-3 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} />
-                              <span className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>{leader.phone}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <Mail className={`h-3 w-3 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} />
-                              <span className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>{leader.email}</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Departments Information */}
               <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
                 <CardHeader>
                   <CardTitle className={`flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                     <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
-                    Các phòng ban chuyên môn
+                    Thông tin liên hệ
                   </CardTitle>
                   <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
                     Thông tin liên hệ với các phòng ban chuyên môn
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {departments.map((dept) => (
-                      <Card key={dept.id} className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg/50 border-dseza-dark-border' : 'bg-dseza-light-main-bg/50 border-dseza-light-border'}`}>
-                        <CardContent className="p-4">
-                          <h4 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                            {dept.name}
-                          </h4>
-                          
-                          <div className="space-y-2 mb-3">
-                            <p className="text-sm">
-                              <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Trưởng phòng:</span>{" "}
-                              <span className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>{dept.head}</span>
-                            </p>
-                            
-                            <div className="flex items-center gap-2 text-sm">
-                              <Phone className={`h-3 w-3 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} />
-                              <span className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>{dept.phone}</span>
+                  {isDepartmentsLoading ? (
+                    <div className="space-y-4">
+                      {[...Array(4)].map((_, index) => (
+                        <div key={index} className="space-y-3">
+                          <Skeleton className={`h-12 w-full ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`} />
+                          <Skeleton className={`h-8 w-3/4 ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : isDepartmentsError ? (
+                    <div className={`text-center py-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      <p>Không thể tải thông tin phòng ban. Vui lòng thử lại sau.</p>
+                    </div>
+                  ) : departments && departments.length > 0 ? (
+                    <Accordion type="single" collapsible className="w-full">
+                      {departments.map((department) => (
+                        <AccordionItem
+                          key={department.id}
+                          value={department.id}
+                          className={theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}
+                        >
+                          <AccordionTrigger className={`hover:no-underline ${theme === 'dark' ? 'text-dseza-dark-main-text hover:text-dseza-dark-primary' : 'text-dseza-light-main-text hover:text-dseza-light-primary'}`}>
+                            <div className="flex items-center gap-4">
+                              <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${theme === 'dark' ? 'bg-dseza-dark-main-bg/50' : 'bg-dseza-light-main-bg/50'}`}>
+                                {department.icon ? (
+                                  <img
+                                    src={department.icon.url}
+                                    alt={department.icon.alt}
+                                    className="w-8 h-8 object-contain"
+                                    onError={(e) => {
+                                      console.error('🚫 Icon failed to load:', department.icon?.url);
+                                      console.log('📊 Department:', department.title);
+                                    }}
+                                  />
+                                ) : (
+                                  <Users className={`w-6 h-6 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} />
+                                )}
+                              </div>
+                              <span className="font-semibold text-left">{department.title}</span>
                             </div>
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            {department.description && (
+                              <div className={`mb-4 pb-4 border-b ${theme === 'dark' ? 'text-dseza-dark-secondary-text border-dseza-dark-border' : 'text-dseza-light-secondary-text border-dseza-light-border'}`}>
+                                <div dangerouslySetInnerHTML={{ __html: department.description }} />
+                              </div>
+                            )}
                             
-                            <div className="flex items-center gap-2 text-sm">
-                              <Mail className={`h-3 w-3 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} />
-                              <span className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>{dept.email}</span>
-                            </div>
-                          </div>
-
-                          <div>
-                            <p className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Chức năng chính:</p>
-                            <ul className={`text-xs space-y-0.5 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                              {dept.functions.map((func, index) => (
-                                <li key={index} className="flex items-center gap-1">
-                                  <span className={`w-1 h-1 rounded-full flex-shrink-0 ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></span>
-                                  {func}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                            {department.staff && department.staff.length > 0 ? (
+                              <div className="space-y-4">
+                                <h4 className={`font-semibold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                                  Danh sách nhân sự
+                                </h4>
+                                <div className="overflow-x-auto">
+                                  <table className={`w-full text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                                    <thead>
+                                      <tr className={`border-b ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                                        <th className={`text-left py-2 px-3 font-semibold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                                          Họ tên
+                                        </th>
+                                        <th className={`text-left py-2 px-3 font-semibold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                                          Chức vụ
+                                        </th>
+                                        <th className={`text-left py-2 px-3 font-semibold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                                          Email
+                                        </th>
+                                        <th className={`text-left py-2 px-3 font-semibold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                                          Số điện thoại
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {department.staff.map((staff) => (
+                                        <tr
+                                          key={staff.id}
+                                          className={`border-b ${theme === 'dark' ? 'border-dseza-dark-border/50' : 'border-dseza-light-border/50'}`}
+                                        >
+                                          <td className="py-3 px-3">
+                                            <div className="flex items-center gap-3">
+                                              {staff.avatar && (
+                                                <img
+                                                  src={staff.avatar}
+                                                  alt={staff.name}
+                                                  className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                                                />
+                                              )}
+                                              <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                                                {staff.name}
+                                              </span>
+                                            </div>
+                                          </td>
+                                          <td className="py-3 px-3">
+                                            {staff.position || '-'}
+                                          </td>
+                                          <td className="py-3 px-3">
+                                            {staff.email ? (
+                                              <a
+                                                href={`mailto:${staff.email}`}
+                                                className={`hover:underline ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
+                                              >
+                                                {staff.email}
+                                              </a>
+                                            ) : (
+                                              '-'
+                                            )}
+                                          </td>
+                                          <td className="py-3 px-3">
+                                            {staff.phone ? (
+                                              <a
+                                                href={`tel:${staff.phone}`}
+                                                className={`hover:underline ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
+                                              >
+                                                {staff.phone}
+                                              </a>
+                                            ) : (
+                                              '-'
+                                            )}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className={`text-center py-4 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                                Chưa có thông tin nhân sự
+                              </p>
+                            )}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  ) : (
+                    <div className={`text-center py-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      <p>Chưa có thông tin phòng ban</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 

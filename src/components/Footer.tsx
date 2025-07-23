@@ -73,11 +73,17 @@ const Footer: React.FC = () => {
               {t('homepage.location')}
             </h3>
             
-            <div className={cn(
-              "h-40 bg-gray-300 dark:bg-gray-700 rounded-lg flex items-center justify-center",
-              secondaryTextColor
-            )}>
-              Google Map Embed
+            <div className="rounded-lg overflow-hidden">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3833.4418592568395!2d108.0822033!3d16.0944277!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31421f89a43bfb03%3A0x40f66e6ba7346b99!2zQmFuIHF14bqjbiBsw70gS2h1IGPDtG5nIG5naOG7hyBjYW8gdsOgIGPDoWMgS2h1IGPDdG5nIG5naGnhu4dwIMSQw6AgTuG6tW5n!5e0!3m2!1svi!2s!4v1736085791335!5m2!1svi!2s" 
+                width="100%" 
+                height="160" 
+                style={{border: 0}} 
+                allowFullScreen={true} 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Ban quản lý Khu công nghệ cao và các Khu công nghiệp Đà Nẵng"
+              />
             </div>
           </div>
           

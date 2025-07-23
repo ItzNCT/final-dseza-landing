@@ -111,7 +111,7 @@ const LocationSection: React.FC = () => {
                       "text-white hover:bg-dseza-light-primary-accent-hover hover:scale-105" // Added scale
                   )}
                 >
-                  <a href="#" target="_blank" rel="noopener noreferrer">
+                  <a href="https://maps.dhpiza.vn/" target="_blank" rel="noopener noreferrer">
                     {t('location.accessDigitalMap')}
                   </a>
                 </Button>
