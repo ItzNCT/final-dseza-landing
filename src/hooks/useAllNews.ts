@@ -7,7 +7,7 @@ const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL ||
   import.meta.env.VITE_API || 
   (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
 
-// Interface for news item
+// Interface for news item (only includes articles from event child categories)
 export interface NewsItem {
   id: string;
   title: string;
@@ -21,9 +21,54 @@ export interface NewsItem {
 }
 
 /**
- * Fetch all news articles from JSON:API
+ * Get all event child category IDs (categories that have "Sự kiện" as parent)
+ */
+async function getEventChildCategoryIds(): Promise<string[]> {
+  const categoriesUrl = `${DRUPAL_BASE_URL}/jsonapi/taxonomy_term/news_category?include=parent&sort=weight`;
+  
+  const categoriesResponse = await fetch(categoriesUrl, {
+    headers: {
+      'Accept': 'application/vnd.api+json',
+      'Content-Type': 'application/vnd.api+json',
+    },
+  });
+
+  if (!categoriesResponse.ok) {
+    throw new Error(`Failed to fetch categories: ${categoriesResponse.status}`);
+  }
+
+  const categoriesData = await categoriesResponse.json();
+  
+  // ID of "Sự kiện" parent category
+  const eventsParentId = "a8128998-5393-45f8-a1de-0bcbc82bd5bf";
+  
+  // Find all categories that have "Sự kiện" as parent
+  const eventChildCategories = categoriesData.data?.filter((item: any) => {
+    return item.relationships?.parent?.data?.some((parent: any) => 
+      parent.id === eventsParentId
+    );
+  }) || [];
+  
+  const childCategoryIds = eventChildCategories.map((cat: any) => cat.id);
+  
+  console.log('🎯 Event child category IDs:', childCategoryIds);
+  console.log('🎯 Event child category names:', eventChildCategories.map((cat: any) => cat.attributes.name));
+  
+  return childCategoryIds;
+}
+
+/**
+ * Fetch news articles from JSON:API that belong to event child categories only
  */
 async function fetchAllNews(): Promise<NewsItem[]> {
+  // First, get all event child category IDs
+  const eventChildCategoryIds = await getEventChildCategoryIds();
+  
+  if (eventChildCategoryIds.length === 0) {
+    console.warn('⚠️ No event child categories found, returning empty array');
+    return [];
+  }
+
   const url = `${DRUPAL_BASE_URL}/jsonapi/node/bai-viet`
     + '?filter[status][value]=1'               // Published
     + '&sort=-created'                         // Newest first
@@ -43,7 +88,25 @@ async function fetchAllNews(): Promise<NewsItem[]> {
 
   const data = await response.json();
 
-  return data.data?.map((item: any) => {
+  // Filter articles to only include those with event child categories
+  const filteredData = data.data?.filter((item: any) => {
+    if (!item.relationships?.field_chuyen_muc?.data?.length) {
+      return false;
+    }
+    
+    // Check if any of the article's categories are event child categories
+    const hasEventCategory = item.relationships.field_chuyen_muc.data.some((categoryRelation: any) => 
+      eventChildCategoryIds.includes(categoryRelation.id)
+    );
+    
+    console.log(`📰 Article "${item.attributes.title}": hasEventCategory = ${hasEventCategory}`);
+    
+    return hasEventCategory;
+  }) || [];
+
+  console.log(`✅ Filtered ${filteredData.length} articles out of ${data.data?.length || 0} total articles`);
+
+  return filteredData.map((item: any) => {
     // Get all categories for this article
     let categoryNames: string[] = [];
     let categoryIds: string[] = [];
@@ -85,11 +148,12 @@ async function fetchAllNews(): Promise<NewsItem[]> {
       all_categories: categoryNames,
       all_category_ids: categoryIds,
     };
-  }) || [];
+  });
 }
 
 /**
- * Hook to fetch and cache all news articles
+ * Hook to fetch and cache news articles that belong to event child categories only
+ * This filters articles to only show those with categories that are children of "Sự kiện" parent category
  */
 export const useAllNews = () => {
   return useQuery({

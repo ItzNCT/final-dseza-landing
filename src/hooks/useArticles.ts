@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { extractImageUrl } from "@/utils/drupal";
 import { extractFirstImageFromRichText } from "@/utils/richTextProcessor";
-import { useNewsCategories } from "./useNewsCategories";
+import { useAllNewsCategories } from "./useNewsCategories";
 
 // Định nghĩa cấu trúc cho một bài viết
 export interface Article {
@@ -24,7 +24,7 @@ const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL ||
 // Custom hook để lấy danh sách bài viết theo category
 export const useArticles = () => {
   const { category, subcategory } = useParams<{ category: string; subcategory?: string; }>();
-  const { data: categoriesData } = useNewsCategories();
+  const { data: categoriesData } = useAllNewsCategories(); // Use ALL categories instead of just event categories
 
   const fetchArticles = async (): Promise<Article[]> => {
     // Xác định target category cho filter
@@ -44,40 +44,62 @@ export const useArticles = () => {
     // Nếu targetCategory là 'su-kien' hoặc 'tin-tuc' thì lấy tất cả tin tức (không filter)
     const showAllNews = targetCategory === 'su-kien' || targetCategory === 'tin-tuc';
 
-    if (!showAllNews) {
-      // URL mapping để convert từ URL slug sang category name thực tế
-      const urlToCategoryMap: { [key: string]: string } = {
-        'dau-tu-hop-tac-quoc-te': 'Đầu tư – Hợp tác quốc tế',
-        'dao-tao-uom-tao-khoi-nghiep': 'Đào tạo, Ươm tạo khởi nghiệp',
-        'chuyen-doi-so': 'Chuyển đổi số',
-        'hoat-dong-ban-quan-ly': 'Hoạt động Ban quản lý',
-        'tin-khac': 'Tin khác',
-        'doanh-nghiep': 'Doanh nghiệp',
-        'thong-bao': 'Thông báo',
-        'hoat-dong': 'Hoạt động',
-      };
-
-      // Lấy category name từ mapping, hoặc nếu không có trong map thì tìm trong categoriesData
-      let categoryNameToFilter = urlToCategoryMap[targetCategory];
+    // URL mapping để convert từ URL slug sang category name thực tế
+    const urlToCategoryMap: { [key: string]: string } = {
+      'dau-tu-hop-tac-quoc-te': 'Đầu tư – Hợp tác quốc tế',
+      'dao-tao-uom-tao-khoi-nghiep': 'Đào tạo, Ươm tạo khởi nghiệp',
+      'chuyen-doi-so': 'Chuyển đổi số',
+      'hoat-dong-ban-quan-ly': 'Hoạt động Ban quản lý',
+      'tin-khac': 'Tin khác',
+      'doanh-nghiep': 'Doanh nghiệp',
+      'thong-bao': 'Thông báo',
+      'hoat-dong': 'Hoạt động',
+      'su-kien': 'Tin tức & Sự kiện',
+      'tin-tuc': 'Tin tức',
+      // Investment-related categories
+      'quy-trinh-linh-vuc-dau-tu': 'Quy trình lĩnh vực đầu tư',
+      'linh-vuc-khuyen-khich-dau-tu': 'Lĩnh vực thu hút đầu tư',
+      'linh-vuc-thu-hut-dau-tu': 'Lĩnh vực thu hút đầu tư', // Alternative slug
+      'danh-cho-nha-dau-tu': 'Dành cho nhà đầu tư', // Parent category
       
-      // Nếu không tìm thấy trong hardcode map, thử tìm trong real categories data
-      if (!categoryNameToFilter && categoriesData) {
-        const foundCategory = categoriesData.find(cat => 
-          cat.name.toLowerCase().includes(targetCategory.replace(/-/g, ' ').toLowerCase()) ||
-          targetCategory.replace(/-/g, ' ').toLowerCase().includes(cat.name.toLowerCase())
-        );
-        if (foundCategory) {
-          categoryNameToFilter = foundCategory.name;
-        }
-      }
+      // Investment environment subcategories
+      'moi-truong-dau-tu': 'Môi trường đầu tư', // Parent category
+      'ha-tang-giao-thong': 'Hạ tầng giao thông',
+      'khoa-hoc-cong-nghe-moi-truong': 'Khoa học công nghệ - Môi trường',
+      'logistics': 'Logistics',
+      'ha-tang-xa-hoi': 'Hạ tầng xã hội',
+      'nguon-nhan-luc': 'Nguồn nhân lực',
+      'cai-cach-hanh-chinh': 'Cải cách hành chính',
+    };
 
-      // Thêm filter cho category cụ thể
+    // Lấy category name từ mapping, hoặc nếu không có trong map thì tìm trong categoriesData
+    let categoryNameToFilter = urlToCategoryMap[targetCategory];
+    
+    // Nếu không tìm thấy trong hardcode map, thử tìm trong real categories data
+    if (!categoryNameToFilter && categoriesData) {
+      const foundCategory = categoriesData.find(cat => 
+        cat.name.toLowerCase().includes(targetCategory.replace(/-/g, ' ').toLowerCase()) ||
+        targetCategory.replace(/-/g, ' ').toLowerCase().includes(cat.name.toLowerCase())
+      );
+      if (foundCategory) {
+        categoryNameToFilter = foundCategory.name;
+      }
+    }
+
+    if (!showAllNews) {
+      // Debug: Log category filtering info
       if (categoryNameToFilter) {
+        console.log(`🔍 Filtering articles for category: "${categoryNameToFilter}" (from slug: "${targetCategory}")`);
+        // Try different filter approaches for Drupal JSON:API
         url += `&filter[field_chuyen_muc.name]=${encodeURIComponent(categoryNameToFilter)}`;
+      } else {
+        console.log(`⚠️ No category name found for filtering. Target category: "${targetCategory}"`);
       }
     }
 
     try {
+      console.log(`📡 API URL: ${url}`);
+      
       const response = await fetch(url, {
         headers: {
           'Accept': 'application/vnd.api+json',
@@ -90,9 +112,10 @@ export const useArticles = () => {
       }
       
       const data = await response.json();
+      console.log(`📊 API returned ${data.data?.length || 0} articles`);
       
       // Map dữ liệu trả về thành cấu trúc Article
-      const articles = data.data?.map((item: any) => {
+      let articles = data.data?.map((item: any) => {
         // Lấy categories từ relationships
         let categories: string[] = [];
         if (item.relationships?.field_chuyen_muc?.data?.length > 0 && data.included) {
@@ -131,6 +154,73 @@ export const useArticles = () => {
         };
       }) || [];
       
+            // Client-side filtering fallback nếu server-side filtering không hoạt động
+      if (!showAllNews && articles.length > 0) {
+        // Helper function to normalize text for comparison
+        const normalizeText = (text: string): string => {
+          return text.toLowerCase()
+                     .trim()
+                     .replace(/\s+/g, ' ') // normalize spaces
+                     .replace(/[–—-]/g, '-') // normalize dashes
+                     .replace(/[^\w\s-]/g, ''); // remove special chars except word chars, spaces, and dashes
+        };
+
+        // If we have a specific category name to filter by
+        if (categoryNameToFilter) {
+          const originalCount = articles.length;
+          
+          // Filter articles that contain the target category name in their categories array
+          articles = articles.filter(article => {
+            const hasMatchingCategory = article.categories.some(category => {
+              const normalizedArticleCategory = normalizeText(category);
+              const normalizedTargetCategory = normalizeText(categoryNameToFilter);
+              
+              // Multiple matching strategies
+              return (
+                // Exact match
+                normalizedArticleCategory === normalizedTargetCategory ||
+                // Contains match (both directions)
+                normalizedArticleCategory.includes(normalizedTargetCategory) ||
+                normalizedTargetCategory.includes(normalizedArticleCategory) ||
+                // Word boundary match
+                normalizedArticleCategory.split(' ').some(word => 
+                  normalizedTargetCategory.split(' ').includes(word) && word.length > 2
+                )
+              );
+            });
+            
+            return hasMatchingCategory;
+          });
+          
+          console.log(`🎯 Client-side filtered: ${originalCount} → ${articles.length} articles for "${categoryNameToFilter}"`);
+          
+          // Debug: Log first few articles and their categories
+          if (articles.length > 0) {
+            console.log(`✅ Sample filtered articles:`, articles.slice(0, 3).map(a => ({
+              title: a.title,
+              categories: a.categories
+            })));
+          } else {
+            console.log(`❌ No articles found for category "${categoryNameToFilter}"`);
+          }
+        } else if (targetCategory && targetCategory !== 'su-kien' && targetCategory !== 'tin-tuc') {
+          // Fallback: filter by URL slug if no category name mapping found
+          const originalCount = articles.length;
+          const targetSlugWords = targetCategory.replace(/-/g, ' ').toLowerCase().split(' ');
+          
+          articles = articles.filter(article => {
+            return article.categories.some(category => {
+              const categoryWords = category.toLowerCase().split(' ');
+              return targetSlugWords.some(slugWord => 
+                categoryWords.some(catWord => catWord.includes(slugWord) && slugWord.length > 2)
+              );
+            });
+          });
+          
+          console.log(`🔄 Slug-based filtered: ${originalCount} → ${articles.length} articles for "${targetCategory}"`);
+        }
+      }
+       
       return articles;
     } catch (error) {
       console.error("Error fetching articles:", error);

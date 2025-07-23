@@ -172,18 +172,26 @@ const jsonApiHeaders = {
  */
 async function fetchArticleById(uuid: string): Promise<any> {
   try {
-    // Focus on paragraphs content and categories, include nested paragraph relationships
-    const url = `${JSON_API_BASE_URL}/jsonapi/node/bai-viet/${encodeURIComponent(uuid)}?include=field_chuyen_muc,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_image,field_noi_dung_bai_viet.field_image.field_media_image`;
+    // Try a simpler include first to avoid API errors, then fetch additional data if needed
+    console.log('🚀 Fetching article with UUID:', uuid);
+    
+    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document';
+    const url = `${JSON_API_BASE_URL}/jsonapi/node/bai-viet/${encodeURIComponent(uuid)}?include=${basicInclude}`;
+    
+    console.log('📡 API URL:', url);
     
     const response = await fetch(url, {
       method: 'GET',
       headers: jsonApiHeaders,
     });
 
+    console.log('📊 Response status:', response.status, response.statusText);
+
     if (!response.ok) {
-      // Fallback for legacy numeric IDs (development support)
+      // Try fallback for legacy numeric IDs (development support)
       if (/^\d+$/.test(uuid)) {
-        const fallbackUrl = `${JSON_API_BASE_URL}/jsonapi/node/bai-viet?filter[nid]=${uuid}&include=field_chuyen_muc,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_image,field_noi_dung_bai_viet.field_image.field_media_image`;
+        console.log('🔄 Trying fallback with numeric ID...');
+        const fallbackUrl = `${JSON_API_BASE_URL}/jsonapi/node/bai-viet?filter[nid]=${uuid}&include=${basicInclude}`;
         
         const fallbackResponse = await fetch(fallbackUrl, {
           method: 'GET',
@@ -192,20 +200,108 @@ async function fetchArticleById(uuid: string): Promise<any> {
         
         if (fallbackResponse.ok) {
           const fallbackData = await fallbackResponse.json();
+          console.log('✅ Fallback successful, data:', fallbackData);
           // Return the first item from the filtered results
           return fallbackData.data[0] ? { data: fallbackData.data[0], included: fallbackData.included } : null;
+        } else {
+          console.log('❌ Fallback also failed:', fallbackResponse.status);
         }
       }
       
       const errorText = await response.text();
+      console.error('❌ API Error:', errorText);
       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('✅ Article data fetched successfully:', data);
+    
+    // Now try to fetch additional media relationships for the paragraphs
+    if (data?.data?.relationships?.field_noi_dung_bai_viet?.data?.length > 0) {
+      await enrichParagraphsWithMedia(data);
+    }
     
     return data;
   } catch (error) {
+    console.error('❌ fetchArticleById error:', error);
     throw new Error(`Failed to fetch article details: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Enrich paragraph data with media relationships
+ */
+async function enrichParagraphsWithMedia(articleData: any): Promise<void> {
+  try {
+    const paragraphIds = articleData.data.relationships.field_noi_dung_bai_viet.data.map((rel: any) => rel.id);
+    const existingParagraphs = articleData.included?.filter((item: any) => paragraphIds.includes(item.id)) || [];
+    
+    console.log('🔍 Found paragraphs to enrich:', existingParagraphs.map((p: any) => ({ type: p.type, id: p.id })));
+    
+    // Find image paragraphs and try to fetch their media data
+    const imageParagraphs = existingParagraphs.filter((p: any) => p.type === 'paragraph--image_block');
+    
+    for (const imageParagraph of imageParagraphs) {
+      console.log('🖼️ Processing image paragraph:', imageParagraph);
+      
+      // Check if we need to fetch media data for this paragraph
+      if (imageParagraph.relationships) {
+        const relationshipKeys = Object.keys(imageParagraph.relationships);
+        console.log('🔗 Available relationships:', relationshipKeys);
+        
+        // Try to find image relationships in common field names
+        for (const key of relationshipKeys) {
+          if (key.includes('image') || key.includes('media')) {
+            const relationship = imageParagraph.relationships[key];
+            if (relationship?.data?.id) {
+              console.log(`📎 Found ${key} relationship:`, relationship.data);
+              
+              // Try to fetch this media item if not in included
+              const mediaExists = articleData.included?.find((item: any) => item.id === relationship.data.id);
+              if (!mediaExists) {
+                console.log(`🔍 Media ${relationship.data.id} not in included, trying to fetch...`);
+                await fetchMissingMediaData(articleData, relationship.data);
+              }
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('⚠️ Error enriching paragraphs with media:', error);
+    // Don't throw - just log warning as this is enhancement
+  }
+}
+
+/**
+ * Fetch missing media data and add to included array
+ */
+async function fetchMissingMediaData(articleData: any, mediaRef: any): Promise<void> {
+  try {
+    const mediaUrl = `${JSON_API_BASE_URL}/jsonapi/${mediaRef.type}/${mediaRef.id}?include=field_media_image,field_media_file,thumbnail`;
+    
+    const response = await fetch(mediaUrl, {
+      method: 'GET',
+      headers: jsonApiHeaders,
+    });
+    
+    if (response.ok) {
+      const mediaData = await response.json();
+      console.log('✅ Fetched missing media data:', mediaData);
+      
+      // Add to included array
+      if (mediaData.data) {
+        articleData.included = articleData.included || [];
+        articleData.included.push(mediaData.data);
+        
+        // Also add any included file entities
+        if (mediaData.included) {
+          articleData.included.push(...mediaData.included);
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('⚠️ Failed to fetch missing media data:', error);
   }
 }
 
@@ -428,6 +524,7 @@ interface DocumentFilters {
   endDate?: string;
   documentNumber?: string;
   summary?: string;
+  category?: string; // Add category filter for document type classification
   page?: number;
   pageSize?: number;
 }
@@ -461,6 +558,10 @@ async function fetchDocuments({ queryKey }: { queryKey: readonly unknown[] }): P
       queryParams.append('filter[field_loai_van_ban.name]', filters.documentType);
     }
     
+    // DISABLE SERVER-SIDE CATEGORY FILTERING - use client-side filtering instead
+    // Server-side filtering có vấn đề với Drupal JSON API syntax
+    // Category filtering sẽ được xử lý hoàn toàn ở client-side
+    
     if (filters.startDate) {
       queryParams.append('filter[field_ngay_ban_hanh][value]', filters.startDate);
       queryParams.append('filter[field_ngay_ban_hanh][operator]', '>=');
@@ -484,7 +585,7 @@ async function fetchDocuments({ queryKey }: { queryKey: readonly unknown[] }): P
     queryParams.append('sort', '-field_ngay_ban_hanh');
     
     // Include all related fields and taxonomy terms
-    queryParams.append('include', 'field_file_dinh_kem.field_media_document,field_loai_van_ban,field_linh_vuc,field_cap_ban_hanh,field_co_quan_ban_hanh');
+    queryParams.append('include', 'field_file_dinh_kem.field_media_document,field_loai_van_ban,field_cac_loai_van_ban,field_linh_vuc,field_cap_ban_hanh,field_co_quan_ban_hanh');
     
     const url = `${JSON_API_BASE_URL}/jsonapi/node/legal_document?${queryParams.toString()}`;
     
@@ -529,7 +630,7 @@ export const useDocuments = (filters: DocumentFilters = {}) => {
   } = useQuery({
     queryKey: ['documents', filters],
     queryFn: fetchDocuments,
-    staleTime: 2 * 60 * 1000, // 2 minutes - document search results can be cached briefly
+    staleTime: 2 * 60 * 1000, // 2 minutes - question search results can be cached briefly
     gcTime: 5 * 60 * 1000, // 5 minutes cache time
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
@@ -542,12 +643,51 @@ export const useDocuments = (filters: DocumentFilters = {}) => {
     error,
     isSuccess,
     refetch,
-    // Additional convenience properties
-    documents: data?.data || [],
-    totalResults: data?.meta?.count || 0,
-    hasDocuments: !!data?.data?.length,
+    // Additional convenience properties with client-side filtering fallback
+    documents: data?.data ? filterDocumentsClientSide(data.data, filters) : [],
+    totalResults: data?.meta?.count || (data?.data ? filterDocumentsClientSide(data.data, filters).length : 0),
+    hasDocuments: !!(data?.data ? filterDocumentsClientSide(data.data, filters).length : 0),
   };
 };
+
+/**
+ * Client-side filtering fallback in case server-side filtering fails
+ */
+function filterDocumentsClientSide(documents: any[], filters: DocumentFilters): any[] {
+  if (!filters.category) {
+    console.log('🔧 No category filter, returning all documents');
+    return documents;
+  }
+  
+  console.log('🔧 Client-side filtering for category:', filters.category);
+  
+  const categoryMapping: { [key: string]: string } = {
+    'phap-quy-trung-uong': '13',     // Match URL param format
+    'phap-quy-dia-phuong': '14',     // Match URL param format  
+    'chi-dao-dieu-hanh': '15',       // Match URL param format
+    'cchc': '16'                     // Match URL param format
+  };
+  
+  const expectedCategoryId = categoryMapping[filters.category];
+  console.log('🎯 Expected category ID:', expectedCategoryId, 'for category:', filters.category);
+  
+  if (!expectedCategoryId) {
+    console.warn('❌ No mapping found for category:', filters.category);
+    return documents;
+  }
+  
+  const filtered = documents.filter((doc: any) => {
+    const docCategoryId = doc.relationships?.field_cac_loai_van_ban?.data?.meta?.drupal_internal__target_id?.toString();
+    const matches = docCategoryId === expectedCategoryId;
+    
+    console.log(`📋 Document ${doc.attributes?.field_so_ky_hieu}: category ${docCategoryId}, expected ${expectedCategoryId}, match: ${matches}`);
+    
+    return matches;
+  });
+  
+  console.log(`✅ Client-side filtering result: ${documents.length} → ${filtered.length} documents`);
+  return filtered;
+}
 
 // Export types for external use
 export type { DocumentFilters };

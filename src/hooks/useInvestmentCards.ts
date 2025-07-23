@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { extractImageUrl } from '@/utils/drupal';
+import { extractImageUrl, resolveDrupalLinkUri } from '@/utils/drupal';
 
 // Use same base URL pattern as other hooks
 const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
@@ -55,7 +55,7 @@ async function fetchInvestmentCards(): Promise<InvestmentCard[]> {
     return {
       id: item.id,
       title: item.attributes.title,
-      url: item.attributes.field_link?.uri || '',
+      url: resolveDrupalLinkUri(item.attributes.field_link?.uri),
       imageUrl,
       category: categoryName,
     };

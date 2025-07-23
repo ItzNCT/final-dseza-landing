@@ -7,96 +7,86 @@ import { useTranslation } from "@/utils/translations";
 import { useLanguage } from "@/context/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// Define interfaces for news data types
-interface NewsCategory {
-  id: string;
-  name: string;
-  nameEn?: string;
-}
-
-interface NewsArticle {
-  id: string;
-  categoryId: string;
-  image: string;
-  date: string;
-  title: string;
-  titleEn?: string;
-  excerpt?: string;
-  excerptEn?: string;
-  url?: string;
-}
+import { useAllNews, type NewsItem } from "@/hooks/useAllNews";
+import { useNewsCategories, type NewsCategory } from "@/hooks/useNewsCategories";
+import { getImageWithFallback } from "@/utils/drupal";
 
 /**
  * Individual news article card component
  */
-const NewsCard: React.FC<NewsArticle> = ({
-  image,
-  date,
+const NewsCard: React.FC<NewsItem & { titleEn?: string; summaryEn?: string }> = ({
+  featured_image,
+  published_date,
   title,
   titleEn,
-  excerpt,
-  excerptEn,
-  url = "#"
+  summary,
+  summaryEn,
+  id
 }) => {
   const { theme } = useTheme();
   const { language } = useLanguage();
 
   // Use translated content if available
   const displayTitle = language === 'en' && titleEn ? titleEn : title;
-  const displayExcerpt = language === 'en' && excerptEn ? excerptEn : excerpt;
+  const displayExcerpt = language === 'en' && summaryEn ? summaryEn : summary;
 
   // Theme-specific styles
-  const cardBg = theme === "dark" ? "bg-[#2C3640]" : "bg-[#F2F2F2]";
-  const mainText = theme === "dark" ? "text-white" : "text-black";
-  const secondaryText = theme === "dark" ? "text-[#B0BEC5]" : "text-[#545454]";
-  const shadowStyle = theme === "dark" ? "shadow-lg shadow-black/25" : "shadow-lg";
-  const hoverShadow = theme === "dark" ? "hover:shadow-xl hover:shadow-black/35" : "hover:shadow-xl";
+  const cardBg = theme === "dark" ? "bg-[#263745]" : "bg-white";
+  const cardBorder = theme === "dark" ? "border-[#3A4A5B]" : "border-gray-200";
+  const cardHover = theme === "dark" ? "hover:bg-[#2D3E4F]" : "hover:bg-gray-50";
+  const titleText = theme === "dark" ? "text-white" : "text-gray-900";
+  const excerptText = theme === "dark" ? "text-gray-300" : "text-gray-600";
+  const secondaryText = theme === "dark" ? "text-gray-400" : "text-gray-500";
 
   return (
     <a
-      href={url}
+      href={`/bai-viet/${id}`}
       className={cn(
         "block rounded-xl overflow-hidden",
+        "border transition-all duration-300 ease-in-out",
         cardBg,
-        shadowStyle,
-        hoverShadow,
-        "transition-transform duration-300 ease-in-out",
-        "hover:scale-[1.01] active:scale-[0.99]",
-        "cursor-pointer"
+        cardBorder,
+        cardHover,
+        "hover:shadow-lg active:scale-95"
       )}
     >
-      {/* News Article Image (16:9 aspect ratio) */}
-      <div className="w-full aspect-video relative">
-        <img
-          src={image}
+      <div className="flex gap-4 p-4">
+        {/* Article Image */}
+        <div className="w-24 h-16 relative flex-shrink-0">
+          <img
+            src={getImageWithFallback(featured_image)}
           alt={displayTitle}
           loading="lazy"
-          className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-lg"
         />
       </div>
 
-      {/* Text Content Area */}
-      <div className="p-4">
-        {/* News Date */}
-        <div className="flex items-center gap-1.5 mb-1.5">
+        {/* Article Content */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between">
+          {/* Date */}
+          <div className="flex items-center gap-2 mb-2">
           <Calendar className={cn("h-3.5 w-3.5", secondaryText)} />
           <p className={cn("text-xs font-inter font-normal", secondaryText)}>
-            {date}
+              {new Date(published_date).toLocaleDateString('vi-VN')}
           </p>
         </div>
 
-        {/* News Title */}
-        <h3 className={cn("font-montserrat font-semibold text-lg mb-2 line-clamp-3", mainText)}>
+          {/* Title */}
+          <h3 className={cn(
+            "font-montserrat font-semibold text-sm line-clamp-2 mb-2",
+            titleText
+          )}>
           {displayTitle}
         </h3>
 
-        {/* News Snippet (if available) */}
-        {displayExcerpt && (
-          <p className={cn("font-inter font-normal text-sm line-clamp-2", secondaryText)}>
+          {/* Excerpt */}
+          <p className={cn(
+            "font-inter text-xs line-clamp-2",
+            excerptText
+          )}>
             {displayExcerpt}
           </p>
-        )}
+        </div>
       </div>
     </a>
   );
@@ -132,7 +122,11 @@ const MobileNewsSection: React.FC = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const [activeCategory, setActiveCategory] = useState<string>("investment");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+
+  // Fetch real data from API
+  const { data: allNewsData, isLoading: newsLoading, isError: newsError } = useAllNews();
+  const { data: categoriesData, isLoading: categoriesLoading, isError: categoriesError } = useNewsCategories();
 
   // Theme-specific styles for the section container
   const sectionBg = theme === "dark" ? "bg-[#1E272F]" : "bg-white";
@@ -141,222 +135,57 @@ const MobileNewsSection: React.FC = () => {
   const buttonBorder = theme === "dark" ? "border-[#19DBCF]" : "border-[#416628]";
   const buttonHoverBg = theme === "dark" ? "hover:bg-[#19DBCF]/10" : "hover:bg-[#416628]/10";
 
-  // News categories data - Đồng bộ với NewsSection
+  // Build categories array with "All News" plus dynamic categories from API
   const categories: NewsCategory[] = [
     {
-      id: "investment",
-      name: "Đầu tư – Hợp tác quốc tế",
-      nameEn: "Investment – Int'l Cooperation"
+      id: "all",
+      name: "Tất cả tin tức", 
+      nameEn: "All News"
     },
-    {
-      id: "training",
-      name: "Đào tạo, Ươm tạo khởi nghiệp",
-      nameEn: "Training & Startup Incubation"
-    },
-    {
-      id: "digital",
-      name: "Chuyển đổi số",
-      nameEn: "Digital Transformation"
-    },
-    {
-      id: "activities", // Đổi từ 'management' để đồng bộ
-      name: "Hoạt động Ban quản lý",
-      nameEn: "Management Board Activities"
-    },
-    {
-      id: "other",
-      name: "Tin khác",
-      nameEn: "Other News"
-    }
+    ...(categoriesData || [])
   ];
 
-  // Sample news articles data for each category - Đồng bộ với NewsSection
-  const newsArticles: { [key: string]: NewsArticle[] } = {
-    "investment": [
-      {
-        id: "inv1",
-        categoryId: "investment",
-        image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-        date: "20/05/2025",
-        title: "DSEZA thu hút thành công dự án FDI 100 triệu USD từ Nhật Bản",
-        titleEn: "DSEZA successfully attracts $100M FDI project from Japan",
-        excerpt: "Dự án tập trung vào sản xuất linh kiện điện tử công nghệ cao, dự kiến tạo ra hàng ngàn việc làm...",
-        excerptEn: "The project focuses on high-tech electronic component manufacturing, expected to create thousands of jobs...",
-        url: "#news-inv1"
-      },
-      {
-        id: "inv2",
-        categoryId: "investment",
-        image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
-        date: "18/05/2025",
-        title: "Hội thảo xúc tiến đầu tư vào Đà Nẵng tổ chức tại Singapore",
-        titleEn: "Da Nang investment promotion workshop held in Singapore",
-        excerpt: "Nhiều nhà đầu tư Singapore bày tỏ sự quan tâm sâu sắc đến môi trường đầu tư tại các KCN, KCNC Đà Nẵng...",
-        excerptEn: "Many Singaporean investors expressed deep interest in the investment environment in Da Nang's industrial and high-tech zones...",
-        url: "#news-inv2"
-      },
-      {
-        id: "inv3",
-        categoryId: "investment",
-        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
-        date: "15/05/2025",
-        title: "Đà Nẵng nâng cao năng lực cạnh tranh trong thu hút đầu tư nước ngoài",
-        titleEn: "Da Nang enhances competitiveness in attracting foreign investment",
-        excerpt: "Thành phố đang tích cực cải thiện môi trường đầu tư, đơn giản hóa thủ tục hành chính để thu hút các dự án chất lượng cao...",
-        excerptEn: "The city is actively improving the investment environment and simplifying administrative procedures to attract high-quality projects...",
-        url: "#news-inv3"
-      }
-    ],
-    "training": [
-      {
-        id: "tr1",
-        categoryId: "training",
-        image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4",
-        date: "19/05/2025",
-        title: "Khởi động chương trình ươm tạo khởi nghiệp công nghệ DSEZA 2025",
-        titleEn: "DSEZA Technology Startup Incubation Program 2025 launched",
-        excerpt: "Chương trình năm nay dự kiến sẽ chọn 10 dự án tiềm năng để hỗ trợ phát triển sản phẩm và kết nối với nhà đầu tư...",
-        excerptEn: "This year's program is expected to select 10 potential projects to support product development and connect with investors...",
-        url: "#news-tr1"
-      },
-      {
-        id: "tr2",
-        categoryId: "training",
-        image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
-        date: "16/05/2025",
-        title: "DSEZA hợp tác với ĐH FPT đào tạo nhân lực công nghệ cao",
-        titleEn: "DSEZA cooperates with FPT University to train high-tech human resources",
-        excerpt: "Thỏa thuận hợp tác nhằm đào tạo nguồn nhân lực chất lượng cao đáp ứng nhu cầu của các doanh nghiệp trong khu công nghệ cao...",
-        excerptEn: "The cooperation agreement aims to train high-quality human resources to meet the needs of businesses in the high-tech park...",
-        url: "#news-tr2"
-      },
-      {
-        id: "tr3",
-        categoryId: "training",
-        image: "https://images.unsplash.com/photo-1531482615713-2afd69097998",
-        date: "10/05/2025",
-        title: "10 startup công nghệ Đà Nẵng được chọn tham gia chương trình tăng tốc khởi nghiệp",
-        titleEn: "10 Da Nang tech startups selected for acceleration program",
-        excerpt: "Các startup sẽ được hỗ trợ về mặt kỹ thuật, tài chính và kết nối thị trường trong 6 tháng...",
-        excerptEn: "Startups will receive technical, financial support and market connections for 6 months...",
-        url: "#news-tr3"
-      }
-    ],
-    "digital": [
-      {
-        id: "dig1",
-        categoryId: "digital",
-        image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12",
-        date: "17/05/2025",
-        title: "DSEZA triển khai nền tảng số hóa quản lý khu công nghiệp",
-        titleEn: "DSEZA implements digital platform for industrial zone management",
-        excerpt: "Nền tảng mới giúp tối ưu hóa quy trình quản lý và tăng cường hiệu quả hoạt động của các khu công nghiệp...",
-        excerptEn: "The new platform helps optimize management processes and enhance the operational efficiency of industrial zones...",
-        url: "#news-dig1"
-      },
-      {
-        id: "dig2",
-        categoryId: "digital",
-        image: "https://images.unsplash.com/photo-1573164713988-8665fc963095",
-        date: "14/05/2025",
-        title: "Các doanh nghiệp trong KCN Đà Nẵng đẩy mạnh chuyển đổi số",
-        titleEn: "Businesses in Da Nang Industrial Zone accelerate digital transformation",
-        excerpt: "Hơn 70% doanh nghiệp đã ứng dụng công nghệ số vào quy trình sản xuất và quản lý...",
-        excerptEn: "More than 70% of businesses have applied digital technology to production and management processes...",
-        url: "#news-dig2"
-      },
-      {
-        id: "dig3",
-        categoryId: "digital",
-        image: "https://images.unsplash.com/photo-1526498460520-4c246339dccb",
-        date: "12/05/2025",
-        title: "Hội thảo về AI và tự động hóa trong sản xuất công nghiệp tại KCNC Đà Nẵng",
-        titleEn: "Workshop on AI and automation in industrial production at Da Nang High-Tech Park",
-        excerpt: "Sự kiện thu hút sự tham gia của nhiều chuyên gia công nghệ và đại diện doanh nghiệp để thảo luận về xu hướng tương lai...",
-        excerptEn: "The event attracted many technology experts and business representatives to discuss future trends...",
-        url: "#news-dig3"
-      }
-    ],
-    "activities": [
-      {
-        id: "act1",
-        categoryId: "activities",
-        image: "https://images.unsplash.com/photo-1530973428-5bf2db2e4d71",
-        date: "21/05/2025",
-        title: "Ban quản lý DSEZA tổ chức đối thoại với doanh nghiệp quý II/2025",
-        titleEn: "DSEZA Management Board organizes Q2/2025 dialogue with businesses",
-        excerpt: "Buổi đối thoại nhằm lắng nghe ý kiến, giải quyết khó khăn và đề xuất từ các doanh nghiệp trong khu công nghiệp...",
-        excerptEn: "The dialogue aims to listen to opinions, resolve difficulties and proposals from businesses in the industrial zone...",
-        url: "#news-act1"
-      },
-      {
-        id: "act2",
-        categoryId: "activities",
-        image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4",
-        date: "11/05/2025",
-        title: "DSEZA làm việc với đoàn đại biểu đến từ Hàn Quốc",
-        titleEn: "DSEZA works with delegation from South Korea",
-        excerpt: "Đoàn đại biểu bày tỏ mong muốn tìm kiếm cơ hội hợp tác và mở rộng hoạt động tại Đà Nẵng...",
-        excerptEn: "The delegation expressed their desire to seek cooperation opportunities and expand activities in Da Nang...",
-        url: "#news-act2"
-      },
-      {
-        id: "act3",
-        categoryId: "activities",
-        image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0",
-        date: "09/05/2025",
-        title: "Ban quản lý DSEZA công bố kế hoạch phát triển 5 năm (2026-2030)",
-        titleEn: "DSEZA Management Board announces 5-year development plan (2026-2030)",
-        excerpt: "Kế hoạch đặt ra mục tiêu thu hút 3 tỷ USD vốn đầu tư và phát triển các ngành công nghệ cao...",
-        excerptEn: "The plan sets a target of attracting $3 billion in investment capital and developing high-tech industries...",
-        url: "#news-act3"
-      }
-    ],
-    "other": [
-      {
-        id: "oth1",
-        categoryId: "other",
-        image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa",
-        date: "19/05/2025",
-        title: "Đà Nẵng phát triển hạ tầng giao thông kết nối các khu công nghiệp",
-        titleEn: "Da Nang develops transportation infrastructure connecting industrial zones",
-        excerpt: "Dự án đường cao tốc mới sẽ giúp rút ngắn thời gian di chuyển và tăng hiệu quả logistic cho các doanh nghiệp...",
-        excerptEn: "The new expressway project will help shorten travel time and increase logistics efficiency for businesses...",
-        url: "#news-oth1"
-      },
-      {
-        id: "oth2",
-        categoryId: "other",
-        image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab",
-        date: "16/05/2025",
-        title: "Triển lãm công nghệ xanh tại KCNC Đà Nẵng",
-        titleEn: "Green technology exhibition at Da Nang High-Tech Park",
-        excerpt: "Triển lãm giới thiệu những giải pháp công nghệ mới nhất giúp doanh nghiệp phát triển bền vững và thân thiện với môi trường...",
-        excerptEn: "The exhibition introduces the latest technological solutions to help businesses develop sustainably and environmentally friendly...",
-        url: "#news-oth2"
-      },
-      {
-        id: "oth3",
-        categoryId: "other",
-        image: "https://images.unsplash.com/photo-1523287562758-66c7fc58967f",
-        date: "13/05/2025",
-        title: "Khu công nghệ cao Đà Nẵng được vinh danh là một trong những KCNC xanh nhất Đông Nam Á",
-        titleEn: "Da Nang High-Tech Park honored as one of the greenest in Southeast Asia",
-        excerpt: "Giải thưởng ghi nhận những nỗ lực trong việc xây dựng môi trường công nghiệp xanh và bền vững...",
-        excerptEn: "The award recognizes efforts in building a green and sustainable industrial environment...",
-        url: "#news-oth3"
-      }
-    ]
+  // Normalize text for better matching (remove extra spaces, normalize case)
+  const normalizeText = (text: string | null | undefined): string => {
+    if (!text) return '';
+    return text.trim().toLowerCase().replace(/\s+/g, ' ');
   };
 
+  // Filter news based on selected category (same logic as desktop)
+  const filteredNews = React.useMemo(() => {
+    if (!allNewsData) return [];
+    if (activeCategory === "all") return allNewsData;
+    
+    // Find the selected category
+    const selectedCategory = categories.find(cat => cat.id === activeCategory);
+    if (!selectedCategory) return [];
+    
+    const selectedCategoryName = normalizeText(selectedCategory.name);
+    
+    // Filter by checking if the selected category name exists in any of the article's categories
+    return allNewsData.filter(article => {
+      // Check primary category match
+      const primaryMatch = normalizeText(article.category) === selectedCategoryName;
+      
+      // Check all categories match
+      const allCategoriesMatch = article.all_categories?.some(cat => 
+        normalizeText(cat) === selectedCategoryName
+      );
+      
+      // Also check by category ID if available
+      let categoryIdMatch = false;
+      if (article.all_category_ids && article.all_category_ids.length > 0) {
+        categoryIdMatch = article.all_category_ids.includes(selectedCategory.id);
+      }
+      
+      return primaryMatch || allCategoriesMatch || categoryIdMatch;
+    });
+  }, [allNewsData, activeCategory, categories]);
 
   // Handle category change
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
   };
-
-  // Get the current category's articles
-  const currentArticles = newsArticles[activeCategory] || [];
 
   return (
     <section className={cn(
@@ -381,7 +210,15 @@ const MobileNewsSection: React.FC = () => {
         {/* Custom TabsList wrapper to allow horizontal scrolling */}
         <div className="overflow-x-auto scrollbar-hide pb-2 mb-6">
           <TabsList className="bg-transparent p-0 h-auto flex space-x-3 min-w-max">
-            {categories.map((category) => (
+            {categoriesLoading ? (
+              // Show skeleton for category tabs while loading
+              <>
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-8 w-32" />
+                <Skeleton className="h-8 w-28" />
+              </>
+            ) : (
+              categories.map((category) => (
               <TabsTrigger
                 key={category.id}
                 value={category.id}
@@ -403,7 +240,8 @@ const MobileNewsSection: React.FC = () => {
               >
                 {language === 'en' && category.nameEn ? category.nameEn : category.name}
               </TabsTrigger>
-            ))}
+              ))
+            )}
           </TabsList>
         </div>
 
@@ -414,33 +252,50 @@ const MobileNewsSection: React.FC = () => {
             value={category.id}
             className="mt-0 focus-visible:outline-none focus-visible:ring-0"
           >
+            {/* Loading State */}
+            {(newsLoading || categoriesLoading) && (
+              <div className="flex flex-col space-y-5">
+                {Array.from({ length: 3 }).map((_, index) => <NewsCardSkeleton key={index} />)}
+              </div>
+            )}
+            
+            {/* Error State */}
+            {(newsError || categoriesError) && !newsLoading && !categoriesLoading && (
+              <div className="text-center py-8">
+                <p className={cn("text-sm", titleText)}>
+                  Đã xảy ra lỗi khi tải tin tức. Vui lòng thử lại sau.
+                </p>
+              </div>
+            )}
+
             {/* News Articles List (Vertical Stack) */}
+            {!newsLoading && !categoriesLoading && !newsError && !categoriesError && (
             <div className="flex flex-col space-y-5">
-              {currentArticles.length > 0 ? (
-                 currentArticles.map((article) => (
+                {filteredNews.length > 0 ? (
+                  filteredNews.slice(0, 6).map((article) => ( // Limit to 6 articles for mobile
                   <NewsCard
                     key={article.id}
-                    id={article.id}
-                    categoryId={article.categoryId}
-                    image={article.image}
-                    date={article.date}
-                    title={article.title}
-                    titleEn={article.titleEn}
-                    excerpt={article.excerpt}
-                    excerptEn={article.excerptEn}
-                    url={article.url}
+                      {...article}
+                      titleEn={article.title} // API doesn't have separate English titles yet
+                      summaryEn={article.summary} // API doesn't have separate English excerpts yet
                   />
                 ))
               ) : (
-                // Hiển thị skeleton nếu không có bài viết
-                Array.from({ length: 3 }).map((_, index) => <NewsCardSkeleton key={index} />)
+                  // No articles found for this category
+                  <div className="text-center py-8">
+                    <p className={cn("text-sm", titleText)}>
+                      Không có bài viết nào trong chuyên mục này.
+                    </p>
+                  </div>
               )}
             </div>
+            )}
 
             {/* View More Button */}
+            {filteredNews.length > 6 && (
             <div className="flex justify-center mt-6">
               <a
-                href={`#view-more-${category.id}`}
+                  href={`/tin-tuc/${category.id}`}
                 className={cn(
                   "py-2.5 px-6 rounded-full font-inter font-medium text-sm",
                   "border transition-colors duration-200",
@@ -452,6 +307,7 @@ const MobileNewsSection: React.FC = () => {
                 {t('homepage.viewAll') || "XEM TẤT CẢ"}
               </a>
             </div>
+            )}
           </TabsContent>
         ))}
       </Tabs>

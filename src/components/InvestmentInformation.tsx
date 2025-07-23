@@ -157,14 +157,18 @@ const InvestmentInformation: React.FC = () => {
                   className="flex overflow-x-auto scrollbar-none gap-4 pb-4 snap-x"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                  {currentCards.map((card: InvestmentCard) => (
-                    <a
-                      key={card.id}
-                      href={card.url}
-                      target={card.url.startsWith('http') ? "_blank" : "_self"}
-                      rel={card.url.startsWith('http') ? "noopener noreferrer" : undefined}
-                      className="group min-w-[280px] sm:min-w-[320px] h-64 rounded-lg overflow-hidden relative flex-shrink-0 snap-start transition-transform duration-300 hover:scale-[1.05]"
-                    >
+                  {currentCards.map((card: InvestmentCard) => {
+                    // Check if URL is external (starts with http/https) vs internal (starts with /)
+                    const isExternalUrl = card.url.startsWith('http');
+                    
+                    return (
+                      <a
+                        key={card.id}
+                        href={card.url}
+                        target={isExternalUrl ? "_blank" : "_self"}
+                        rel={isExternalUrl ? "noopener noreferrer" : undefined}
+                        className="group min-w-[280px] sm:min-w-[320px] h-64 rounded-lg overflow-hidden relative flex-shrink-0 snap-start transition-transform duration-300 hover:scale-[1.05]"
+                      >
                       <div
                         className="absolute inset-0 bg-cover bg-center transition-transform duration-300 ease-in-out group-hover:scale-110" 
                         style={{ 
@@ -181,7 +185,8 @@ const InvestmentInformation: React.FC = () => {
                         </h3>
                       </div>
                     </a>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-12">

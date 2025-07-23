@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Download, Search, ChevronRight, Loader2 } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Download, Search, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,33 +34,36 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useDocuments, DocumentFilters } from "@/api/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/context/ThemeContext";
-import TopBar from "@/components/hero/TopBar";
-import LogoSearchBar from "@/components/hero/LogoSearchBar";
-import NavigationBar from "@/components/hero/NavigationBar";
-import Footer from "@/components/Footer";
 
 /**
  * DocumentSearchPage component for searching legal documents
  */
 const DocumentSearchPage: React.FC = () => {
+  // Get category from URL params
+  const { category, subcategory } = useParams<{ category: string; subcategory: string }>();
+  
+  // DEBUG: Log URL params
+  console.log('🔍 URL Params - category:', category, 'subcategory:', subcategory);
+  
   // Base URL for API endpoints
   const JSON_API_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
     (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
   const { toast } = useToast();
   const { theme } = useTheme();
+  
   const [filters, setFilters] = useState<DocumentFilters>({
     documentNumber: "",
     summary: "",
     startDate: "",
     endDate: "",
     documentType: "",
+    category: subcategory || "", // Use subcategory as the filter category
     page: 1,
     pageSize: 5, // Maximum 5 results per page
   });
@@ -68,9 +72,20 @@ const DocumentSearchPage: React.FC = () => {
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
-  const [showMobileView, setShowMobileView] = useState(false);
 
   const { data, isLoading, isError, error, documents, totalResults } = useDocuments(filters);
+  
+  // DEBUG: Log filters being passed to useDocuments  
+  console.log('🎯 Filters passed to useDocuments:', filters);
+
+  // Update filters when category changes from URL
+  React.useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      category: subcategory || "",
+      page: 1 // Reset to first page when category changes
+    }));
+  }, [subcategory]);
 
   const handleInputChange = (field: keyof DocumentFilters, value: string | number) => {
     setFilters(prev => ({
@@ -144,39 +159,6 @@ const DocumentSearchPage: React.FC = () => {
         });
       }, 1000);
     }
-  };
-
-  const handleBulkDownload = async () => {
-    if (selectedDocuments.size === 0) {
-      toast({
-        title: "Thông báo",
-        description: "Vui lòng chọn ít nhất một văn bản để tải xuống.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const documentsToDownload = documents.filter(doc => 
-      selectedDocuments.has(doc.id) && getDocumentFileUrl(doc, data?.included)
-    );
-
-    if (documentsToDownload.length === 0) {
-      toast({
-        title: "Thông báo",
-        description: "Không có văn bản nào được chọn có file đính kèm.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Download each document with a small delay to avoid overwhelming the server
-    for (const doc of documentsToDownload) {
-      await handleDownload(doc.id);
-      await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
-    }
-
-    // Clear selection after download
-    setSelectedDocuments(new Set());
   };
 
   const handleSelectDocument = (documentId: string, checked: boolean) => {
@@ -335,7 +317,7 @@ const DocumentSearchPage: React.FC = () => {
           <p className={`text-sm mt-1 ${
             theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
           }`}>
-            {document.attributes?.field_so_ky_hieu || "N/A"}
+            {document.attributes?.field_so_ky_hieu || document.attributes?.title || "N/A"}
           </p>
         </DialogHeader>
         
@@ -383,10 +365,10 @@ const DocumentSearchPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Cấp ban hành:</span>
+                  }`}>Các loại văn bản:</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
-                  }`}>{getTaxonomyTermName(document.relationships?.field_cap_ban_hanh?.data, data?.included)}</span>
+                  }`}>{getTaxonomyTermName(document.relationships?.field_cac_loai_van_ban?.data, data?.included)}</span>
                 </div>
               </div>
               
@@ -414,6 +396,14 @@ const DocumentSearchPage: React.FC = () => {
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{formatDate(document.attributes?.field_ngay_het_hieu_luc || "")}</span>
+                </div>
+                <div className="flex flex-col sm:flex-row sm:justify-between">
+                  <span className={`font-medium ${
+                    theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                  }`}>Cấp ban hành:</span>
+                  <span className={`sm:text-right ${
+                    theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
+                  }`}>{getTaxonomyTermName(document.relationships?.field_cap_ban_hanh?.data, data?.included)}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
@@ -581,644 +571,326 @@ const DocumentSearchPage: React.FC = () => {
     </div>
   );
 
-  return (
-    <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
-      {/* Header - Complete header structure */}
-      <TopBar />
-      <LogoSearchBar />
-      <NavigationBar />
-      
-      {/* Main Content */}
-      <main className="flex-1 pt-52"> {/* Added flex-1 and increased padding to accommodate full header */}
-        {/* Breadcrumb */}
-        <div className={`py-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
-          <div className="container mx-auto px-4">
-            <nav className={`flex items-center space-x-2 text-sm ${
-              theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
-            }`}>
-              <a 
-                href="/" 
-                className={`transition-colors ${
-                  theme === 'dark' 
-                    ? 'hover:text-dseza-dark-primary' 
-                    : 'hover:text-dseza-light-primary'
-                }`}
-              >
-                Trang chủ
-              </a>
-              <ChevronRight className="h-4 w-4" />
-              <span className={`font-medium ${
-                theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-              }`}>
-                Tra cứu Văn bản Pháp quy
-              </span>
-            </nav>
-          </div>
-        </div>
+  // Get category display name
+  const getCategoryDisplayName = () => {
+    switch (subcategory) {
+      case 'phap-quy-trung-uong':
+        return 'Văn bản pháp quy trung ương';
+      case 'phap-quy-dia-phuong':
+        return 'Văn bản pháp quy địa phương';
+      case 'chi-dao-dieu-hanh':
+        return 'Văn bản chỉ đạo điều hành';
+      case 'cchc':
+        return 'Văn bản CCHC';
+      default:
+        return 'Tra cứu văn bản';
+    }
+  };
 
-        {/* Document Search Content */}
-        <div className="container mx-auto px-4 py-8">
-          {/* Page Title */}
-          <h1 className={`text-3xl md:text-4xl font-bold mb-8 text-center ${
+  return (
+    <div className="p-6">
+        {/* Category Header */}
+        <div className="mb-6">
+          <h2 className={`text-xl font-semibold ${
             theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
           }`}>
-            Tra cứu Văn bản Pháp quy
-          </h1>
+            {getCategoryDisplayName()}
+          </h2>
+        </div>
 
-          {/* Search Filters Section */}
-          <div className={`p-6 rounded-lg mb-8 ${
-            theme === 'dark' 
-              ? 'bg-dseza-dark-secondary border border-dseza-dark-border' 
-              : 'bg-dseza-light-secondary border border-dseza-light-border'
-          }`}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Document Number/Symbol */}
-              <div className="space-y-2">
-                <Label 
-                  htmlFor="documentNumber"
-                  className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
-                >
-                  Số/Ký hiệu
-                </Label>
-                <Input
-                  id="documentNumber"
-                  name="documentNumber"
-                  placeholder="Nhập số/ký hiệu văn bản"
-                  value={filters.documentNumber || ""}
-                  onChange={(e) => handleInputChange("documentNumber", e.target.value)}
-                  className={`${
-                    theme === 'dark' 
-                      ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' 
-                      : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'
-                  }`}
-                />
-              </div>
-
-              {/* Summary */}
-              <div className="space-y-2">
-                <Label 
-                  htmlFor="summary"
-                  className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
-                >
-                  Trích yếu
-                </Label>
-                <Input
-                  id="summary"
-                  name="summary"
-                  placeholder="Nhập từ khóa trích yếu"
-                  value={filters.summary || ""}
-                  onChange={(e) => handleInputChange("summary", e.target.value)}
-                  className={`${
-                    theme === 'dark' 
-                      ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' 
-                      : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'
-                  }`}
-                />
-              </div>
-
-              {/* Date From */}
-              <div className="space-y-2">
-                <Label 
-                  htmlFor="startDate"
-                  className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
-                >
-                  Ngày ban hành từ
-                </Label>
-                <Input
-                  id="startDate"
-                  name="startDate"
-                  type="date"
-                  value={filters.startDate || ""}
-                  onChange={(e) => handleInputChange("startDate", e.target.value)}
-                  className={`${
-                    theme === 'dark' 
-                      ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' 
-                      : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'
-                  }`}
-                />
-              </div>
-
-              {/* Date To */}
-              <div className="space-y-2">
-                <Label 
-                  htmlFor="endDate"
-                  className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
-                >
-                  Ngày ban hành đến
-                </Label>
-                <Input
-                  id="endDate"
-                  name="endDate"
-                  type="date"
-                  value={filters.endDate || ""}
-                  onChange={(e) => handleInputChange("endDate", e.target.value)}
-                  className={`${
-                    theme === 'dark' 
-                      ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' 
-                      : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'
-                  }`}
-                />
-              </div>
-
-              {/* Document Type */}
-              <div className="space-y-2">
-                <Label 
-                  htmlFor="documentType"
-                  className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
-                >
-                  Loại văn bản
-                </Label>
-                <Select 
-                  value={filters.documentType || "all"} 
-                  onValueChange={(value) => handleInputChange("documentType", value === "all" ? "" : value)}
-                  name="documentType"
-                >
-                  <SelectTrigger 
-                    id="documentType"
-                    className={`${
-                      theme === 'dark' 
-                        ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' 
-                        : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'
-                    }`}
-                  >
-                    <SelectValue placeholder="Chọn loại văn bản" />
-                  </SelectTrigger>
-                  <SelectContent className={`${
-                    theme === 'dark' 
-                      ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
-                      : 'bg-dseza-light-main-bg border-dseza-light-border'
-                  }`}>
-                    <SelectItem value="all">Tất cả</SelectItem>
-                    <SelectItem value="quyet-dinh">Quyết định</SelectItem>
-                    <SelectItem value="nghi-dinh">Nghị định</SelectItem>
-                    <SelectItem value="thong-tu">Thông tư</SelectItem>
-                    <SelectItem value="cong-van">Công văn</SelectItem>
-                    <SelectItem value="chi-thi">Chỉ thị</SelectItem>
-                    <SelectItem value="huong-dan">Hướng dẫn</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Search Button */}
-              <div className="space-y-2 lg:col-span-3 flex items-end">
-                <Button 
-                  onClick={handleSearch}
-                  className={`w-full md:w-auto px-8 ${
-                    theme === 'dark' 
-                      ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary-hover' 
-                      : 'bg-dseza-light-primary text-dseza-light-main-bg hover:bg-dseza-light-primary-hover'
-                  }`}
-                  size="default"
-                  disabled={isLoading}
-                >
-                  <Search className="h-4 w-4 mr-2" />
-                  {isLoading ? "Đang tìm kiếm..." : "Tìm kiếm"}
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Results Section */}
-          <div className="space-y-6">
-            {/* Results Count and Statistics */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <div className={`text-sm ${
-                theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
-              }`}>
-                {isLoading ? (
-                  <Skeleton className="h-4 w-48" />
-                ) : (
-                  `Hiển thị ${startResult}-${endResult} của ${totalResults} kết quả`
-                )}
-              </div>
-              
-              {/* Quick Stats and Bulk Actions */}
-              {!isLoading && documents.length > 0 && (
-                <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
-                  <div className="flex flex-wrap gap-2">
-                    <Badge 
-                      variant="secondary" 
-                      className={`text-xs ${
-                        theme === 'dark' 
-                          ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary border-dseza-dark-primary/30' 
-                          : 'bg-dseza-light-primary/20 text-dseza-light-primary border-dseza-light-primary/30'
-                      }`}
-                    >
-                      {(() => {
-                        return documents.filter(doc => {
-                          const termData = doc.relationships?.field_loai_van_ban?.data;
-                          if (!termData || !data?.included) return false;
-                          
-                          const termRef = Array.isArray(termData) ? termData[0] : termData;
-                          if (!termRef) return false;
-                          
-                          const term = data.included.find((item: any) => 
-                            item.type === termRef.type && item.id === termRef.id
-                          );
-                          
-                          return term?.attributes?.name === 'Quyết định';
-                        }).length;
-                      })()} Quyết định
-                    </Badge>
-                    <Badge 
-                      variant="secondary" 
-                      className={`text-xs ${
-                        theme === 'dark' 
-                          ? 'bg-dseza-dark-secondary-accent/20 text-dseza-dark-secondary-accent border-dseza-dark-secondary-accent/30' 
-                          : 'bg-dseza-light-secondary-accent/20 text-dseza-light-secondary-accent border-dseza-light-secondary-accent/30'
-                      }`}
-                    >
-                      {(() => {
-                        return documents.filter(doc => {
-                          const termData = doc.relationships?.field_loai_van_ban?.data;
-                          if (!termData || !data?.included) return false;
-                          
-                          const termRef = Array.isArray(termData) ? termData[0] : termData;
-                          if (!termRef) return false;
-                          
-                          const term = data.included.find((item: any) => 
-                            item.type === termRef.type && item.id === termRef.id
-                          );
-                          
-                          return term?.attributes?.name === 'Thông tư';
-                        }).length;
-                      })()} Thông tư
-                    </Badge>
-                    <Badge 
-                      variant="secondary" 
-                      className={`text-xs ${
-                        theme === 'dark' 
-                          ? 'bg-dseza-dark-accent/20 text-dseza-dark-accent border-dseza-dark-accent/30' 
-                          : 'bg-dseza-light-accent/20 text-dseza-light-accent border-dseza-light-accent/30'
-                      }`}
-                    >
-                      {documents.filter(doc => getDocumentFileUrl(doc, data?.included)).length} Có file đính kèm
-                    </Badge>
-                  </div>
-                  
-                  {/* Bulk Actions */}
-                  <div className="flex gap-2 items-center">
-                    {selectedDocuments.size > 0 && (
-                      <>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${
-                            theme === 'dark' 
-                              ? 'border-dseza-dark-border text-dseza-dark-main-text' 
-                              : 'border-dseza-light-border text-dseza-light-main-text'
-                          }`}
-                        >
-                          {selectedDocuments.size} đã chọn
-                        </Badge>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={handleBulkDownload}
-                          disabled={downloadingIds.size > 0}
-                          className={`text-xs ${
-                            theme === 'dark' 
-                              ? 'bg-dseza-dark-secondary text-dseza-dark-main-text border-dseza-dark-border hover:bg-dseza-dark-hover' 
-                              : 'bg-dseza-light-secondary text-dseza-light-main-text border-dseza-light-border hover:bg-dseza-light-hover'
-                          }`}
-                        >
-                          <Download className="h-3 w-3 mr-1" />
-                          Tải xuống đã chọn
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
+        {/* Search Filters Section */}
+        <div className={`p-6 rounded-lg mb-8 ${
+          theme === 'dark' 
+            ? 'bg-dseza-dark-hover border border-dseza-dark-border' 
+            : 'bg-dseza-light-hover border border-dseza-light-border'
+        }`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Document Number/Symbol */}
+            <div className="space-y-2">
+              <Label 
+                htmlFor="documentNumber"
+                className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
+              >
+                Số/Ký hiệu
+              </Label>
+              <Input
+                id="documentNumber"
+                placeholder="Nhập số/ký hiệu văn bản"
+                value={filters.documentNumber || ""}
+                onChange={(e) => handleInputChange("documentNumber", e.target.value)}
+                className={`${
+                  theme === 'dark' 
+                    ? 'bg-dseza-dark-secondary border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' 
+                    : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'
+                }`}
+              />
             </div>
 
-            {/* Error State */}
-            {isError && (
-              <div className="text-center py-8">
-                <div className={`mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
-                  <p className="text-lg font-semibold">Có lỗi xảy ra khi tìm kiếm</p>
-                  <p className="text-sm">{error?.message || "Vui lòng thử lại sau"}</p>
-                </div>
-                <Button 
-                  onClick={() => window.location.reload()} 
-                  variant="outline"
-                  className={`${
-                    theme === 'dark' 
-                      ? 'bg-dseza-dark-secondary text-dseza-dark-main-text border-dseza-dark-border hover:bg-dseza-dark-hover' 
-                      : 'bg-dseza-light-secondary text-dseza-light-main-text border-dseza-light-border hover:bg-dseza-light-hover'
-                  }`}
-                >
-                  Tải lại trang
-                </Button>
-              </div>
-            )}
+            {/* Summary */}
+            <div className="space-y-2">
+              <Label 
+                htmlFor="summary"
+                className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
+              >
+                Trích yếu
+              </Label>
+              <Input
+                id="summary"
+                placeholder="Nhập từ khóa trích yếu"
+                value={filters.summary || ""}
+                onChange={(e) => handleInputChange("summary", e.target.value)}
+                className={`${
+                  theme === 'dark' 
+                    ? 'bg-dseza-dark-secondary border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' 
+                    : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'
+                }`}
+              />
+            </div>
 
-            {/* Results Table */}
-            {isLoading ? (
-              <TableSkeleton />
-            ) : (
-              <div className={`rounded-md border ${
-                theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'
-              }`}>
-                <Table>
-                  <TableHeader className={`${
-                    theme === 'dark' 
-                      ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
-                      : 'bg-dseza-light-secondary border-dseza-light-border'
-                  }`}>
-                    <TableRow>
-                      <TableHead className="w-[50px]">
-                        <Checkbox 
-                          checked={selectedDocuments.size > 0 && selectedDocuments.size === documents.filter(doc => getDocumentFileUrl(doc, data?.included)).length}
-                          onCheckedChange={handleSelectAll}
-                          aria-label="Chọn tất cả"
-                          className={`${
-                            theme === 'dark' 
-                              ? 'border-dseza-dark-border data-[state=checked]:bg-dseza-dark-primary data-[state=checked]:border-dseza-dark-primary' 
-                              : 'border-dseza-light-border data-[state=checked]:bg-dseza-light-primary data-[state=checked]:border-dseza-light-primary'
-                          }`}
-                        />
-                      </TableHead>
-                      <TableHead className={`w-[200px] ${
-                        theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                      }`}>Số/Ký hiệu</TableHead>
-                      <TableHead className={`${
-                        theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                      }`}>Trích yếu</TableHead>
-                      <TableHead className={`w-[150px] ${
-                        theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                      }`}>Ngày ban hành</TableHead>
-                      <TableHead className={`w-[100px] text-center ${
-                        theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                      }`}>Tải về</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {documents.length > 0 ? (
-                      documents.map((doc: any) => (
-                        <TableRow key={doc.id} className={`${
-                          theme === 'dark' 
-                            ? 'border-dseza-dark-border hover:bg-dseza-dark-hover/50' 
-                            : 'border-dseza-light-border hover:bg-dseza-light-hover/50'
-                        }`}>
-                          <TableCell>
-                            <Checkbox 
-                              checked={selectedDocuments.has(doc.id)}
-                              onCheckedChange={(checked) => handleSelectDocument(doc.id, !!checked)}
-                              disabled={!getDocumentFileUrl(doc, data?.included)}
-                              aria-label={`Chọn văn bản ${doc.attributes?.field_so_ky_hieu || doc.attributes?.field_document_number || doc.id}`}
-                              className={`${
-                                theme === 'dark' 
-                                  ? 'border-dseza-dark-border data-[state=checked]:bg-dseza-dark-primary data-[state=checked]:border-dseza-dark-primary' 
-                                  : 'border-dseza-light-border data-[state=checked]:bg-dseza-light-primary data-[state=checked]:border-dseza-light-primary'
-                              }`}
-                            />
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            <button
-                              onClick={() => handleDocumentClick(doc)}
-                              className={`font-medium transition-colors cursor-pointer text-left ${
-                                theme === 'dark' 
-                                  ? 'text-dseza-dark-primary hover:text-dseza-dark-primary-hover hover:underline' 
-                                  : 'text-dseza-light-primary hover:text-dseza-light-primary-hover hover:underline'
-                              }`}
-                              title="Xem chi tiết văn bản"
-                            >
-                              {doc.attributes?.field_so_ky_hieu || "N/A"}
-                            </button>
-                          </TableCell>
-                          <TableCell>
-                            <div className="max-w-md">
-                              <p className={`truncate ${
-                                theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                              }`} title={getTextContent(doc.attributes?.field_trich_yeu) || getTextContent(doc.attributes?.title) || "N/A"}>
-                                {getTextContent(doc.attributes?.field_trich_yeu) || getTextContent(doc.attributes?.title) || "N/A"}
-                              </p>
-                              <span className={`text-xs px-2 py-1 rounded mt-1 inline-block ${
-                                theme === 'dark' 
-                                  ? 'bg-dseza-dark-secondary text-dseza-dark-secondary-text' 
-                                  : 'bg-dseza-light-secondary text-dseza-light-secondary-text'
-                              }`}>
-                                {/* Get taxonomy term name from relationships */}
-                                {(() => {
-                                  const termData = doc.relationships?.field_loai_van_ban?.data;
-                                  if (!termData || !data?.included) return "Văn bản";
-                                  
-                                  const termRef = Array.isArray(termData) ? termData[0] : termData;
-                                  if (!termRef) return "Văn bản";
-                                  
-                                  const term = data.included.find((item: any) => 
-                                    item.type === termRef.type && item.id === termRef.id
-                                  );
-                                  
-                                  return term?.attributes?.name || "Văn bản";
-                                })()}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className={`${
-                            theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                          }`}>
-                            {formatDate(doc.attributes?.field_ngay_ban_hanh || doc.attributes?.created)}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDownload(doc.id)}
-                              disabled={downloadingIds.has(doc.id)}
-                              className={`${
-                                theme === 'dark' 
-                                  ? 'bg-dseza-dark-secondary text-dseza-dark-main-text border-dseza-dark-border hover:bg-dseza-dark-primary hover:text-dseza-dark-main-text hover:border-dseza-dark-primary' 
-                                  : 'bg-dseza-light-secondary text-dseza-light-main-text border-dseza-light-border hover:bg-dseza-light-primary hover:text-dseza-light-main-bg hover:border-dseza-light-primary'
-                              }`}
-                            >
-                              {downloadingIds.has(doc.id) ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Download className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8">
-                          <div className={`${
-                            theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
-                          }`}>
-                            <p className="text-lg font-semibold mb-2">Không tìm thấy kết quả</p>
-                            <p className="text-sm">Vui lòng thử lại với từ khóa khác</p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-
-            {/* Pagination */}
-            {!isLoading && documents.length > 0 && totalPages > 1 && (
-              <div className="flex justify-center">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        href="#" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (currentPage > 1) handlePageChange(currentPage - 1);
-                        }}
-                        className={`${currentPage === 1 ? "pointer-events-none opacity-50" : ""} ${
-                          theme === 'dark' 
-                            ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
-                            : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
-                        }`}
-                      />
-                    </PaginationItem>
-                    
-                    {/* Dynamic pagination based on totalPages */}
-                    {(() => {
-                      const pages = [];
-                      const maxVisiblePages = 5;
-                      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-                      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-                      
-                      if (endPage - startPage + 1 < maxVisiblePages) {
-                        startPage = Math.max(1, endPage - maxVisiblePages + 1);
-                      }
-                      
-                      if (startPage > 1) {
-                        pages.push(
-                          <PaginationItem key={1}>
-                            <PaginationLink 
-                              href="#" 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handlePageChange(1);
-                              }}
-                              isActive={currentPage === 1}
-                              className={`${
-                                theme === 'dark' 
-                                  ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
-                                  : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
-                              } ${currentPage === 1 ? (theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-text' : 'bg-dseza-light-primary text-dseza-light-main-bg') : ''}`}
-                            >
-                              1
-                            </PaginationLink>
-                          </PaginationItem>
-                        );
-                        
-                        if (startPage > 2) {
-                          pages.push(
-                            <PaginationItem key="ellipsis1">
-                              <PaginationEllipsis className={`${
-                                theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
-                              }`} />
-                            </PaginationItem>
-                          );
-                        }
-                      }
-                      
-                      for (let i = startPage; i <= endPage; i++) {
-                        if (i !== 1 && i !== totalPages) {
-                          pages.push(
-                            <PaginationItem key={i}>
-                              <PaginationLink 
-                                href="#" 
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  handlePageChange(i);
-                                }}
-                                isActive={currentPage === i}
-                                className={`${
-                                  theme === 'dark' 
-                                    ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
-                                    : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
-                                } ${currentPage === i ? (theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-text' : 'bg-dseza-light-primary text-dseza-light-main-bg') : ''}`}
-                              >
-                                {i}
-                              </PaginationLink>
-                            </PaginationItem>
-                          );
-                        }
-                      }
-                      
-                      if (endPage < totalPages) {
-                        if (endPage < totalPages - 1) {
-                          pages.push(
-                            <PaginationItem key="ellipsis2">
-                              <PaginationEllipsis className={`${
-                                theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
-                              }`} />
-                            </PaginationItem>
-                          );
-                        }
-                        
-                        pages.push(
-                          <PaginationItem key={totalPages}>
-                            <PaginationLink 
-                              href="#" 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handlePageChange(totalPages);
-                              }}
-                              isActive={currentPage === totalPages}
-                              className={`${
-                                theme === 'dark' 
-                                  ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
-                                  : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
-                              } ${currentPage === totalPages ? (theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-text' : 'bg-dseza-light-primary text-dseza-light-main-bg') : ''}`}
-                            >
-                              {totalPages}
-                            </PaginationLink>
-                          </PaginationItem>
-                        );
-                      }
-                      
-                      return pages;
-                    })()}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        href="#" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (currentPage < totalPages) handlePageChange(currentPage + 1);
-                        }}
-                        className={`${currentPage === totalPages ? "pointer-events-none opacity-50" : ""} ${
-                          theme === 'dark' 
-                            ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
-                            : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
-                        }`}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
+            {/* Search Button */}
+            <div className="space-y-2 flex items-end">
+              <Button 
+                onClick={handleSearch}
+                className={`w-full ${
+                  theme === 'dark' 
+                    ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary-hover' 
+                    : 'bg-dseza-light-primary text-dseza-light-main-bg hover:bg-dseza-light-primary-hover'
+                }`}
+                disabled={isLoading}
+              >
+                <Search className="h-4 w-4 mr-2" />
+                {isLoading ? "Đang tìm kiếm..." : "Tìm kiếm"}
+              </Button>
+            </div>
           </div>
         </div>
-      </main>
 
-      {/* Footer */}
-      <Footer />
+        {/* Results Section */}
+        <div className="space-y-6">
+          {/* Results Count */}
+          <div className="flex justify-between items-center">
+            <div className={`text-sm ${
+              theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
+            }`}>
+              {isLoading ? (
+                <Skeleton className="h-4 w-48" />
+              ) : (
+                `Hiển thị ${startResult}-${endResult} của ${totalResults} kết quả`
+              )}
+            </div>
+          </div>
 
-      {/* Document Detail Dialog */}
-      <Dialog 
-        open={isDetailDialogOpen} 
-        onOpenChange={(open) => {
-          setIsDetailDialogOpen(open);
-          if (!open) {
-            setSelectedDocument(null);
-          }
-        }}
-      >
-        <DocumentDetailModal document={selectedDocument} />
-      </Dialog>
-    </div>
-  );
+          {/* Error State */}
+          {isError && (
+            <div className="text-center py-8">
+              <div className={`mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+                <p className="text-lg font-semibold">Có lỗi xảy ra khi tìm kiếm</p>
+                <p className="text-sm">{error?.message || "Vui lòng thử lại sau"}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Results Table */}
+          {isLoading ? (
+            <TableSkeleton />
+          ) : (
+            <div className={`rounded-md border ${
+              theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'
+            }`}>
+              <Table>
+                <TableHeader className={`${
+                  theme === 'dark' 
+                    ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
+                    : 'bg-dseza-light-secondary border-dseza-light-border'
+                }`}>
+                  <TableRow>
+                    <TableHead className="w-[50px]">
+                      <Checkbox 
+                        checked={selectedDocuments.size > 0 && selectedDocuments.size === documents.filter(doc => getDocumentFileUrl(doc, data?.included)).length}
+                        onCheckedChange={handleSelectAll}
+                        className={`${
+                          theme === 'dark' 
+                            ? 'border-dseza-dark-border data-[state=checked]:bg-dseza-dark-primary data-[state=checked]:border-dseza-dark-primary' 
+                            : 'border-dseza-light-border data-[state=checked]:bg-dseza-light-primary data-[state=checked]:border-dseza-light-primary'
+                        }`}
+                      />
+                    </TableHead>
+                    <TableHead className={`w-[200px] ${
+                      theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                    }`}>Số/Ký hiệu</TableHead>
+                    <TableHead className={`${
+                      theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                    }`}>Trích yếu</TableHead>
+                    <TableHead className={`w-[150px] ${
+                      theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                    }`}>Ngày ban hành</TableHead>
+                    <TableHead className={`w-[100px] text-center ${
+                      theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                    }`}>Tải về</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {documents.length > 0 ? (
+                    documents.map((doc: any) => (
+                      <TableRow key={doc.id} className={`${
+                        theme === 'dark' 
+                          ? 'border-dseza-dark-border hover:bg-dseza-dark-hover/50' 
+                          : 'border-dseza-light-border hover:bg-dseza-light-hover/50'
+                      }`}>
+                        <TableCell>
+                          <Checkbox 
+                            checked={selectedDocuments.has(doc.id)}
+                            onCheckedChange={(checked) => handleSelectDocument(doc.id, !!checked)}
+                            disabled={!getDocumentFileUrl(doc, data?.included)}
+                            className={`${
+                              theme === 'dark' 
+                                ? 'border-dseza-dark-border data-[state=checked]:bg-dseza-dark-primary data-[state=checked]:border-dseza-dark-primary' 
+                                : 'border-dseza-light-border data-[state=checked]:bg-dseza-light-primary data-[state=checked]:border-dseza-light-primary'
+                            }`}
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <button
+                            onClick={() => handleDocumentClick(doc)}
+                            className={`font-medium transition-colors cursor-pointer text-left ${
+                              theme === 'dark' 
+                                ? 'text-dseza-dark-primary hover:text-dseza-dark-primary-hover hover:underline' 
+                                : 'text-dseza-light-primary hover:text-dseza-light-primary-hover hover:underline'
+                            }`}
+                          >
+                            {doc.attributes?.field_so_ky_hieu || "N/A"}
+                          </button>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-md">
+                            <p className={`truncate ${
+                              theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                            }`}>
+                              {getTextContent(doc.attributes?.field_trich_yeu) || getTextContent(doc.attributes?.title) || "N/A"}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell className={`${
+                          theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                        }`}>
+                          {formatDate(doc.attributes?.field_ngay_ban_hanh || doc.attributes?.created)}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownload(doc.id)}
+                            disabled={downloadingIds.has(doc.id)}
+                            className={`${
+                              theme === 'dark' 
+                                ? 'bg-dseza-dark-secondary text-dseza-dark-main-text border-dseza-dark-border hover:bg-dseza-dark-primary hover:text-dseza-dark-main-text hover:border-dseza-dark-primary' 
+                                : 'bg-dseza-light-secondary text-dseza-light-main-text border-dseza-light-border hover:bg-dseza-light-primary hover:text-dseza-light-main-bg hover:border-dseza-light-primary'
+                            }`}
+                          >
+                            {downloadingIds.has(doc.id) ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Download className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        <div className={`${
+                          theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
+                        }`}>
+                          <p className="text-lg font-semibold mb-2">Không tìm thấy kết quả</p>
+                          <p className="text-sm">Vui lòng thử lại với từ khóa khác</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {!isLoading && documents.length > 0 && totalPages > 1 && (
+            <div className="flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      href="#" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage > 1) handlePageChange(currentPage - 1);
+                      }}
+                      className={`${currentPage === 1 ? "pointer-events-none opacity-50" : ""} ${
+                        theme === 'dark' 
+                          ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
+                          : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
+                      }`}
+                    />
+                  </PaginationItem>
+                  
+                  {/* Show page numbers */}
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <PaginationItem key={pageNum}>
+                        <PaginationLink 
+                          href="#" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(pageNum);
+                          }}
+                          isActive={currentPage === pageNum}
+                          className={`${
+                            theme === 'dark' 
+                              ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
+                              : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
+                          } ${currentPage === pageNum ? (theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-text' : 'bg-dseza-light-primary text-dseza-light-main-bg') : ''}`}
+                        >
+                          {pageNum}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      href="#" 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage < totalPages) handlePageChange(currentPage + 1);
+                      }}
+                      className={`${currentPage === totalPages ? "pointer-events-none opacity-50" : ""} ${
+                        theme === 'dark' 
+                          ? 'text-dseza-dark-main-text hover:bg-dseza-dark-hover' 
+                          : 'text-dseza-light-main-text hover:bg-dseza-light-hover'
+                      }`}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </div>
+
+        {/* Document Detail Dialog */}
+        <Dialog 
+          open={isDetailDialogOpen} 
+          onOpenChange={(open) => {
+            setIsDetailDialogOpen(open);
+            if (!open) {
+              setSelectedDocument(null);
+            }
+          }}
+        >
+          <DocumentDetailModal document={selectedDocument} />
+        </Dialog>
+      </div>
+    );
 };
 
 export default DocumentSearchPage; 

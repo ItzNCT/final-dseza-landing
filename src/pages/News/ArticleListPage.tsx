@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useArticles } from "../../hooks/useArticles";
-import { useNewsCategories } from "../../hooks/useNewsCategories";
+import { useAllNewsCategories } from "../../hooks/useNewsCategories";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
 import { ChevronRight, Calendar, ArrowRight, Star } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
@@ -24,6 +24,20 @@ const formatTitle = (slug: string, categoriesData?: any[]) => {
     'thong-bao': 'Thông báo',
     'hoat-dong': 'Hoạt động',
     'tin-tuc': 'Tin tức',
+    // Add missing investment-related categories
+    'quy-trinh-linh-vuc-dau-tu': 'Quy trình lĩnh vực đầu tư',
+    'linh-vuc-khuyen-khich-dau-tu': 'Lĩnh vực thu hút đầu tư',
+    'linh-vuc-thu-hut-dau-tu': 'Lĩnh vực thu hút đầu tư', // Alternative slug
+    'danh-cho-nha-dau-tu': 'Dành cho nhà đầu tư', // Parent category
+    
+    // Add investment environment subcategories
+    'moi-truong-dau-tu': 'Môi trường đầu tư', // Parent category
+    'ha-tang-giao-thong': 'Hạ tầng giao thông',
+    'khoa-hoc-cong-nghe-moi-truong': 'Khoa học công nghệ - Môi trường',
+    'logistics': 'Logistics',
+    'ha-tang-xa-hoi': 'Hạ tầng xã hội',
+    'nguon-nhan-luc': 'Nguồn nhân lực',
+    'cai-cach-hanh-chinh': 'Cải cách hành chính',
   };
   
   // Trước tiên thử mapping cố định
@@ -63,7 +77,7 @@ const formatDate = (dateString: string) => {
 const ArticleListPage = () => {
   const { category, subcategory } = useParams<{ category: string; subcategory?: string; }>();
   const { data: articles, isLoading, isError } = useArticles();
-  const { data: categoriesData } = useNewsCategories();
+  const { data: categoriesData } = useAllNewsCategories(); // Use ALL categories instead of just event categories
   const { theme } = useTheme();
 
   // Tạo tiêu đề động với real categories

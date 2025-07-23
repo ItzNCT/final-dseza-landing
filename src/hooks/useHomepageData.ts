@@ -178,9 +178,8 @@ async function fetchMainMenuData(): Promise<MainMenuData> {
 async function fetchNewsList(baseUrl: string): Promise<NewsItem[]> {
   const url = `${baseUrl}/jsonapi/node/bai-viet`
     + '?filter[status][value]=1'               // Published
-    // Note: We'll filter out featured events on frontend side for simplicity
     + '&sort=-created'                         // Newest first
-    + '&page[limit]=8'                         // 8 articles (filter to 4 regular news)
+    + '&page[limit]=8'                         // 8 articles for homepage
     + '&include=field_anh_dai_dien.field_media_image,field_chuyen_muc'; // Include featured images for homepage
 
   const response = await fetch(url, {
@@ -197,7 +196,6 @@ async function fetchNewsList(baseUrl: string): Promise<NewsItem[]> {
   const data = await response.json();
 
   return data.data
-    ?.filter((item: any) => !item.attributes.field_su_kien_tieu_bieu) // Exclude featured events from news
     ?.map((item: any) => {
       // Get category name from included data
       let categoryName = 'Tin tức';
@@ -216,11 +214,11 @@ async function fetchNewsList(baseUrl: string): Promise<NewsItem[]> {
         title: item.attributes.title,
         summary: item.attributes.body?.summary || item.attributes.body?.value?.substring(0, 200) + '...' || '',
         published_date: item.attributes.created,
-        featured_image: extractImageUrl(item.relationships.field_anh_dai_dien, data.included), // Restore featured images for homepage
+        featured_image: extractImageUrl(item.relationships.field_anh_dai_dien, data.included),
         category: categoryName,
       };
     })
-    ?.slice(0, 4) || []; // Take only first 4 after filtering
+    ?.slice(0, 4) || []; // Take only first 4 for homepage
 }
 
 /**

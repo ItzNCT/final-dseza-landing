@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import ArticleDetailPage from "@/pages/Article/ArticleDetailPage";
 import ArticleListPage from "@/pages/News/ArticleListPage";
 import DocumentSearchPage from "@/pages/Document/DocumentSearchPage";
+import DocumentTabLayout from "@/pages/Document/Layout/DocumentTabLayout";
 import EnterpriseListPage from "@/pages/Enterprise/EnterpriseListPage";
 import WorkSchedulePage from "@/pages/Schedule/WorkSchedulePage";
 import QnAListPage from "@/pages/QnA/QnAListPage";
@@ -35,6 +36,8 @@ import FunctionalZonesListPage from "./pages/Introduction/FunctionalZonesListPag
 import InvestmentGuidePage from "./pages/Brochure/InvestmentGuidePage";
 import InvestmentPolicyPage from "./pages/Brochure/InvestmentPolicyPage";
 import BrochurePage from "./pages/Brochure/BrochurePage";
+import InvestmentEnvironmentPage from "./pages/News/InvestmentEnvironmentPage";
+import InvestorGuidelinesPage from "./pages/News/InvestorGuidelinesPage";
 import MobileLayout from "./components/mobile/MobileLayout";
 import AccessibilityPanel from "./components/AccessibilityPanel";
 
@@ -57,9 +60,17 @@ const App: React.FC = () => (
                       <Route path="/" element={<Index />} />
                       <Route path="/bai-viet/:uuid" element={<ArticleDetailPage />} />
                       <Route path="/su-kien/:uuid" element={<ArticleDetailPage />} />
-                      <Route path="/van-ban" element={<DocumentSearchPage />} />
+                      {/* Document pages with nested routes */}
+                      <Route path="/van-ban" element={<DocumentTabLayout />}>
+                        <Route index element={<Navigate to="/van-ban/van-ban-phap-luat/phap-quy-trung-uong" replace />} />
+                        <Route path=":category/:subcategory" element={<DocumentSearchPage />} />
+                      </Route>
                       <Route path="/doanh-nghiep/thong-tin-doanh-nghiep/thong-ke-doanh-nghiep" element={<EnterpriseListPage />} />
                       <Route path="/tin-tuc/lich-cong-tac" element={<WorkSchedulePage />} />
+                      {/* Specific route for investment environment page */}
+                      <Route path="/tin-tuc/moi-truong-dau-tu" element={<InvestmentEnvironmentPage />} />
+                      {/* Specific route for investor guidelines page */}
+                      <Route path="/tin-tuc/danh-cho-nha-dau-tu" element={<InvestorGuidelinesPage />} />
                       {/* Dynamic routes for news categories - IMPORTANT: longer routes must come first */}
                       <Route path="/tin-tuc/:category/:subcategory" element={<ArticleListPage />} />
                       <Route path="/tin-tuc/:category" element={<ArticleListPage />} />

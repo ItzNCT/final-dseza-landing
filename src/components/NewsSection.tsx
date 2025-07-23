@@ -111,6 +111,8 @@ const NewsCard: React.FC<NewsCardProps> = ({ date, title, titleEn, excerpt, exce
 
 /**
  * News section with category filters
+ * Note: Only displays articles that belong to event child categories
+ * (categories that are children of "Sự kiện" parent category)
  */
 const NewsSection: React.FC = () => {
   const { theme } = useTheme();
@@ -141,6 +143,7 @@ const NewsSection: React.FC = () => {
   ];
 
   // Filter news based on selected category
+  // Note: allNewsData already contains only articles from event child categories
   const filteredNews = React.useMemo(() => {
     if (!allNewsData) return [];
     if (activeCategory === "all") return allNewsData;
@@ -149,15 +152,11 @@ const NewsSection: React.FC = () => {
     const selectedCategory = categories.find(cat => cat.id === activeCategory);
     if (!selectedCategory) return [];
     
-    // Filter by checking if the selected category name exists in any of the article's categories
+    // Filter by checking if the selected category ID exists in the article's category IDs
+    // This is more reliable than name matching
     return allNewsData.filter(article => {
-      // Check both primary category and all categories
-      const primaryMatch = article.category?.trim() === selectedCategory.name?.trim();
-      const allCategoriesMatch = article.all_categories?.some(cat => 
-        cat?.trim() === selectedCategory.name?.trim()
-      );
-      
-      return primaryMatch || allCategoriesMatch;
+      // Check if the selected category ID is in the article's category IDs
+      return article.all_category_ids && article.all_category_ids.includes(selectedCategory.id);
     });
   }, [allNewsData, activeCategory, categories]);
 
