@@ -1,17 +1,28 @@
 // src/components/hero/TopBar.tsx
 import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { useTranslation, formatDate } from "@/utils/translations"; // Đảm bảo formatDate được import
+import { useTranslation, formatDate } from "@/utils/translations";
+import { useLanguageRoutes } from "@/utils/routes";
 import { Sun, Moon, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TopBar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
-  const { language, toggleLanguage } = useLanguage();
+  const { language } = useLanguage();
+  const { switchLanguageUrl } = useLanguageRoutes();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
-  const [currentDateTime, setCurrentDateTime] = useState(new Date()); // Đổi tên state để rõ ràng hơn
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Handle language switching with URL navigation
+  const handleLanguageSwitch = (targetLang: "vi" | "en") => {
+    const newUrl = switchLanguageUrl(targetLang, location.pathname);
+    navigate(newUrl);
+  };
 
   useEffect(() => {
     // Cập nhật mỗi giây để hiển thị giờ:phút:giây chính xác
@@ -76,7 +87,7 @@ const TopBar: React.FC = () => {
           {/* Ngôn ngữ */}
           <div className="flex items-center mx-4">
             <button
-              onClick={toggleLanguage}
+              onClick={() => handleLanguageSwitch("vi")}
               className={cn(
                 "text-sm font-medium transition-colors duration-300",
                 language === "vi"
@@ -93,7 +104,7 @@ const TopBar: React.FC = () => {
                 /
             </span>
             <button
-              onClick={toggleLanguage}
+              onClick={() => handleLanguageSwitch("en")}
               className={cn(
                 "text-sm font-medium transition-colors duration-300",
                 language === "en"

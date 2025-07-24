@@ -12,12 +12,12 @@ const tabsData = [
     titleKey: "heroBackground.tab1",
     images: {
       light: {
-        main: "media/HeroBackground/Slide1light.png",
-        thumbnail: "media/HeroBackground/Slide1light.png"
+        main: "/media/HeroBackground/Slide1light.png",
+        thumbnail: "/media/HeroBackground/Slide1light.png"
       },
       dark: {
-        main: "media/HeroBackground/Slide1dark.png",
-        thumbnail: "media/HeroBackground/Slide1dark.png"
+        main: "/media/HeroBackground/Slide1dark.png",
+        thumbnail: "/media/HeroBackground/Slide1dark.png"
       }
     }
   },
@@ -26,12 +26,12 @@ const tabsData = [
     titleKey: "heroBackground.tab2",
     images: {
       light: {
-        main: "media/HeroBackground/Slide2light.png",
-        thumbnail: "media/HeroBackground/Slide2light.png"
+        main: "/media/HeroBackground/Slide2light.png",
+        thumbnail: "/media/HeroBackground/Slide2light.png"
       },
       dark: {
-        main: "media/HeroBackground/Slide2dark.png",
-        thumbnail: "media/HeroBackground/Slide2dark.png"
+        main: "/media/HeroBackground/Slide2dark.png",
+        thumbnail: "/media/HeroBackground/Slide2dark.png"
       }
     }
   },
@@ -40,12 +40,12 @@ const tabsData = [
     titleKey: "heroBackground.tab3",
     images: {
       light: {
-        main: "media/HeroBackground/Slide3light.png",
-        thumbnail: "media/HeroBackground/Slide3light.png"
+        main: "/media/HeroBackground/Slide3light.png",
+        thumbnail: "/media/HeroBackground/Slide3light.png"
       },
       dark: {
-        main: "media/HeroBackground/Slide3dark.png",
-        thumbnail: "media/HeroBackground/Slide3dark.png"
+        main: "/media/HeroBackground/Slide3dark.png",
+        thumbnail: "/media/HeroBackground/Slide3dark.png"
       }
     }
   },
@@ -54,12 +54,12 @@ const tabsData = [
     titleKey: "heroBackground.tab4",
     images: {
       light: {
-        main: "media/HeroBackground/Slide4light.png",
-        thumbnail: "media/HeroBackground/Slide4light.png"
+        main: "/media/HeroBackground/Slide4light.png",
+        thumbnail: "/media/HeroBackground/Slide4light.png"
       },
       dark: {
-        main: "media/HeroBackground/Slide4dark.png",
-        thumbnail: "media/HeroBackground/Slide4dark.png"
+        main: "/media/HeroBackground/Slide4dark.png",
+        thumbnail: "/media/HeroBackground/Slide4dark.png"
       }
     }
   }
@@ -72,19 +72,19 @@ const tabsData = [
  */
 const HeroBackground: React.FC = () => {
   const [activeTab, setActiveTab] = useState(tabsData[0].id);
-  const [activeImage, setActiveImage] = useState("");
-  const [prevImage, setPrevImage] = useState("");
-  const [transitioning, setTransitioning] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const { theme } = useTheme();
   const { t } = useTranslation();
   
-  // Set initial image based on theme when component mounts
-  useEffect(() => {
-    const currentTheme = theme === "dark" ? "dark" : "light";
-    const initialTab = tabsData[0];
-    setActiveImage(initialTab.images[currentTheme].main);
-  }, []);
+  // Helper function to get current theme mode
+  const getCurrentTheme = () => theme === "dark" ? "dark" : "light";
+  
+  // Initialize with proper image from start
+  const initialImage = tabsData[0].images[getCurrentTheme()].main;
+  
+  const [activeImage, setActiveImage] = useState(initialImage);
+  const [prevImage, setPrevImage] = useState("");
+  const [transitioning, setTransitioning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   // Auto-slide functionality - changes tab every 5 seconds
   useEffect(() => {
@@ -103,8 +103,7 @@ const HeroBackground: React.FC = () => {
 
   // Handle image transition when tab or theme changes
   useEffect(() => {
-    const currentTheme = theme === "dark" ? "dark" : "light";
-    const newImage = tabsData.find(tab => tab.id === activeTab)?.images[currentTheme].main || "";
+    const newImage = tabsData.find(tab => tab.id === activeTab)?.images[getCurrentTheme()].main || "";
     
     if (newImage !== activeImage && newImage) {
       setPrevImage(activeImage);
@@ -117,7 +116,7 @@ const HeroBackground: React.FC = () => {
       
       return () => clearTimeout(timer);
     }
-  }, [activeTab, theme]);
+  }, [activeTab, theme, activeImage]);
 
   // Handle manual tab click
   const handleTabClick = (tabId: string) => {
@@ -128,7 +127,6 @@ const HeroBackground: React.FC = () => {
   };
 
   const activeTitle = t(tabsData.find(tab => tab.id === activeTab)?.titleKey || "");
-  const currentTheme = theme === "dark" ? "dark" : "light";
 
   return (
     <div 
@@ -174,7 +172,7 @@ const HeroBackground: React.FC = () => {
           >
             <AspectRatio ratio={16/9}>
               <img 
-                src={tab.images[currentTheme].thumbnail} 
+                src={tab.images[getCurrentTheme()].thumbnail} 
                 alt={t(tab.titleKey)}
                 className="object-cover w-full h-full"
               />

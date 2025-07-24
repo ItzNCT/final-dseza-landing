@@ -1,0 +1,284 @@
+{
+  "sitemap": "Site Map",
+  "nav": {
+    "intro": "Introduction",
+    "news": "News",
+    "business": "Business",
+    "services": "Services",
+    "investments": "Investments",
+    "contact": "Contact",
+    "investmentGuide": "Investment Guide",
+    "documents": "Documents",
+    "adminReform": "Administrative Reform",
+    "utilities": "Utilities"
+  },
+  "homepage": {
+    "featuredEvents": "FEATURED EVENTS",
+    "latestNews": "LATEST NEWS",
+    "viewAll": "View all",
+    "functionalZones": "FUNCTIONAL ZONES",
+    "functionalZonesMobile": "FUNCTIONAL ZONES",
+    "investmentInfo": "INVESTMENT INFORMATION",
+    "location": "LOCATION",
+    "resources": "RESOURCES",
+    "businessesAndPartners": "BUSINESSES & PARTNERS"
+  },
+  "investment": {
+    "forInvestors": "For Investors",
+    "investmentEnvironment": "Investment Environment",
+    "investmentProcedures": "Investment Procedures",
+    "incentives": "Investment Incentives",
+    "services": "Utilities & Services",
+    "workforce": "Human Resources",
+    "infrastructure": "Infrastructure",
+    "environment": "Environment"
+  },
+  "footer": {
+    "management": "Da Nang Specific Economic Zones Authority",
+    "address": "Address: Lot A17, Center Road, High-Tech Park, Hoa Lien Commune, Hoa Vang District, Da Nang",
+    "tel": "Tel",
+    "fax": "Fax",
+    "email": "Email",
+    "copyright": "Copyright © 2025 DSEZA. All rights reserved.",
+    "legalInfo": "Legal Information",
+    "networkCredibility": "Network Credibility",
+    "license": "License: No. 05/GP-STTTT issued by Danang Department of Information and Communications on 01/02/2020.",
+    "editor": "Editor in Chief: Tran Van Ty, Deputy Head of the Management Board of Da Nang Specific Economic Zones Authority.",
+    "citationConnect": "Citation & Connect",
+    "citationNote": "Please cite \"www.dseza.danang.gov.vn\" when referencing our information.",
+    "visitorCount": "Visitor count"
+  },
+  "date": {
+    "dayNames": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+  },
+  "location": {
+    "title": "LOCATION MAP",
+    "vrTour": "VR 360 Tour - Danang Hi-Tech Park",
+    "digitalMap": "Digital Map of High-Tech Park + Industrial Zones + Online Reports",
+    "digitalMapTitle": "Digital Map and Investment Reports",
+    "digitalMapDescription": "Interactive map with detailed data about industrial zones, business locations, and investment information.",
+    "accessDigitalMap": "Access Digital Map"
+  },
+  "news": {
+    "title": "NEWS",
+    "noNews": "No news articles have been published yet.",
+    "categories": {
+      "investment": "Investment & International Cooperation",
+      "training": "Training & Business Incubation",
+      "digital": "Digital Transformation",
+      "management": "Management Activities",
+      "other": "Other News"
+    }
+  },
+  "functionalZones": {
+    "title": "HIGH-TECH PARK, SEMICONDUCTOR & AI CENTER, INDUSTRIAL ZONES, IT ZONES, FREE TRADE ZONE",
+    "enterprises": "Enterprises",
+    "occupancyRate": "Occupancy Rate",
+    "area": "Area",
+    "noDataTitle": "No data available",
+    "noZones": "No information about functional zones available."
+  },
+  "quickAccess": {
+    "onlinePublicService": "Online Public Services",
+    "administrativeProcedures": "Administrative Procedures",
+    "publicResults": "Public Administrative Results",
+    "feedbackChannel": "Feedback & Suggestion Channel",
+    "appointmentScheduling": "Online Appointment Scheduling"
+  },
+  "featuredEvents": {
+    "title": "FEATURED EVENTS",
+    "eventPrefix": "Featured event"
+  },
+  "heroBackground": {
+    "tab1": "Danang Hi-Tech Park",
+    "tab2": "Danang Hi-Tech Park",
+    "tab3": "Danang Hi-Tech Park",
+    "tab4": "Danang Hi-Tech Park"
+  },
+  "menuSpecial": {
+    "achievementTitle": "Outstanding Achievements",
+    "achievementDesc": "Danang Hi-Tech Park and Industrial Zones have become a key driving force for the city's development.",
+    "achievementBtn": "Learn more",
+    "featuredServiceTitle": "Featured Public Services",
+    "featuredServiceDesc": "Experience online public services at the Danang Hi-Tech Park and Industrial Zones Authority",
+    "featuredServiceBtn": "Access now",
+    "quickDocSearchTitle": "Quick Document Search",
+    "quickDocSearchPlaceholder": "Enter search keywords...",
+    "quickDocSearchBtn": "Search",
+    "supportServiceTitle": "Support Services",
+    "supportServiceDesc": "We provide a variety of support services for businesses in the industrial zones.",
+    "supportServiceBtn": "Contact support",
+    "newsCardTitle": "Latest news on Management Authority activities",
+    "newsCardDesc": "Get the latest updates on important activities and events.",
+    "newsCardBtn": "See more →",
+    "letterOfGreeting": "Welcome Letter",
+    "overviewDanang": "Overview of Da Nang",
+    "overviewAuthority": "Overview of the Authority",
+    "functionsAndDuties": "Functions, Duties, and Powers",
+    "departments": "Departments",
+    "affiliatedUnits": "Affiliated Units",
+    "functionalAreas": "Functional Zones",
+    "seeMore": "See More"
+  },
+  "resourcesSection": {
+    "sectionTitle": "RESOURCES",
+    "tabImages": "Images",
+    "tabVideos": "Videos",
+    "tabDocuments": "Documents",
+    "dateLabel": "Date posted",
+    "comingSoonTitle": "Coming soon",
+    "comingSoonVideos": "Coming soon: Videos related to DSEZA's activities and zones.",
+    "comingSoonDocuments": "Coming soon: Downloadable documents, reports, and legal frameworks.",
+    "viewAll": "View all resources",
+    "downloadLabel": "Download",
+    "noDocuments": "No documents available",
+    "noDocumentsDesc": "No documents have been uploaded yet."
+  },
+  "logoSearchBar": {
+    "searchPlaceholder": "Search...",
+    "login": "Login"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "description": "Enter your username or email and password to continue",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "usernameOrEmail": "Username or Email",
+      "usernameOrEmailPlaceholder": "admin or name@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter password",
+      "forgotPassword": "Forgot password?",
+      "submitButton": "Login",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Register now",
+      "validation": {
+        "usernameOrEmailRequired": "Please enter username or email",
+        "passwordRequired": "Please enter password",
+        "invalidFormat": "Invalid username or email format"
+      }
+    },
+    "register": {
+      "title": "Create Account",
+      "description": "Fill in the details below to register a new account",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "John Doe",
+      "email": "Email Address",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "At least 6 characters",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter password",
+      "submitButton": "Register",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Login"
+    }
+  },
+  "languageSwitcher": {
+    "vietnamese": "Vietnamese",
+    "english": "English"
+  },
+  "themeToggle": {
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode"
+  },
+  "common": {
+    "loading": "Loading functional zones data...",
+    "errorTitle": "An error occurred",
+    "errorLoading": "Unable to load functional zones data from server.",
+    "tryAgain": "Try again",
+    "debugInfo": "Debug information"
+  },
+  "contact": {
+    "title": "CONTACT US",
+    "name": "Full Name",
+    "namePlaceholder": "Enter your full name",
+    "email": "Email",
+    "emailPlaceholder": "example@email.com",
+    "subject": "Subject",
+    "subjectPlaceholder": "Enter email subject",
+    "content": "Content",
+    "contentPlaceholder": "Enter detailed content...",
+    "sending": "Sending...",
+    "send": "Send",
+    "successTitle": "Email sent successfully!",
+    "successDesc": "We will respond to you within 24 hours.",
+    "errorTitle": "An error occurred!",
+    "errorDesc": "Please try again later."
+  },
+  "qna": {
+    "createTitle": "ASK US A QUESTION",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "address": "Address",
+    "addressPlaceholder": "Enter your address",
+    "phone": "Phone Number",
+    "phonePlaceholder": "Enter your phone number",
+    "email": "Email",
+    "emailPlaceholder": "example@email.com",
+    "category": "Category",
+    "categoryPlaceholder": "Select category",
+    "title": "Title",
+    "titlePlaceholder": "Enter question title",
+    "content": "Question Content",
+    "contentPlaceholder": "Enter detailed question content...",
+    "submitButton": "Submit Question",
+    "submitting": "Submitting...",
+    "successTitle": "Question submitted successfully!",
+    "successDesc": "Your question has been sent and is awaiting approval.",
+    "errorTitle": "Failed to submit question!",
+    "validationError": "Please check your information!",
+    "validationErrorDesc": "Some required fields have not been filled completely.",
+    "categories": {
+      "adminProcedures": "Administrative Procedures",
+      "incentivePolicies": "Incentive Policies",
+      "planning": "Planning & Construction",
+      "laborPolicies": "Labor Policies",
+      "businessLicense": "Business License",
+      "startupSupport": "Startup Support",
+      "technicalInfra": "Technical Infrastructure",
+      "other": "Other"
+    },
+    "noteTitle": "Notes when submitting questions:",
+    "notes": [
+      "Please fill in complete name information so we can assist you best",
+      "Clearly state your question content to receive accurate answers",
+      "We will respond within 24-48 working hours",
+      "Frequently asked questions will be published to support the community"
+    ],
+    "required": "required"
+  },
+  "document": {
+    "categories": {
+      "centralLegal": "Central Legal Documents",
+      "localLegal": "Local Legal Documents",
+      "administrative": "Administrative Guidance Documents",
+      "reform": "Administrative Reform Documents"
+    },
+    "search": "Document Search",
+    "typeDocument": "Document Type"
+  },
+  "comments": {
+    "noComments": "No comments yet. Be the first to comment!",
+    "pending": "Your comment will be displayed after approval.",
+    "successTitle": "Thank you for your comment!",
+    "successDesc": "Due to system configuration, comments are currently being processed and will be displayed after administrator approval."
+  },
+  "welcome": {
+    "greeting": "Welcome to DSEZA,",
+    "introduction": "First of all, the Da Nang Specific Economic Zones Authority (DSEZA) would like to send respectful greetings and wishes for health, peace and prosperity to all organizations, enterprises, investors, and individuals."
+  },
+  "errors": {
+    "loadNavFailed": "Failed to load navigation menu",
+    "loadDataFailed": "An error occurred while loading investment information. Please try again later.",
+    "loadNewsFailed": "An error occurred while loading news. Please try again later.",
+    "noArticles": "No articles in this category."
+  },
+  "validation": {
+    "nameRequired": "Full name is required",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email",
+    "titleRequired": "Title is required",
+    "contentRequired": "Question content is required"
+  }
+} 

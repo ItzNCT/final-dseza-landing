@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { extractImageUrl } from "@/utils/drupal";
+import { extractImageUrl, useDrupalApi } from "@/utils/drupal";
 import { extractFirstImageFromRichText } from "@/utils/richTextProcessor";
 import { useAllNewsCategories } from "./useNewsCategories";
 
@@ -16,15 +16,11 @@ export interface Article {
   is_featured?: boolean;
 }
 
-// URL của Drupal API
-const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  import.meta.env.VITE_API || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
-
 // Custom hook để lấy danh sách bài viết theo category
 export const useArticles = () => {
   const { category, subcategory } = useParams<{ category: string; subcategory?: string; }>();
   const { data: categoriesData } = useAllNewsCategories(); // Use ALL categories instead of just event categories
+  const { apiGet } = useDrupalApi(); // Use language-aware API client
 
   const fetchArticles = async (): Promise<Article[]> => {
     // Xác định target category cho filter
@@ -34,12 +30,15 @@ export const useArticles = () => {
       return []; // Nếu không có category, trả về mảng rỗng
     }
 
-    // Xây dựng URL với JSON:API
-    let url = `${DRUPAL_BASE_URL}/jsonapi/node/bai-viet`
-      + '?filter[status][value]=1'  // Chỉ lấy bài viết đã publish
-      + '&sort=-created'             // Sắp xếp theo ngày tạo mới nhất
-      + '&page[limit]=20'            // Giới hạn 20 bài viết
-      + '&include=field_anh_dai_dien.field_media_image,field_chuyen_muc'; // Include images và categories
+    // Xây dựng API options với JSON:API
+    const apiOptions = {
+      filter: {
+        status: { value: '1' } // Chỉ lấy bài viết đã publish
+      },
+      sort: '-created', // Sắp xếp theo ngày tạo mới nhất
+      page: { limit: 20 }, // Giới hạn 20 bài viết
+      include: 'field_anh_dai_dien.field_media_image,field_chuyen_muc' // Include images và categories
+    };
 
     // Nếu targetCategory là 'su-kien' hoặc 'tin-tuc' thì lấy tất cả tin tức (không filter)
     const showAllNews = targetCategory === 'su-kien' || targetCategory === 'tin-tuc';
@@ -86,32 +85,19 @@ export const useArticles = () => {
       }
     }
 
-    if (!showAllNews) {
+    if (!showAllNews && categoryNameToFilter) {
       // Debug: Log category filtering info
-      if (categoryNameToFilter) {
-        console.log(`🔍 Filtering articles for category: "${categoryNameToFilter}" (from slug: "${targetCategory}")`);
-        // Try different filter approaches for Drupal JSON:API
-        url += `&filter[field_chuyen_muc.name]=${encodeURIComponent(categoryNameToFilter)}`;
-      } else {
-        console.log(`⚠️ No category name found for filtering. Target category: "${targetCategory}"`);
-      }
+      console.log(`🔍 Filtering articles for category: "${categoryNameToFilter}" (from slug: "${targetCategory}")`);
+      // Add category filter to API options
+      apiOptions.filter['field_chuyen_muc.name'] = categoryNameToFilter;
+    } else if (!showAllNews) {
+      console.log(`⚠️ No category name found for filtering. Target category: "${targetCategory}"`);
     }
 
     try {
-      console.log(`📡 API URL: ${url}`);
+      console.log(`📡 API call with options:`, apiOptions);
       
-      const response = await fetch(url, {
-        headers: {
-          'Accept': 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch articles: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const data = await apiGet('/jsonapi/node/bai-viet', apiOptions);
       console.log(`📊 API returned ${data.data?.length || 0} articles`);
       
       // Map dữ liệu trả về thành cấu trúc Article

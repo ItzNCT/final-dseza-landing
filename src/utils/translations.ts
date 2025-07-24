@@ -1,4 +1,5 @@
 import { useLanguage } from "@/context/LanguageContext";
+import { useTranslation as useI18nTranslation } from "react-i18next";
 
 // Translation type definition
 type TranslationObject = {
@@ -587,10 +588,12 @@ const getNestedValue = (obj: any, path: string): string | undefined => {
 
 /**
  * Hook to get translations based on the current language
+ * Uses react-i18next under the hood while maintaining compatibility with existing API
  * @returns An object with t function to get translations
  */
 export const useTranslation = () => {
   const { language } = useLanguage();
+  const { t: i18nT } = useI18nTranslation();
 
   /**
    * Get a translation by key
@@ -598,10 +601,20 @@ export const useTranslation = () => {
    * @returns The translated string or the key itself if not found
    */
   const t = (key: string): string => {
+    try {
+      // Use react-i18next first
+      const translation = i18nT(key);
+      if (translation !== key && translation) {
+        return translation;
+      }
+    } catch (error) {
+      console.warn('react-i18next error:', error);
+    }
+
+    // Fallback to the existing custom translation logic
     const translationSet = translations[language];
     const translation = getNestedValue(translationSet, key);
-    // Fallback to the key itself if translation is not found
-    // or if the key points to an object (meaning it's a parent key, not a string leaf)
+    
     if (translation === undefined || typeof translation !== 'string') {
         // console.warn(`Translation key not found or not a string: ${key}`); // Optional: for debugging
         return key;

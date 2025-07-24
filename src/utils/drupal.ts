@@ -1,7 +1,27 @@
 // src/utils/drupal.ts
+import { api } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
 
 const DRUPAL_BASE = import.meta.env.VITE_DRUPAL_BASE_URL || 
   (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+
+// Type definitions for API options
+interface ApiGetOptions {
+  sort?: string;
+  include?: string;
+  filter?: Record<string, any>;
+  page?: {
+    limit?: number;
+    offset?: number;
+  };
+}
+
+interface ApiResponse<T = any> {
+  data: T;
+  included?: any[];
+  meta?: any;
+  links?: any;
+}
 
 /**
  * Resolve Drupal relative paths to absolute URLs
@@ -177,4 +197,105 @@ export function extractImageUrl(imageRelationship: any, included: any[]): string
  */
 export function getImageWithFallback(imageUrl?: string, fallbackUrl = '/placeholder.svg'): string {
   return imageUrl || fallbackUrl;
+}
+
+/**
+ * Get current language from localStorage (fallback approach)
+ * This is used when LanguageContext is not available in the component tree
+ */
+function getCurrentLanguage(): 'vi' | 'en' {
+  if (typeof window === 'undefined') return 'vi';
+  
+  const storedLang = localStorage.getItem('i18nextLng');
+  if (storedLang === 'vi' || storedLang === 'en') {
+    return storedLang;
+  }
+  
+  // Fallback to Vietnamese
+  return 'vi';
+}
+
+/**
+ * Add language prefix to JSON:API endpoints
+ * @param endpoint - The original endpoint (e.g., '/jsonapi/node/article')
+ * @param language - Language code ('vi' or 'en')
+ * @returns Language-prefixed endpoint (e.g., '/vi/jsonapi/node/article')
+ */
+function addLanguagePrefix(endpoint: string, language: 'vi' | 'en'): string {
+  // Ensure endpoint starts with /
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+  
+  // Add language prefix for JSON:API endpoints
+  if (cleanEndpoint.startsWith('/jsonapi/')) {
+    return `/${language}${cleanEndpoint}`;
+  }
+  
+  // For non-JSON:API endpoints, return as-is
+  return cleanEndpoint;
+}
+
+/**
+ * Language-aware API call function
+ * Automatically adds language prefix to JSON:API endpoints
+ * @param endpoint - API endpoint
+ * @param options - API options
+ * @param language - Optional language override
+ * @returns Promise with API response
+ */
+export async function apiGetWithLanguage<T = any>(
+  endpoint: string, 
+  options: ApiGetOptions = {},
+  language?: 'vi' | 'en'
+): Promise<ApiResponse<T>> {
+  const currentLang = language || getCurrentLanguage();
+  const languageAwareEndpoint = addLanguagePrefix(endpoint, currentLang);
+  
+  console.log(`🌐 API call with language: ${currentLang}`);
+  console.log(`📡 Original endpoint: ${endpoint}`);
+  console.log(`🔗 Language-aware endpoint: ${languageAwareEndpoint}`);
+  
+  return api.get<T>(languageAwareEndpoint, options);
+}
+
+/**
+ * Hook to get language-aware API client
+ * Uses LanguageContext to automatically add language prefix to API calls
+ * @returns Object with API methods that automatically use current language
+ * 
+ * @example
+ * ```typescript
+ * const MyComponent = () => {
+ *   const { apiGet } = useDrupalApi();
+ *   
+ *   const fetchArticles = async () => {
+ *     // This will automatically call /vi/jsonapi/node/article or /en/jsonapi/node/article
+ *     const response = await apiGet('/jsonapi/node/article', {
+ *       include: 'field_anh_dai_dien'
+ *     });
+ *     return response;
+ *   };
+ * };
+ * ```
+ */
+export function useDrupalApi() {
+  const { language } = useLanguage();
+  
+  /**
+   * Language-aware API GET method
+   * @param endpoint - API endpoint
+   * @param options - API options
+   * @returns Promise with API response
+   */
+  const apiGet = async <T = any>(
+    endpoint: string, 
+    options: ApiGetOptions = {}
+  ): Promise<ApiResponse<T>> => {
+    return apiGetWithLanguage<T>(endpoint, options, language);
+  };
+  
+  return {
+    apiGet,
+    language,
+    // Add other API methods here if needed (POST, PATCH, DELETE, etc.)
+  };
 } 

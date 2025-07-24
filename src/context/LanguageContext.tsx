@@ -1,24 +1,37 @@
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 type Language = "vi" | "en";
 
 interface LanguageContextType {
   language: Language;
+  setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>("vi");
+  const [language, setLanguageState] = useState<Language>("vi");
+  const { i18n } = useTranslation();
+
+  // Sync with react-i18next when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+  };
 
   const toggleLanguage = () => {
-    setLanguage(language === "vi" ? "en" : "vi");
+    const newLang = language === "vi" ? "en" : "vi";
+    setLanguage(newLang);
   };
 
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage }}>
+    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage }}>
       {children}
     </LanguageContext.Provider>
   );
