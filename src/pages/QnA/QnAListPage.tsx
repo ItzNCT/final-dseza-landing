@@ -309,13 +309,13 @@ const QnAListPage: React.FC = () => {
 
                       {/* Sender and Date Info */}
                       <div className={`flex flex-col sm:flex-row sm:items-center gap-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                        {question.attributes?.field_ten_nguoi_gui && (
+                        {question.attributes?.field_nguoi_gui && (
                           <div className="flex items-center gap-1">
                             <User className="h-3 w-3" />
-                            <span>Người gửi: {question.attributes.field_ten_nguoi_gui}</span>
+                            <span>Người gửi: {question.attributes.field_nguoi_gui}</span>
                           </div>
                         )}
-                        {question.attributes?.field_ten_nguoi_gui && question.attributes?.created && (
+                        {question.attributes?.field_nguoi_gui && question.attributes?.created && (
                           <span className="hidden sm:inline">|</span>
                         )}
                         {question.attributes?.created && (
@@ -444,37 +444,7 @@ const QnAListPage: React.FC = () => {
               </div>
             )}
 
-            {/* Statistics Summary */}
-            {!isLoading && hasQuestions && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-                <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
-                  <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-blue-300' : 'text-blue-800'}`}>
-                    Tổng câu hỏi
-                  </h3>
-                  <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-                    {totalResults}
-                  </p>
-                </div>
-                
-                <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'}`}>
-                  <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-green-300' : 'text-green-800'}`}>
-                    Đã trả lời
-                  </h3>
-                  <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
-                    {questions.filter((q: any) => q.attributes?.field_trang_thai === "answered" || q.attributes?.field_trang_thai === "Đã trả lời").length}
-                  </p>
-                </div>
-                
-                <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-yellow-900/20' : 'bg-yellow-50'}`}>
-                  <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-800'}`}>
-                    Đang xử lý
-                  </h3>
-                  <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`}>
-                    {questions.filter((q: any) => q.attributes?.field_trang_thai !== "answered" && q.attributes?.field_trang_thai !== "Đã trả lời").length}
-                  </p>
-                </div>
-              </div>
-            )}
+
           </div>
         </div>
       </main>

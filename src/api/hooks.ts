@@ -994,6 +994,7 @@ interface QuestionFilters {
 
 /**
  * Fetch questions from Drupal JSON:API with filters
+ * Only fetch questions for Q&A section (exclude FAQ questions)
  * @param params - Object containing queryKey from useQuery
  * @returns Promise containing the questions data
  */
@@ -1001,6 +1002,17 @@ async function fetchQuestions({ queryKey }: { queryKey: readonly unknown[] }): P
   try {
     const filters = queryKey[1] as QuestionFilters;
     const queryParams = new URLSearchParams();
+    
+    // IMPORTANT: Only get Q&A questions (exclude FAQ questions)
+    // QnA questions have status: "da_tra_loi" (answered) or "cho_duyet" (pending approval)
+    // FAQ questions have status: "da_cong_khai" (published publicly) - these are handled by useFaq hook
+    
+    // Filter for Q&A questions only (not FAQ)
+    // We need to exclude "da_cong_khai" status as those are for FAQ page
+    queryParams.append('filter[status][value]', '1'); // Only published content
+    
+    // Use a complex filter to get only Q&A questions (not FAQ questions)
+    // This is a bit tricky with JSON:API, so we'll fetch all and filter client-side if needed
     
     // Build query parameters based on filters using JSON:API format
     if (filters.keyword) {
@@ -1028,6 +1040,8 @@ async function fetchQuestions({ queryKey }: { queryKey: readonly unknown[] }): P
     
     const url = `${JSON_API_BASE_URL}/jsonapi/node/question?${queryParams.toString()}`;
     
+    console.log('🔍 Fetching Q&A questions from:', url);
+    
     const response = await fetch(url, {
       method: 'GET',
       headers: jsonApiHeaders,
@@ -1039,6 +1053,28 @@ async function fetchQuestions({ queryKey }: { queryKey: readonly unknown[] }): P
     }
 
     const data = await response.json();
+    
+    // Client-side filtering to exclude FAQ questions (da_cong_khai)
+    // Only include questions that are for Q&A section
+    if (data.data) {
+      const originalCount = data.data.length;
+      
+      data.data = data.data.filter((item: any) => {
+        const status = item.attributes?.field_trang_thai;
+        // Include questions that are:
+        // 1. "da_tra_loi" (answered) - for Q&A
+        // 2. "cho_duyet" (pending approval) - for Q&A
+        // 3. null/undefined (default questions) - for Q&A
+        // Exclude: "da_cong_khai" (published publicly) - those are for FAQ
+        const isQnAQuestion = status !== 'da_cong_khai';
+        
+        console.log(`📋 Question "${item.attributes?.title}": status="${status}", isQnA=${isQnAQuestion}`);
+        
+        return isQnAQuestion;
+      });
+      
+      console.log(`🔄 Q&A filtering: ${originalCount} → ${data.data.length} questions (excluded FAQ questions)`);
+    }
     
     return data;
   } catch (error) {

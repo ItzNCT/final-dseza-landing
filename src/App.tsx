@@ -19,6 +19,7 @@ import EnterpriseListPage from "@/pages/Enterprise/EnterpriseListPage";
 import WorkSchedulePage from "@/pages/Schedule/WorkSchedulePage";
 import QnAListPage from "@/pages/QnA/QnAListPage";
 import CreateQuestionPage from "@/pages/QnA/CreateQuestionPage";
+import QnADetailPage from "@/pages/QnA/QnADetailPage";
 import ContactPage from "@/pages/Contact/ContactPage";
 import LoginPage from "@/pages/Auth/LoginPage";
 import RegisterPage from "@/pages/Auth/RegisterPage";
@@ -51,6 +52,10 @@ import InvestmentPolicyPage from "./pages/Brochure/InvestmentPolicyPage";
 import BrochurePage from "./pages/Brochure/BrochurePage";
 import InvestmentEnvironmentPage from "./pages/News/InvestmentEnvironmentPage";
 import InvestorGuidelinesPage from "./pages/News/InvestorGuidelinesPage";
+import DraftFeedbackPage from "./pages/Feedback/DraftFeedbackPage";
+import DraftDetailPage from "./pages/Feedback/DraftDetailPage";
+import VanBanHuongDanPage from "./pages/Feedback/VanBanHuongDanPage";
+import FaqPage from "./pages/QnA/FaqPage";
 import MobileLayout from "./components/mobile/MobileLayout";
 import AccessibilityPanel from "./components/AccessibilityPanel";
 
@@ -78,6 +83,10 @@ const App: React.FC = () => (
                         <Route index element={<Navigate to="/van-ban/van-ban-phap-luat/phap-quy-trung-uong" replace />} />
                         <Route path=":category/:subcategory" element={<DocumentSearchPage />} />
                       </Route>
+                      {/* Draft feedback routes */}
+                      <Route path="/van-ban/huong-dan-gop-y/gop-y-du-thao-van-ban" element={<DraftFeedbackPage />} />
+                      <Route path="/van-ban/huong-dan-gop-y/gop-y-du-thao-van-ban/:id" element={<DraftDetailPage />} />
+                      <Route path="/van-ban/huong-dan-gop-y/van-ban-huong-dan" element={<VanBanHuongDanPage />} />
                       <Route path="/doanh-nghiep/thong-tin-doanh-nghiep/thong-ke-doanh-nghiep" element={<EnterpriseListPage />} />
                       <Route path="/tin-tuc/lich-cong-tac" element={<WorkSchedulePage />} />
                       {/* Specific route for investment environment page */}
@@ -87,8 +96,11 @@ const App: React.FC = () => (
                       {/* Dynamic routes for news categories - IMPORTANT: longer routes must come first */}
                       <Route path="/tin-tuc/:category/:subcategory" element={<ArticleListPage />} />
                       <Route path="/tin-tuc/:category" element={<ArticleListPage />} />
-                      <Route path="/tien-ich/hoi-dap" element={<QnAListPage />} />
+                      <Route path="/tien-ich/hoi-dap/:id" element={<QnADetailPage />} />
                       <Route path="/tien-ich/hoi-dap/tao-moi" element={<CreateQuestionPage />} />
+                      <Route path="/tien-ich/hoi-dap" element={<QnAListPage />} />
+                      <Route path="/tien-ich/cau-hoi-thuong-gap" element={<FaqPage />} />
+                      <Route path="/faq" element={<FaqPage />} />
                       <Route path="/lien-he" element={<ContactPage />} />
                       <Route path="/contact" element={<ContactPage />} />
                       <Route path="/dang-nhap" element={<LoginPage />} />
