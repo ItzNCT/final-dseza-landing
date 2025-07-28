@@ -3,7 +3,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import { cn } from "@/lib/utils";
 import MegaMenu from './MegaMenu';
 import NavigationMenuItem from './NavigationMenuItem';
-import { useMainMenu } from '@/api/hooks';
+import { useMultilingualMenu } from '@/api/hooks';
+import { useLanguage } from '@/context/LanguageContext';
 import { MenuItem as NavigationMenuItemType, MegaMenuContentType } from './types/megaMenu';
 import type { MenuLinkWithSubtree } from '@/api/hooks';
 
@@ -78,11 +79,38 @@ const NavigationBar: React.FC = () => {
   const navRef = useRef<HTMLElement>(null);
   const [isSticky, setIsSticky] = useState(false);
   
-  // Use the new hook to fetch menu data from GraphQL API
-  const { data: menuData, isLoading, isError, menuLinks } = useMainMenu();
+  // Use language context and multilingual menu hook
+  const { language } = useLanguage();
+  const { isLoading, isError, error, getMenuLinks, hasMenuData, viMenuLinks, enMenuLinks } = useMultilingualMenu();
+  
+  // Get menu links for current language
+  const menuLinks = getMenuLinks(language);
+  
+  // Debug log to see multilingual menu data
+  React.useEffect(() => {
+    console.log('🔄 NavigationBar State:');
+    console.log('  - isLoading:', isLoading);
+    console.log('  - isError:', isError);
+    console.log('  - error:', error?.message);
+    console.log('  - hasMenuData:', hasMenuData);
+    console.log('  - language:', language);
+    console.log('  - menuLinks.length:', menuLinks.length);
+    
+    if (hasMenuData) {
+      console.log('🌍 Multilingual Menu Data Available:');
+      console.log('📋 VI Menu Links:', viMenuLinks.length);
+      console.log('📋 EN Menu Links:', enMenuLinks.length);
+      console.log('🔤 Current Language:', language);
+      console.log('📋 Current Menu Links:', menuLinks.length);
+    }
+    
+    if (isError && error) {
+      console.error('❌ Navigation Menu Error:', error.message);
+    }
+  }, [isLoading, isError, error, hasMenuData, viMenuLinks, enMenuLinks, language, menuLinks]);
   
   // Map API data to the expected format for NavigationMenuItem components
-  const menuItems: NavigationMenuItemType[] = isLoading || isError 
+  const menuItems: NavigationMenuItemType[] = isLoading || isError || !hasMenuData
     ? [] 
     : mapApiDataToMenuItems(menuLinks);
 

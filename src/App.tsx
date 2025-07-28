@@ -61,6 +61,7 @@ import AccessibilityPanel from "./components/AccessibilityPanel";
 import LanguageLayout from "./components/LanguageLayout";
 import RootRedirect from "./components/RootRedirect";
 
+
 // Create a client
 const queryClient = new QueryClient();
 
@@ -155,6 +156,9 @@ const App: React.FC = () => (
                         
                         {/* Functional Zone Detail Pages */}
                         <Route path="functionalzone/:slug" element={<FunctionalzoneDetailPage />} />
+                        
+                        {/* Language Test Component - Development only */}
+    
                         
                         {/* 404 - This should be the last route */}
                         <Route path="*" element={<NotFound />} />

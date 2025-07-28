@@ -99,23 +99,45 @@ async function fetchMainMenuData(): Promise<MainMenuData> {
     const graphqlQuery = {
       query: `
         query GetMainMenu {
-          menu(name: "main") {
-            name
-            items {
-              id
-              title
-              url
-              expanded
-              children {
-                id
-                title
-                url
+          menuByName(name: MAIN) {
+            links {
+              # --- Cấp 1 ---
+              link {
+                label
+                url {
+                  path
+                }
                 expanded
-                children {
-                  id
-                  title
-                  url
+              }
+              subtree {
+                # --- Cấp 2 ---
+                link {
+                  label
+                  url {
+                    path
+                  }
                   expanded
+                }
+                subtree {
+                  # --- Cấp 3 ---
+                  link {
+                    label
+                    url {
+                      path
+                    }
+                    expanded
+                  }
+                  # Thêm cấp lồng cuối cùng để lấy cấp 4
+                  subtree {
+                    # --- Cấp 4 ---
+                    link {
+                      label
+                      url {
+                        path
+                      }
+                      expanded
+                    }
+                  }
                 }
               }
             }
@@ -144,24 +166,26 @@ async function fetchMainMenuData(): Promise<MainMenuData> {
     }
 
     // Transform the GraphQL response to our interface
-    const menuItems: MenuItem[] = result.data?.menu?.items?.map((item: any) => ({
-      id: item.id,
-      title: item.title,
-      url: item.url,
-      expanded: item.expanded,
-      children: item.children?.map((child: any) => ({
-        id: child.id,
-        title: child.title,
-        url: child.url,
-        expanded: child.expanded,
-        children: child.children?.map((grandchild: any) => ({
-          id: grandchild.id,
-          title: grandchild.title,
-          url: grandchild.url,
-          expanded: grandchild.expanded,
+    const transformMenuLink = (linkData: any, index: number): MenuItem => ({
+      id: `menu-item-${index}`,
+      title: linkData.link.label,
+      url: linkData.link.url.path,
+      expanded: linkData.link.expanded,
+      children: linkData.subtree?.map((subLink: any, subIndex: number) => ({
+        id: `menu-item-${index}-${subIndex}`,
+        title: subLink.link.label,
+        url: subLink.link.url.path,
+        expanded: subLink.link.expanded,
+        children: subLink.subtree?.map((grandLink: any, grandIndex: number) => ({
+          id: `menu-item-${index}-${subIndex}-${grandIndex}`,
+          title: grandLink.link.label,
+          url: grandLink.link.url.path,
+          expanded: grandLink.link.expanded,
         })) || [],
       })) || [],
-    })) || [];
+    });
+
+    const menuItems: MenuItem[] = result.data?.menuByName?.links?.map(transformMenuLink) || [];
 
     return {
       menuItems,

@@ -42,10 +42,10 @@ const Index: React.FC = () => {
         
         {/* Location Map Section */}
         <LocationSection />
-        
+
         {/* Resources Section */}
         <ResourcesSection />
-        
+
         {/* Businesses and Partners Section */}
         <BusinessesAndPartners />
       </div>

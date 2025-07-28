@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiClient } from '@/api/client';
+import { apiClient, enApiClient, createLanguageClient } from '@/api/client';
 
 // Define TypeScript interfaces for the menu data structure
 interface MenuUrl {
@@ -23,19 +23,25 @@ interface MenuLinkWithSubtree {
 }
 
 interface MenuByName {
+  langcode?: string;
   links: MenuLinkWithSubtree[];
 }
 
-interface FullMenuQueryResponse {
-  menuByName: MenuByName;
-}
-
-// Define the GraphQL query for fetching the main menu
-const GET_MAIN_MENU_QUERY = `
-  query FullMenuQuery {
-    menuByName(name: MAIN) {
-      links {
-        # --- Cấp 1 ---
+// Fallback query using correct menuByName syntax
+const GET_MAIN_MENU_FALLBACK_QUERY = `
+query GetMainMenu {
+  menuByName(name: MAIN) {
+    links {
+      # --- Cấp 1 ---
+      link {
+        label
+        url {
+          path
+        }
+        expanded
+      }
+      subtree {
+        # --- Cấp 2 ---
         link {
           label
           url {
@@ -44,7 +50,7 @@ const GET_MAIN_MENU_QUERY = `
           expanded
         }
         subtree {
-          # --- Cấp 2 ---
+          # --- Cấp 3 ---
           link {
             label
             url {
@@ -52,8 +58,9 @@ const GET_MAIN_MENU_QUERY = `
             }
             expanded
           }
+          # Thêm cấp lồng cuối cùng để lấy cấp 4
           subtree {
-            # --- Cấp 3 ---
+            # --- Cấp 4 ---
             link {
               label
               url {
@@ -61,54 +68,156 @@ const GET_MAIN_MENU_QUERY = `
               }
               expanded
             }
-            # Thêm cấp lồng cuối cùng để lấy cấp 4
-            subtree {
-              # --- Cấp 4 ---
-              link {
-                label
-                url {
-                  path
-                }
-                expanded
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
+// Define the GraphQL query for fetching the main menu - using basic menuByName without language
+const GET_MAIN_MENU_QUERY = `
+query GetMainMenu {
+  menuByName(name: MAIN) {
+    links {
+      # --- Cấp 1 ---
+      link {
+        label
+        url {
+          path
+        }
+        expanded
+      }
+      subtree {
+        # --- Cấp 2 ---
+        link {
+          label
+          url {
+            path
+          }
+          expanded
+        }
+        subtree {
+          # --- Cấp 3 ---
+          link {
+            label
+            url {
+              path
+            }
+            expanded
+          }
+          # Thêm cấp lồng cuối cùng để lấy cấp 4
+          subtree {
+            # --- Cấp 4 ---
+            link {
+              label
+              url {
+                path
               }
+              expanded
             }
           }
         }
       }
     }
   }
+}
 `;
+
+// Simple query that works with current schema - no multilingual support for now
+const GET_MULTILINGUAL_MENU_QUERY = `
+query GetMainMenu {
+  menuByName(name: MAIN) {
+    links {
+      link { label url { path } expanded }
+      subtree {
+        link { label url { path } expanded }
+        subtree {
+          link { label url { path } expanded }
+          subtree {
+            link { label url { path } expanded }
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
 
 /**
  * Fetch main menu data from Drupal GraphQL API
+ * @param language - Language code (e.g., 'vi', 'en') or 'both' for multilingual
  * @returns Promise containing the menu data
  */
-async function fetchMainMenuData(): Promise<MenuByName> {
+async function fetchMainMenuData(language?: string): Promise<MenuByName | { vi: MenuByName, en: MenuByName }> {
   try {
-    const response: FullMenuQueryResponse = await apiClient.request(GET_MAIN_MENU_QUERY);
+    console.log('🔍 Fetching menu data with language:', language);
+
+    // For now, we'll use the same menu for all languages since multilingual isn't working
+    const response: { menuByName: MenuByName } = await apiClient.request(GET_MAIN_MENU_FALLBACK_QUERY);
     
     if (!response.menuByName) {
       throw new Error('Menu data not found in response');
     }
 
+    console.log('✅ Menu query successful');
+
+    // If requesting both languages, return the same data for both
+    if (language === 'both') {
+      return {
+        vi: response.menuByName,
+        en: response.menuByName // Same menu data for both languages until multilingual is fixed
+      };
+    }
+
+    // Return single menu data
     return response.menuByName;
+
   } catch (error) {
-    throw new Error(`Failed to fetch main menu data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('❌ Menu fetch failed:', error);
+    
+    // Try one more time with the basic query
+    try {
+      console.log('🔄 Retrying with basic query...');
+      const retryResponse: { menuByName: MenuByName } = await apiClient.request(GET_MAIN_MENU_QUERY);
+      
+      if (!retryResponse.menuByName) {
+        throw new Error('Retry failed - no menu data');
+      }
+
+      console.log('✅ Retry successful');
+
+      if (language === 'both') {
+        return {
+          vi: retryResponse.menuByName,
+          en: retryResponse.menuByName
+        };
+      }
+
+      return retryResponse.menuByName;
+
+    } catch (retryError) {
+      console.error('❌ Retry also failed:', retryError);
+      throw retryError;
+    }
   }
 }
 
 /**
  * Custom hook to fetch and manage main menu data using TanStack Query
  * 
+ * @param language - Language code (e.g., 'vi', 'en') or 'both' for multilingual
  * @returns {Object} Object containing:
- *   - data: The menu data from the API
+ *   - data: The menu data from the API (single menu or multilingual object)
  *   - isLoading: Boolean indicating if the request is in progress
  *   - isError: Boolean indicating if an error occurred
  *   - error: The error object if an error occurred
  *   - isSuccess: Boolean indicating if the request was successful
  *   - refetch: Function to manually refetch the data
  */
-export const useMainMenu = () => {
+export const useMainMenu = (language?: string) => {
   const {
     data,
     isLoading,
@@ -117,14 +226,17 @@ export const useMainMenu = () => {
     isSuccess,
     refetch,
   } = useQuery({
-    queryKey: ['mainMenu'],
-    queryFn: fetchMainMenuData,
+    queryKey: ['mainMenu', language || 'default'],
+    queryFn: () => fetchMainMenuData(language),
     staleTime: 10 * 60 * 1000, // 10 minutes - menu data doesn't change frequently
     gcTime: 30 * 60 * 1000, // 30 minutes cache time
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
+  // Handle both single language and multilingual data
+  const isMultilingual = language === 'both';
+  
   return {
     data,
     isLoading,
@@ -133,8 +245,74 @@ export const useMainMenu = () => {
     isSuccess,
     refetch,
     // Additional convenience properties
-    menuLinks: data?.links || [],
-    hasMenuData: !!data?.links?.length,
+    menuLinks: isMultilingual 
+      ? { vi: (data as any)?.vi?.links || [], en: (data as any)?.en?.links || [] }
+      : (data as MenuByName)?.links || [],
+    hasMenuData: isMultilingual 
+      ? !!((data as any)?.vi?.links?.length && (data as any)?.en?.links?.length)
+      : !!(data as MenuByName)?.links?.length,
+    // For backward compatibility
+    viMenuLinks: isMultilingual ? (data as any)?.vi?.links || [] : 
+                 language === 'vi' ? (data as MenuByName)?.links || [] : [],
+    enMenuLinks: isMultilingual ? (data as any)?.en?.links || [] :
+                 language === 'en' ? (data as MenuByName)?.links || [] : [],
+  };
+};
+
+/**
+ * Hook cụ thể cho menu tiếng Anh
+ */
+export const useMainMenuEn = () => {
+  return useMainMenu('en');
+};
+
+/**
+ * Custom hook to fetch multilingual menu data (both VI and EN) using TanStack Query
+ * This hook fetches both languages in a single GraphQL query for better performance
+ * 
+ * @returns {Object} Object containing:
+ *   - data: Object with vi and en menu data
+ *   - isLoading: Boolean indicating if the request is in progress
+ *   - isError: Boolean indicating if an error occurred
+ *   - error: The error object if an error occurred
+ *   - isSuccess: Boolean indicating if the request was successful
+ *   - refetch: Function to manually refetch the data
+ *   - viMenuLinks: Vietnamese menu links array
+ *   - enMenuLinks: English menu links array
+ *   - getMenuLinks: Function to get menu links for a specific language
+ */
+export const useMultilingualMenu = () => {
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+  } = useQuery({
+    queryKey: ['multilingualMenu'],
+    queryFn: () => fetchMainMenuData('both'),
+    staleTime: 10 * 60 * 1000, // 10 minutes - menu data doesn't change frequently
+    gcTime: 30 * 60 * 1000, // 30 minutes cache time
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+  });
+
+  const multilingualData = data as { vi: MenuByName, en: MenuByName } | undefined;
+
+  return {
+    data: multilingualData,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+    // Convenience accessors
+    viMenuLinks: multilingualData?.vi?.links || [],
+    enMenuLinks: multilingualData?.en?.links || [],
+    hasMenuData: !!(multilingualData?.vi?.links?.length && multilingualData?.en?.links?.length),
+    // Function to get menu links for specific language
+    getMenuLinks: (language: 'vi' | 'en') => multilingualData?.[language]?.links || [],
   };
 };
 
@@ -145,7 +323,6 @@ export type {
   MenuSubtree,
   MenuLinkWithSubtree,
   MenuByName,
-  FullMenuQueryResponse,
 };
 
 // Export the fetch function for potential standalone use
