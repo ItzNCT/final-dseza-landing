@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "@/context/ThemeContext";
 import { cn } from "@/lib/utils";
-import { Calendar } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { useTranslation } from "@/utils/translations";
 import { useLanguage } from "@/context/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,6 +22,20 @@ interface EventCardProps {
   url?: string;
 }
 
+// Format date function
+const formatDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  } catch (error) {
+    return dateString;
+  }
+};
+
 /**
  * Individual mobile event card component
  */
@@ -35,48 +49,54 @@ const MobileEventCard: React.FC<EventCardProps> = ({
   const displayTitle = language === 'en' && titleEn ? titleEn : title;
   const displayExcerpt = language === 'en' && excerptEn ? excerptEn : excerpt;
   
-  // Theme-specific styles
-  const cardBg = theme === "dark" ? "bg-[#2C3640]" : "bg-[#F2F2F2]";
-  const mainText = theme === "dark" ? "text-white" : "text-black";
-  const secondaryText = theme === "dark" ? "text-[#B0BEC5]" : "text-[#545454]";
-  const shadowStyle = theme === "dark" ? "shadow-lg shadow-black/25" : "shadow-lg";
-  const hoverShadow = theme === "dark" ? "hover:shadow-xl hover:shadow-black/35" : "hover:shadow-xl";
+  // Theme-specific styles using dseza variables
+  const cardBg = theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-dseza-light-secondary-bg";
+  const cardBorder = theme === "dark" ? "border-dseza-dark-border" : "border-dseza-light-border";
+  const mainText = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
+  const secondaryText = theme === "dark" ? "text-dseza-dark-secondary-text" : "text-dseza-light-secondary-text";
+  const cardHoverBg = theme === "dark" ? "hover:bg-dseza-dark-hover-bg" : "hover:bg-dseza-light-hover-bg";
+  const titleHoverColor = theme === "dark" ? "hover:text-dseza-dark-primary-accent" : "hover:text-dseza-light-primary-accent";
   
   return (
     <Link
       to={`/bai-viet/${id}`}
       className={cn(
-        "block rounded-xl overflow-hidden",
+        "group block rounded-xl overflow-hidden border transition-all duration-300 ease-in-out",
         cardBg,
-        shadowStyle,
-        hoverShadow,
-        "transition-transform duration-300 ease-in-out",
-        "hover:scale-[1.01] active:scale-[0.99]",
+        cardBorder,
+        cardHoverBg,
+        "hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]",
         "cursor-pointer"
       )}
     >
       {/* Event Image (16:9 aspect ratio) */}
-      <div className="w-full aspect-video relative">
+      <div className="w-full aspect-video relative overflow-hidden">
         <img
           src={image}
           alt={displayTitle}
           loading="lazy"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
         />
+        {/* Overlay for hover effect */}
+        <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/20"></div>
       </div>
       
       {/* Text Content Area */}
       <div className="p-4">
         {/* Event Date */}
         <div className="flex items-center gap-1.5 mb-1.5">
-          <Calendar className={cn("h-3.5 w-3.5", secondaryText)} />
+          <CalendarDays className={cn("h-3.5 w-3.5", secondaryText)} />
           <p className={cn("text-xs font-inter font-normal", secondaryText)}>
             {date}
           </p>
         </div>
         
         {/* Event Title */}
-        <h3 className={cn("font-montserrat font-semibold text-lg mb-2 line-clamp-3", mainText)}>
+        <h3 className={cn(
+          "font-montserrat font-semibold text-lg mb-2 line-clamp-3 transition-colors duration-300",
+          mainText,
+          titleHoverColor
+        )}>
           {displayTitle}
         </h3>
         
@@ -96,10 +116,11 @@ const MobileEventCard: React.FC<EventCardProps> = ({
  */
 const EventCardSkeleton: React.FC = () => {
   const { theme } = useTheme();
-  const cardBg = theme === "dark" ? "bg-[#2C3640]" : "bg-[#F2F2F2]";
+  const cardBg = theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-dseza-light-secondary-bg";
+  const cardBorder = theme === "dark" ? "border-dseza-dark-border" : "border-dseza-light-border";
   
   return (
-    <div className={cn("rounded-xl overflow-hidden", cardBg, "shadow-lg")}>
+    <div className={cn("rounded-xl overflow-hidden border", cardBg, cardBorder)}>
       <Skeleton className="w-full aspect-video" />
       <div className="p-4">
         <div className="flex items-center gap-1.5 mb-1.5">
@@ -122,23 +143,9 @@ const MobileFeaturedEvents: React.FC = () => {
   const { t } = useTranslation();
   const { data, isLoading, isError } = useHomepageData();
   
-  // Theme-specific styles for the section container
-  const sectionBg = theme === "dark" ? "bg-[#1E272F]" : "bg-white";
-  const titleText = theme === "dark" ? "text-white" : "text-black";
-  
-  // Format date function
-  const formatDate = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-    } catch (error) {
-      return dateString;
-    }
-  };
+  // Theme-specific styles using dseza variables to match PC version
+  const sectionBg = theme === "dark" ? "bg-[#2C363F]" : "bg-[#F2F2F2]";
+  const titleText = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
 
   return (
     <section className={cn(
@@ -178,7 +185,7 @@ const MobileFeaturedEvents: React.FC = () => {
             <MobileEventCard
               key={event.id}
               id={event.id}
-                             image={getImageWithFallback(event.featured_image)}
+              image={getImageWithFallback(event.featured_image)}
               date={formatDate(event.start_date)}
               title={event.title}
               titleEn={event.title} // API doesn't have separate English titles yet

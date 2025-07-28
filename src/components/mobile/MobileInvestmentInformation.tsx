@@ -3,108 +3,58 @@ import { useTheme } from "@/context/ThemeContext";
 import { useTranslation } from "@/utils/translations";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useInvestmentCards, InvestmentCard } from "@/hooks/useInvestmentCards";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface InvestmentCard {
-  id: string;
-  titleKey: string;
-  image: string;
-  link: string;
-}
+// CardSkeleton component for loading state
+const CardSkeleton = () => {
+  const { theme } = useTheme();
+  
+  return (
+    <div className="min-w-[280px] h-56 rounded-lg overflow-hidden flex-shrink-0">
+      <Skeleton className="w-full h-full" />
+    </div>
+  );
+};
 
 const MobileInvestmentInformation: React.FC = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] =
-    useState<"investors" | "environment">("investors");
+  const [activeTab, setActiveTab] = useState<"investors" | "environment">("investors");
   const carouselRef = useRef<HTMLDivElement>(null);
+  
+  // Fetch investment cards using the custom hook
+  const { data: investmentCards, isLoading, isError } = useInvestmentCards();
 
-  // Theme-specific styles
-  const sectionBg = theme === "dark" ? "bg-[#1E272F]" : "bg-white"; // Mobile section background
-  const textColor =
-    theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
-  const secondaryTextColor =
-    theme === "dark"
-      ? "text-dseza-dark-secondary-text"
-      : "text-dseza-light-secondary-text";
-  const accentColor =
-    theme === "dark"
-      ? "text-dseza-dark-primary-accent"
-      : "text-dseza-light-primary-accent";
-  const accentHoverColor =
-    theme === "dark"
-      ? "hover:text-dseza-dark-primary-accent-hover"
-      : "hover:text-dseza-light-primary-accent-hover";
-  const cardTitleColor = "text-white"; // Luôn là màu trắng cho dễ đọc trên ảnh nền
+  // Theme-specific styles using dseza variables to match PC version
+  const sectionBg = theme === "dark" ? "bg-[#1D262E]" : "bg-[#FFFFFF]";
+  const titleText = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
+  const secondaryTextColor = theme === "dark" ? "text-dseza-dark-secondary-text" : "text-dseza-light-secondary-text";
+  const accentColor = theme === "dark" ? "text-dseza-dark-primary-accent" : "text-dseza-light-primary-accent";
+  const navArrowHoverBgColor = theme === "dark" ? "hover:bg-dseza-dark-primary-accent/20" : "hover:bg-dseza-light-primary-accent/20";
+  const navArrowHoverTextColor = theme === "dark" ? "hover:text-dseza-dark-primary-accent" : "hover:text-dseza-light-primary-accent";
 
-  // Dữ liệu card (giữ nguyên từ component gốc, có thể tùy chỉnh nếu cần cho mobile)
-  const investorCards: InvestmentCard[] = [
-    {
-      id: "inv1",
-      titleKey: "investment.investmentProcedures",
-      image:
-        "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=70", // Giảm chất lượng ảnh một chút
-      link: "#investor-process",
-    },
-    {
-      id: "inv2",
-      titleKey: "investment.incentives",
-      image:
-        "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=70",
-      link: "#investment-fields",
-    },
-    {
-      id: "inv3",
-      titleKey: "investment.services",
-      image:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=70",
-      link: "#zoning-plans",
-    },
-    {
-      id: "inv4",
-      titleKey: "investment.workforce",
-      image:
-        "https://images.unsplash.com/photo-1483058712412-4245e9b90334?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=70",
-      link: "#postal-submission",
-    },
-    {
-      id: "inv5",
-      titleKey: "investment.infrastructure",
-      image:
-        "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=70",
-      link: "#admin-procedure-lookup",
-    },
-    {
-      id: "inv6",
-      titleKey: "investment.services",
-      image:
-        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=70",
-      link: "#online-services",
-    },
-  ];
+  // Tab button styles
+  const activeTabBg = theme === "dark" ? "bg-dseza-dark-primary-accent" : "bg-dseza-light-primary-accent";
+  const activeTabText = theme === "dark" ? "text-dseza-dark-main-bg" : "text-white";
+  const inactiveTabBg = theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-dseza-light-secondary-bg";
+  const inactiveTabText = theme === "dark" ? "text-dseza-dark-secondary-text" : "text-dseza-light-secondary-text";
+  const inactiveTabHoverBg = theme === "dark" ? "hover:bg-dseza-dark-hover-bg" : "hover:bg-dseza-light-hover-bg";
 
-  const environmentCards: InvestmentCard[] = [
-    {
-      id: "env1",
-      titleKey: "investment.infrastructure",
-      image:
-        "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=70",
-      link: "#iz-infrastructure",
-    },
-    {
-      id: "env2",
-      titleKey: "investment.infrastructure",
-      image:
-        "https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=70",
-      link: "#transport-infra",
-    },
-    // Thêm các card khác tương tự nếu cần
-  ];
+  // Filter investment cards by category
+  const forInvestorsData = investmentCards?.filter(card => 
+    card.category === 'Dành cho nhà đầu tư'
+  ) || [];
+  
+  const investmentEnvironmentData = investmentCards?.filter(card => 
+    card.category === 'Môi trường đầu tư'
+  ) || [];
+  
+  const currentCards = activeTab === "investors" ? forInvestorsData : investmentEnvironmentData;
 
-  const currentCards =
-    activeTab === "investors" ? investorCards : environmentCards;
-
-  const cardWidth = 280; // Chiều rộng card trên mobile
-  const cardGap = 16; // gap-4
+  const cardWidth = 280;
+  const cardGap = 16;
   const scrollAmount = cardWidth + cardGap;
 
   const scrollCarousel = (direction: "left" | "right") => {
@@ -128,102 +78,142 @@ const MobileInvestmentInformation: React.FC = () => {
   };
 
   return (
-    <section className={cn("py-8 px-4", sectionBg)}> {/* Giảm padding cho mobile */}
-      {/* Tiêu đề section - căn trái */}
-      <h2
-        className={cn(
-          "font-montserrat font-bold text-2xl mb-6 text-center", // text-2xl và text-left
-          textColor
-        )}
-      >
+    <section className={cn("py-8 px-4", sectionBg)}>
+      {/* Section Title */}
+      <h2 className={cn(
+        "font-montserrat font-bold text-2xl mb-6 text-left",
+        titleText
+      )}>
         {t("homepage.investmentInfo")}
       </h2>
 
-      {/* Tabs chọn loại thông tin */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex space-x-3">
-            <button
-            className={cn(
-                "font-montserrat font-semibold text-base py-2 px-3 rounded-md transition-colors",
-                activeTab === "investors"
-                ? (theme === "dark" ? "bg-dseza-dark-primary text-dseza-dark-main-bg" : "bg-dseza-light-primary text-white")
-                : (theme === "dark" ? "bg-dseza-dark-secondary-bg text-dseza-dark-secondary-text hover:bg-dseza-dark-hover" : "bg-dseza-light-secondary-bg text-dseza-light-secondary-text hover:bg-dseza-light-hover")
-            )}
-            onClick={() => setActiveTab("investors")}
-            >
-            {t("investment.forInvestors")}
-            </button>
-            <button
-            className={cn(
-                "font-montserrat font-semibold text-base py-2 px-3 rounded-md transition-colors",
-                activeTab === "environment"
-                ? (theme === "dark" ? "bg-dseza-dark-primary text-dseza-dark-main-bg" : "bg-dseza-light-primary text-white")
-                : (theme === "dark" ? "bg-dseza-dark-secondary-bg text-dseza-dark-secondary-text hover:bg-dseza-dark-hover" : "bg-dseza-light-secondary-bg text-dseza-light-secondary-text hover:bg-dseza-light-hover")
-            )}
-            onClick={() => setActiveTab("environment")}
-            >
-            {t("investment.investmentEnvironment")}
-            </button>
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex justify-center items-center py-16">
+          <LoadingSpinner size="lg" className={titleText} />
         </div>
-        {/* Nút điều khiển carousel */}
-        <div className="flex space-x-2">
-            <button
-                className={cn(
-                "p-2 rounded-full transition-colors",
-                secondaryTextColor,
-                accentHoverColor
-                )}
-                onClick={() => scrollCarousel("left")}
-                aria-label="Scroll left"
-            >
-                <ArrowLeft className="w-5 h-5" />
-            </button>
-            <button
-                className={cn(
-                "p-2 rounded-full transition-colors",
-                secondaryTextColor,
-                accentHoverColor
-                )}
-                onClick={() => scrollCarousel("right")}
-                aria-label="Scroll right"
-            >
-                <ArrowRight className="w-5 h-5" />
-            </button>
+      )}
+
+      {/* Error State */}
+      {isError && (
+        <div className="text-center py-16">
+          <p className={cn("text-lg", titleText)}>
+            Đã xảy ra lỗi khi tải thông tin đầu tư. Vui lòng thử lại sau.
+          </p>
         </div>
-      </div>
+      )}
 
-
-      {/* Carousel cards */}
-      <div
-        ref={carouselRef}
-        className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 snap-x" // scrollbar-hide cho mobile
-      >
-        {currentCards.map((card) => (
-          <a
-            key={card.id}
-            href={card.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="min-w-[280px] h-56 rounded-lg overflow-hidden relative flex-shrink-0 snap-start group" // Giảm chiều cao card
-          >
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
-              style={{ backgroundImage: `url(${card.image})` }}
-            ></div>
-            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div> {/* Tăng độ mờ khi hover */}
-            <div className="absolute bottom-0 left-0 right-0 p-3"> {/* Giảm padding card */}
-              <h3
+      {/* Content */}
+      {!isLoading && !isError && (
+        <>
+          {/* Tabs and Navigation Controls */}
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex space-x-3">
+              <button
                 className={cn(
-                  "font-montserrat font-semibold text-md", // Giảm kích thước font title card
-                  cardTitleColor
+                  "font-montserrat font-semibold text-base py-2 px-3 rounded-md transition-colors duration-300",
+                  activeTab === "investors" 
+                    ? cn(activeTabBg, activeTabText)
+                    : cn(inactiveTabBg, inactiveTabText, inactiveTabHoverBg)
                 )}
+                onClick={() => setActiveTab("investors")}
               >
-                {t(card.titleKey)}
-              </h3>
+                {t("investment.forInvestors")}
+              </button>
+              <button
+                className={cn(
+                  "font-montserrat font-semibold text-base py-2 px-3 rounded-md transition-colors duration-300",
+                  activeTab === "environment"
+                    ? cn(activeTabBg, activeTabText)
+                    : cn(inactiveTabBg, inactiveTabText, inactiveTabHoverBg)
+                )}
+                onClick={() => setActiveTab("environment")}
+              >
+                {t("investment.investmentEnvironment")}
+              </button>
             </div>
-          </a>
-        ))}
-      </div>
+            
+            {/* Navigation arrows - only show if there are cards */}
+            {currentCards.length > 0 && (
+              <div className="flex space-x-2">
+                <button
+                  className={cn(
+                    "p-2 rounded-full transition-colors duration-300",
+                    secondaryTextColor,
+                    navArrowHoverBgColor,
+                    navArrowHoverTextColor
+                  )}
+                  onClick={() => scrollCarousel("left")}
+                  aria-label="Scroll left"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <button
+                  className={cn(
+                    "p-2 rounded-full transition-colors duration-300",
+                    secondaryTextColor,
+                    navArrowHoverBgColor,
+                    navArrowHoverTextColor
+                  )}
+                  onClick={() => scrollCarousel("right")}
+                  aria-label="Scroll right"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Cards Display */}
+          {currentCards.length > 0 ? (
+            <div
+              ref={carouselRef}
+              className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 snap-x"
+              role="region"
+              aria-label="Investment information cards"
+            >
+              {currentCards.map((card: InvestmentCard) => {
+                // Check if URL is external (starts with http/https) vs internal (starts with /)
+                const isExternalUrl = card.url.startsWith('http');
+                
+                return (
+                  <a
+                    key={card.id}
+                    href={card.url}
+                    target={isExternalUrl ? "_blank" : "_self"}
+                    rel={isExternalUrl ? "noopener noreferrer" : undefined}
+                    className="group min-w-[280px] h-56 rounded-lg overflow-hidden relative flex-shrink-0 snap-start transition-transform duration-300 hover:scale-[1.05]"
+                  >
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-300 ease-in-out group-hover:scale-110"
+                      style={{ 
+                        backgroundImage: `url(${card.imageUrl || '/placeholder.svg'})` 
+                      }}
+                    ></div>
+                    <div className="absolute inset-0 bg-black/40 transition-all duration-300 group-hover:bg-black/60"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <h3 className={cn(
+                        "font-montserrat font-semibold text-lg text-white transition-colors duration-300",
+                        "group-hover:text-white/90"
+                      )}>
+                        {card.title}
+                      </h3>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className={cn("text-lg", titleText)}>
+                {activeTab === "environment" 
+                  ? "Chưa có thông tin môi trường đầu tư nào được đăng tải." 
+                  : "Chưa có thông tin dành cho nhà đầu tư nào được đăng tải."}
+              </p>
+            </div>
+          )}
+        </>
+      )}
     </section>
   );
 };

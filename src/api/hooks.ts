@@ -27,6 +27,59 @@ interface MenuByName {
   links: MenuLinkWithSubtree[];
 }
 
+/**
+ * Create dynamic GraphQL query for menu by name
+ * @param menuName - The name of the menu (e.g., "MAIN", "MAIN1")
+ * @returns GraphQL query string
+ */
+const createGetMenuQuery = (menuName: string) => `
+query GetMainMenu {
+  menuByName(name: ${menuName}) {
+    langcode
+    links {
+      # --- Cấp 1 ---
+      link {
+        label
+        url {
+          path
+        }
+        expanded
+      }
+      subtree {
+        # --- Cấp 2 ---
+        link {
+          label
+          url {
+            path
+          }
+          expanded
+        }
+        subtree {
+          # --- Cấp 3 ---
+          link {
+            label
+            url {
+              path
+            }
+            expanded
+          }
+          subtree {
+            # --- Cấp 4 ---
+            link {
+              label
+              url {
+                path
+              }
+              expanded
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
 // Fallback query using correct menuByName syntax
 const GET_MAIN_MENU_FALLBACK_QUERY = `
 query GetMainMenu {
@@ -148,69 +201,71 @@ query GetMainMenu {
 
 /**
  * Fetch main menu data from Drupal GraphQL API
- * @param language - Language code (e.g., 'vi', 'en') or 'both' for multilingual
- * @returns Promise containing the menu data
+ * Now supports bilingual menu fetching with separate MAIN and MAIN1 menus
+ * @returns Promise containing bilingual menu data
  */
-async function fetchMainMenuData(language?: string): Promise<MenuByName | { vi: MenuByName, en: MenuByName }> {
+async function fetchMainMenuData(): Promise<{ vi: MenuByName, en: MenuByName }> {
   try {
-    console.log('🔍 Fetching menu data with language:', language);
+    console.log('🔍 Fetching bilingual menu data...');
 
-    // For now, we'll use the same menu for all languages since multilingual isn't working
-    const response: { menuByName: MenuByName } = await apiClient.request(GET_MAIN_MENU_FALLBACK_QUERY);
-    
-    if (!response.menuByName) {
-      throw new Error('Menu data not found in response');
+    // Tạo các truy vấn động
+    const viQuery = createGetMenuQuery("MAIN");
+    const enQuery = createGetMenuQuery("MAIN1");
+
+    // Gọi đồng thời cả hai truy vấn
+    const [viResponse, enResponse] = await Promise.all([
+      apiClient.request<{ menuByName: MenuByName }>(viQuery),
+      apiClient.request<{ menuByName: MenuByName }>(enQuery)
+    ]);
+
+    if (!viResponse.menuByName || !enResponse.menuByName) {
+      throw new Error('One or both menus not found in API response');
     }
 
-    console.log('✅ Menu query successful');
+    console.log('✅ Bilingual menu fetch successful');
 
-    // If requesting both languages, return the same data for both
-    if (language === 'both') {
-      return {
-        vi: response.menuByName,
-        en: response.menuByName // Same menu data for both languages until multilingual is fixed
-      };
-    }
-
-    // Return single menu data
-    return response.menuByName;
+    return {
+      vi: viResponse.menuByName,
+      en: enResponse.menuByName
+    };
 
   } catch (error) {
-    console.error('❌ Menu fetch failed:', error);
+    console.error('❌ Bilingual menu fetch failed:', error);
     
-    // Try one more time with the basic query
+    // Fallback: Try with the original fallback query for both languages
     try {
-      console.log('🔄 Retrying with basic query...');
-      const retryResponse: { menuByName: MenuByName } = await apiClient.request(GET_MAIN_MENU_QUERY);
+      console.log('🔄 Retrying with fallback query...');
+      const fallbackResponse: { menuByName: MenuByName } = await apiClient.request(GET_MAIN_MENU_FALLBACK_QUERY);
       
-      if (!retryResponse.menuByName) {
-        throw new Error('Retry failed - no menu data');
+      if (!fallbackResponse.menuByName) {
+        throw new Error('Fallback query failed - no menu data');
       }
 
-      console.log('✅ Retry successful');
+      console.log('⚠️ Using fallback menu data for both languages');
 
-      if (language === 'both') {
-        return {
-          vi: retryResponse.menuByName,
-          en: retryResponse.menuByName
-        };
-      }
-
-      return retryResponse.menuByName;
+      return {
+        vi: fallbackResponse.menuByName,
+        en: fallbackResponse.menuByName // Use same menu as fallback
+      };
 
     } catch (retryError) {
-      console.error('❌ Retry also failed:', retryError);
-      throw retryError;
+      console.error('❌ Fallback also failed:', retryError);
+      // Trả về cấu trúc rỗng để tránh lỗi crash ứng dụng
+      return {
+        vi: { links: [] },
+        en: { links: [] }
+      };
     }
   }
 }
 
 /**
  * Custom hook to fetch and manage main menu data using TanStack Query
+ * Now returns bilingual menu data (both VI and EN)
  * 
- * @param language - Language code (e.g., 'vi', 'en') or 'both' for multilingual
+ * @param language - Language code (e.g., 'vi', 'en') - used for backward compatibility
  * @returns {Object} Object containing:
- *   - data: The menu data from the API (single menu or multilingual object)
+ *   - data: The bilingual menu data from the API
  *   - isLoading: Boolean indicating if the request is in progress
  *   - isError: Boolean indicating if an error occurred
  *   - error: The error object if an error occurred
@@ -226,44 +281,44 @@ export const useMainMenu = (language?: string) => {
     isSuccess,
     refetch,
   } = useQuery({
-    queryKey: ['mainMenu', language || 'default'],
-    queryFn: () => fetchMainMenuData(language),
+    queryKey: ['mainMenu'], // Simplified key since we always fetch both languages
+    queryFn: () => fetchMainMenuData(),
     staleTime: 10 * 60 * 1000, // 10 minutes - menu data doesn't change frequently
     gcTime: 30 * 60 * 1000, // 30 minutes cache time
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
-  // Handle both single language and multilingual data
-  const isMultilingual = language === 'both';
+  const multilingualData = data as { vi: MenuByName, en: MenuByName } | undefined;
   
   return {
-    data,
+    data: multilingualData,
     isLoading,
     isError,
     error,
     isSuccess,
     refetch,
-    // Additional convenience properties
-    menuLinks: isMultilingual 
-      ? { vi: (data as any)?.vi?.links || [], en: (data as any)?.en?.links || [] }
-      : (data as MenuByName)?.links || [],
-    hasMenuData: isMultilingual 
-      ? !!((data as any)?.vi?.links?.length && (data as any)?.en?.links?.length)
-      : !!(data as MenuByName)?.links?.length,
+    // Additional convenience properties for backward compatibility
+    menuLinks: language === 'vi' ? multilingualData?.vi?.links || [] :
+               language === 'en' ? multilingualData?.en?.links || [] :
+               { vi: multilingualData?.vi?.links || [], en: multilingualData?.en?.links || [] },
+    hasMenuData: !!(multilingualData?.vi?.links?.length && multilingualData?.en?.links?.length),
     // For backward compatibility
-    viMenuLinks: isMultilingual ? (data as any)?.vi?.links || [] : 
-                 language === 'vi' ? (data as MenuByName)?.links || [] : [],
-    enMenuLinks: isMultilingual ? (data as any)?.en?.links || [] :
-                 language === 'en' ? (data as MenuByName)?.links || [] : [],
+    viMenuLinks: multilingualData?.vi?.links || [],
+    enMenuLinks: multilingualData?.en?.links || [],
   };
 };
 
 /**
- * Hook cụ thể cho menu tiếng Anh
+ * Hook cụ thể cho menu tiếng Anh (deprecated - use useMultilingualMenu instead)
  */
 export const useMainMenuEn = () => {
-  return useMainMenu('en');
+  const result = useMainMenu();
+  return {
+    ...result,
+    menuLinks: result.data?.en?.links || [],
+    hasMenuData: !!(result.data?.en?.links?.length),
+  };
 };
 
 /**
@@ -291,7 +346,7 @@ export const useMultilingualMenu = () => {
     refetch,
   } = useQuery({
     queryKey: ['multilingualMenu'],
-    queryFn: () => fetchMainMenuData('both'),
+    queryFn: () => fetchMainMenuData(),
     staleTime: 10 * 60 * 1000, // 10 minutes - menu data doesn't change frequently
     gcTime: 30 * 60 * 1000, // 30 minutes cache time
     retry: 3,
