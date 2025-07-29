@@ -77,6 +77,7 @@ const viTranslation = {
     "enterprises": "Doanh nghiệp",
     "occupancyRate": "Tỉ lệ lấp đầy",
     "area": "Diện tích",
+    "dataSource": "Dữ liệu được cập nhật từ hệ thống",
     "noDataTitle": "Chưa có dữ liệu",
     "noZones": "Chưa có thông tin về các khu chức năng."
   },
@@ -89,7 +90,8 @@ const viTranslation = {
   },
   "featuredEvents": {
     "title": "SỰ KIỆN TIÊU ĐIỂM",
-    "eventPrefix": "Sự kiện nổi bật"
+    "eventPrefix": "Sự kiện nổi bật",
+    "noEvents": "Chưa có sự kiện nào được đăng tải."
   },
   "heroBackground": {
     "tab1": "Khu công nghệ cao Đà Nẵng",
@@ -360,6 +362,7 @@ const enTranslation = {
     "enterprises": "Enterprises",
     "occupancyRate": "Occupancy Rate",
     "area": "Area",
+    "dataSource": "Data updated from the system",
     "noDataTitle": "No data available",
     "noZones": "No information about functional zones available."
   },
@@ -372,7 +375,8 @@ const enTranslation = {
   },
   "featuredEvents": {
     "title": "FEATURED EVENTS",
-    "eventPrefix": "Featured event"
+    "eventPrefix": "Featured event",
+    "noEvents": "No events have been published yet."
   },
   "heroBackground": {
     "tab1": "Danang Hi-Tech Park",
