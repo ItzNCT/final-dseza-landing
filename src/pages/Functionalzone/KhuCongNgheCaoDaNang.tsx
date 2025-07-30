@@ -7,14 +7,17 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useTheme } from "@/context/ThemeContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
 import Footer from "@/components/Footer";
+import MobileLayout from "@/components/mobile/MobileLayout";
 import { Button } from "@/components/ui/button";
 
 const KhuCongNgheCaoDaNang = () => {
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
 
   const handleDownload = () => {
     console.log('Downloading document...');
@@ -88,6 +91,265 @@ const KhuCongNgheCaoDaNang = () => {
     }
   ];
 
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          {/* Main Content - Mobile optimized */}
+          <main className="flex-1 px-4 py-2 space-y-3">
+            {/* Mobile Breadcrumb */}
+            <div className={`py-1 px-2 rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50' : 'bg-dseza-light-secondary-bg/50'}`}>
+              <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <Link
+                  to="/"
+                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  Trang chủ
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <Link
+                  to="/gioi-thieu"
+                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  Giới thiệu
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <Link
+                  to="/gioi-thieu/cac-khu-chuc-nang"
+                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  Các khu chức năng
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`font-medium line-clamp-1 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  Khu công nghệ cao Đà Nẵng
+                </span>
+              </nav>
+            </div>
+
+            <article className="space-y-4">
+              {/* Article Header - Mobile optimized */}
+              <header className="space-y-3">
+                <h1 className={`font-montserrat text-xl font-bold leading-tight ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  Khu công nghệ cao Đà Nẵng
+                </h1>
+              </header>
+
+              {/* Article Content - Mobile optimized */}
+              <div className={`prose prose-sm max-w-none font-inter ${theme === 'dark' ? 'prose-invert text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <div className="space-y-6 text-justify text-sm">
+                  <section>
+                    <h2 className={`font-montserrat text-lg font-bold mb-3 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>1. Quá trình thành lập</h2>
+                    <p className="text-sm leading-relaxed">
+                      Khu công nghệ cao Đà Nẵng được thành lập theo Quyết định số 1979/QĐ-TTg ngày 28/10/2010 của Thủ tướng Chính phủ Thành lập Khu công nghệ cao Đà Nẵng trực thuộc Ủy ban nhân dân thành phố Đà Nẵng. Khu công nghệ cao Đà Nẵng có diện tích 1128,40 ha, thuộc huyện Hòa Vang, thành phố Đà Nẵng. Quyết định số 3409/QĐ-UBND ngày 23/7/2016 của UBND thành phố về việc phê duyệt điểu chỉnh tổng mặt bằng quy hoạch chi tiết tỷ lệ 1/500 nay được điều chỉnh tại điều chỉnh theo Quyết định số 5468/QĐ-UBND ngày 30/11/2019 của UBND thành phố, trong đó, có 6 phân khu chức năng chính bao gồm Khu sản xuất công nghệ cao, Khu nghiên cứu – Phát triển đào tạo và ươm tạo doanh nghiệp, Khu quản lý – hành chính, Khu ở, Khu hạ tầng kỹ thuật đầu mối, Khu hậu cần, logistics và dịch vụ công nghệ cao...
+                    </p>
+                    <div className="my-4 rounded-lg overflow-hidden shadow-lg">
+                      <img 
+                        src="/media/Functionalmap/ban-do-khu-cong-nghe-cao-da-nang.jpg" 
+                        alt="Bản đồ Khu công nghệ cao Đà Nẵng"
+                        className="w-full h-auto object-cover"
+                      />
+                    </div>
+                  </section>
+
+                  <section>
+                    <h2 className={`font-montserrat text-lg font-bold mb-3 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>2. Mục tiêu phát triển</h2>
+                    <ul className="list-disc pl-4 space-y-2 text-sm">
+                      <li>Thu hút các nguồn lực công nghệ cao (CNC) trong nước và nước ngoài, tạo động lực thúc đẩy phát triển CNC. Gắn kết giữa đào tạo, nghiên cứu khoa học và phát triển công nghệ với sản xuất, kinh doanh và dịch vụ; thúc đẩy đổi mới công nghệ, ươm tạo công nghệ, ươm tạo doanh nghiệp CNC và phát triển thị trường khoa học và công nghệ.</li>
+                      <li>Hình thành và phát triển một số ngành công nghiệp CNC, góp phần quan trọng vào việc nâng cao hiệu quả kinh tế, sức cạnh tranh của các sản phẩm hàng hóa, dịch vụ của thành phố Đà Nẵng và khu vực miền Trung - Tây Nguyên, Việt Nam.</li>
+                    </ul>
+                  </section>
+
+                  <section>
+                    <h2 className={`font-montserrat text-lg font-bold mb-3 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>3. Sứ mệnh</h2>
+                    <ul className="list-disc pl-4 space-y-2 text-sm">
+                      <li>Nghiên cứu, ươm tạo, phát triển, chuyển giao, ứng dụng công nghệ cao.</li>
+                      <li>Đào tạo nhân lực công nghệ cao.</li>
+                      <li>Ươm tạo doanh nghiệp công nghệ cao.</li>
+                      <li>Thương mại hóa các kết quả nghiên cứu khoa học và phát triển công nghệ.</li>
+                      <li>Sản xuất kinh doanh và dịch vụ công nghệ cao.</li>
+                      <li>Đầu tư mạo hiểm.</li>
+                    </ul>
+                  </section>
+
+                  <section>
+                    <h2 className={`font-montserrat text-lg font-bold mb-3 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>4. Hiện trạng sử dụng đất</h2>
+                    <p className="mb-3 text-sm">Bảng tổng hợp tỷ lệ lấp đầy các phân khu đất tại dự án Khu công nghệ cao</p>
+                    <div className="overflow-x-auto -mx-4 px-4">
+                      <table className={`min-w-full border-collapse border text-xs ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                          <thead className={`${theme === 'dark' ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary'}`}>
+                              <tr>
+                                  <th className={`p-2 text-left font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Stt</th>
+                                  <th className={`p-2 text-left font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Thành phần</th>
+                                  <th className={`p-2 text-left font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>QH (ha)</th>
+                                  <th className={`p-2 text-left font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Đã thuê (ha)</th>
+                                  <th className={`p-2 text-left font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Tỷ lệ (%)</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              <tr className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+                                  <td className={`p-2 border font-semibold ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>I</td>
+                                  <td className={`p-2 border font-semibold ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>Đất dành cho khu chức năng (cho thuê)</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>329,96</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>107,98</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>32,73</td>
+                              </tr>
+                              <tr className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg' : 'bg-dseza-light-secondary-bg'}`}>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>1</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>Khu sản xuất công nghệ cao</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>202,58</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>85,61</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>42,26</td>
+                              </tr>
+                              <tr className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>2</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>Khu nghiên cứu – Phát triển, đào tạo và ươm tạo doanh nghiệp</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>99,93</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>4,45</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>4,45</td>
+                              </tr>
+                              <tr className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg' : 'bg-dseza-light-secondary-bg'}`}>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>3</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>Khu hậu cần, logistic và dịch vụ công nghệ cao</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>27,45</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>17,92</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>65,28</td>
+                              </tr>
+                              <tr className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+                                  <td className={`p-2 border font-semibold ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>II</td>
+                                  <td className={`p-2 border font-semibold ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>Đất công trình phụ trợ (khu ở, quản lý hành chính, giao thông, cây xanh, mặt nước, Nhà máy nước, trạm biến áp, hải quan,công an, cảnh sát PCCC...)</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>280,48</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}></td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}></td>
+                              </tr>
+                              <tr className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg' : 'bg-dseza-light-secondary-bg'}`}>
+                                  <td className={`p-2 border font-semibold ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>III</td>
+                                  <td className={`p-2 border font-semibold ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>Đất đồi núi, hồ Hòa Trung, mương nước tưới tiêu và vành đai cây xanh cách ly</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>517,96</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}></td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}></td>
+                              </tr>
+                              <tr className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+                                  <td colSpan={2} className={`p-2 border font-semibold text-center ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>∑ TỔNG CỘNG</td>
+                                  <td className={`p-2 border font-semibold ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>1.128,40</td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}></td>
+                                  <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}></td>
+                              </tr>
+                          </tbody>
+                      </table>
+                    </div>
+                  </section>
+                  
+                  <section>
+                      <h2 className={`font-montserrat text-lg font-bold mb-3 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>5. Giá cho thuê lại đất và tiền sử dụng hạ tầng</h2>
+                      <p className="mb-3 text-sm">BẢNG GIÁ ĐẤT CÁC TUYẾN ĐƯỜNG TRONG KHU CÔNG NGHỆ CAO ĐÀ NẴNG</p>
+                      <div className="overflow-x-auto -mx-4 px-4">
+                          <table className={`min-w-full border-collapse border text-xs ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                               <thead className={`${theme === 'dark' ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary'}`}>
+                                  <tr>
+                                      <th rowSpan={2} className={`p-1 text-center align-middle font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>STT<br/>(1)</th>
+                                      <th rowSpan={2} className={`p-1 text-center align-middle font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Vị trí<br/>(2)</th>
+                                      <th colSpan={3} className={`p-1 text-center align-middle font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Căn cứ tính đơn giá</th>
+                                      <th colSpan={2} className={`p-1 text-center align-middle font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Đơn giá thuê đất (đồng/m²)</th>
+                                  </tr>
+                                  <tr>
+                                      <th className={`p-1 text-center font-normal border text-xs ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Giá đất theo QĐ 06/2019/QĐ-UBND<br/>ngày 31/01/2019<br/>(3)</th>
+                                      <th className={`p-1 text-center font-normal border text-xs ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Hệ số điều chỉnh QĐ 08/2019/QĐ-UBND<br/>ngày 01/02/2019<br/>(4)</th>
+                                      <th className={`p-1 text-center font-normal border text-xs ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Tỷ lệ % theo QĐ 12/2019/QĐ-UBND<br/>ngày 14/02/2019<br/>(5)</th>
+                                      <th className={`p-1 text-center font-normal border text-xs ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Trả 1 lần<br/>(50 năm)<br/>(6) = (3)x(4)x50/70</th>
+                                      <th className={`p-1 text-center font-normal border text-xs ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Trả hàng năm<br/>(7) = (6)x(5)</th>
+                                  </tr>
+                              </thead>
+                              <tbody className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                                  {dataGiaDat.flatMap((nhomDat) => [
+                                  <tr key={nhomDat.stt} className={`${theme === 'dark' ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary'}`}>
+                                      <td className={`p-1 text-center font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>
+                                          {nhomDat.stt}
+                                      </td>
+                                      <td colSpan={7} className={`p-1 font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>
+                                          {nhomDat.viTri}
+                                      </td>
+                                  </tr>,
+                                  ...nhomDat.loaiDat.map((dat) => (
+                                      <tr key={`${nhomDat.stt}-${dat.id}`} className={`${theme === 'dark' ? 'odd:bg-dseza-dark-main-bg even:bg-dseza-dark-secondary-bg hover:bg-dseza-dark-hover' : 'odd:bg-white even:bg-dseza-light-secondary hover:bg-dseza-light-hover'}`}>
+                                          <td className={`p-1 text-center border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                                              {dat.id}
+                                          </td>
+                                          <td className={`p-1 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                                              {dat.name}
+                                          </td>
+                                          <td className={`p-1 text-right border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                                              {dat.giaDat}
+                                          </td>
+                                          <td className={`p-1 text-center border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                                              {dat.heSo}
+                                          </td>
+                                          <td className={`p-1 text-center border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                                              {dat.tyLe}
+                                          </td>
+                                          <td className={`p-1 text-right border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                                              {dat.tra1Lan}
+                                          </td>
+                                          <td className={`p-1 text-right border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                                              {dat.traHangNam}
+                                          </td>
+                                      </tr>
+                                  ))
+                              ])}
+                          </tbody>
+                          </table>
+                      </div>
+                      <div className="mt-3">
+                          <p className={`font-semibold text-sm ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Lưu ý:</p>
+                          <ul className="list-disc pl-4 mt-2 space-y-1 text-xs">
+                              <li>Tiền sử dụng hạ tầng: 6.000đ/m2/năm (giá trị này chưa bao gồm thuế VAT)</li>
+                              <li>Trường hợp diện tích tính thu tiền thuê đất của thửa đất hoặc khu đất có giá trị (tính theo giá đất trong Bảng giá đất) từ 30 tỷ đồng trở lên thì giá đất cụ thể tính thu tiền thuê đất được xác định theo các phương pháp so sánh trực tiếp, chiết trừ, thu nhập, thặng dư.</li>
+                          </ul>
+                      </div>
+                  </section>
+
+                  <section>
+                      <h2 className={`font-montserrat text-lg font-bold mb-3 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>6. Bản đồ quy hoạch Khu CNC Đà Nẵng và tình hình sử dụng đất</h2>
+                       <p className="mb-3 text-sm">Tính đến tháng 7 năm 2020 (có file đính kèm)</p>
+                      <a href="#" className={`font-semibold text-sm ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary-hover' : 'text-dseza-light-primary hover:text-dseza-light-primary-hover'} underline`}>
+                          (Xem tại đây)
+                      </a>
+                  </section>
+                </div>
+              </div>
+
+              {/* Share Section - Mobile optimized */}
+              <div className={`pt-4 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                <h3 className={`font-montserrat text-base font-semibold mb-3 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  Chia sẻ trang:
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs">
+                    <Download className="h-3 w-3 mr-1" />
+                    Tải xuống
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleShare} className="text-xs">
+                    <Share2 className="h-3 w-3 mr-1" />
+                    Chia sẻ
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handlePrint} className="text-xs">
+                    <Printer className="h-3 w-3 mr-1" />
+                    In
+                  </Button>
+                </div>
+              </div>
+            </article>
+          </main>
+
+          {/* Footer */}
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Desktop Layout (original)
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}
@@ -98,26 +360,26 @@ const KhuCongNgheCaoDaNang = () => {
       {/* Main Content */}
       <main className="flex-1 pt-52">
         {/* Breadcrumb */}
-        <div className={`py-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
+        <div className={`py-3 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'} border-b ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
               <Link
                 to="/"
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Trang chủ
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link
                 to="/gioi-thieu"
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Giới thiệu
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link
                 to="/gioi-thieu/cac-khu-chuc-nang"
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Các khu chức năng
               </Link>

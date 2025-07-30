@@ -8,6 +8,7 @@ import {
   Users
 } from 'lucide-react';
 import { useTheme } from "@/context/ThemeContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTranslation } from "@/utils/translations";
 import { useFunctionalZones } from "@/hooks/useFunctionalZones";
@@ -19,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
+import MobileLayout from "@/components/mobile/MobileLayout";
 import Footer from "@/components/Footer";
 
 /**
@@ -27,6 +29,7 @@ import Footer from "@/components/Footer";
  */
 const FunctionalZonesListPage: React.FC = () => {
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
   const { language } = useLanguage();
   const { t } = useTranslation();
   const { data: functionalZones, isLoading, isError, error } = useFunctionalZones();
@@ -37,6 +40,262 @@ const FunctionalZonesListPage: React.FC = () => {
   const borderColor = theme === "dark" ? "border-dseza-dark-border" : "border-dseza-light-border";
   const hoverColor = theme === "dark" ? "hover:bg-dseza-dark-hover" : "hover:bg-dseza-light-hover";
 
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          {/* Main Content - Mobile optimized */}
+          <main className="flex-1 px-4 py-2 space-y-3">
+            {/* Mobile Breadcrumb */}
+            <div className={`py-1 px-2 rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50' : 'bg-dseza-light-secondary-bg/50'}`}>
+              <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <Link
+                  to="/"
+                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  Trang chủ
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <Link
+                  to="/gioi-thieu"
+                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  Giới thiệu
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  Các Khu chức năng
+                </span>
+              </nav>
+            </div>
+
+            <article className="space-y-4">
+              {/* Article Header - Mobile optimized */}
+              <header className="space-y-3">
+                <h1 className={`font-montserrat text-xl font-bold leading-tight ${textColor}`}>
+                  Các Khu chức năng
+                </h1>
+                <p className={`text-sm ${secondaryTextColor}`}>
+                  Khám phá các khu công nghệ cao, khu công nghiệp và khu chức năng đặc biệt tại Đà Nẵng
+                </p>
+              </header>
+
+              {/* Loading State - Mobile optimized */}
+              {isLoading && (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <LoadingSpinner size="lg" className={textColor} />
+                  <p className={`mt-3 text-base font-medium ${textColor}`}>
+                    {t('common.loading') || 'Đang tải dữ liệu các khu chức năng...'}
+                  </p>
+                </div>
+              )}
+
+              {/* Error State - Mobile optimized */}
+              {isError && (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className={cn(
+                    "p-3 rounded-full mb-4",
+                    theme === "dark" ? "bg-dseza-dark-hover" : "bg-dseza-light-hover"
+                  )}>
+                    <Building2 className={cn(
+                      "w-8 h-8",
+                      theme === "dark" ? "text-red-400" : "text-red-600"
+                    )} />
+                  </div>
+                  <h2 className={cn("text-lg font-bold mb-3", textColor)}>
+                    {t('common.errorTitle') || 'Có lỗi xảy ra'}
+                  </h2>
+                  <p className={cn("text-sm text-center max-w-xs", textColor)}>
+                    {t('common.errorLoading') || 'Không thể tải dữ liệu các khu chức năng từ server.'}
+                  </p>
+                  {error && (
+                    <p className={cn("text-xs mt-2 opacity-70", textColor)}>
+                      {error.message}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* No Data State - Mobile optimized */}
+              {!isLoading && !isError && (!functionalZones || functionalZones.length === 0) && (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className={cn(
+                    "p-3 rounded-full mb-4",
+                    theme === "dark" ? "bg-dseza-dark-hover" : "bg-dseza-light-hover"
+                  )}>
+                    <Building2 className={cn(
+                      "w-8 h-8",
+                      secondaryTextColor
+                    )} />
+                  </div>
+                  <h2 className={cn("text-lg font-bold mb-3", textColor)}>
+                    {t('functionalZones.noDataTitle') || 'Chưa có dữ liệu'}
+                  </h2>
+                  <p className={cn("text-sm text-center", textColor)}>
+                    {t('functionalZones.noZones') || 'Chưa có thông tin về các khu chức năng.'}
+                  </p>
+                </div>
+              )}
+
+              {/* Main Content - Functional Zones Mobile Cards */}
+              {functionalZones && functionalZones.length > 0 && !isLoading && (
+                <div className="space-y-4">
+                  {functionalZones.map((zone) => (
+                    <Link
+                      key={zone.id}
+                      to={zone.path}
+                      className="block group"
+                    >
+                      <div className={cn(
+                        "rounded-lg overflow-hidden shadow-md transition-all duration-200",
+                        "group-hover:shadow-lg active:scale-[0.98] border",
+                        cardBackground,
+                        borderColor,
+                        hoverColor
+                      )}>
+                        <div className="flex">
+                          {/* Image Section - Mobile compact */}
+                          <div className="relative flex-shrink-0 w-24 h-24 overflow-hidden">
+                            {zone.imageUrl ? (
+                              <img
+                                src={zone.imageUrl}
+                                alt={zone.title}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                loading="lazy"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = '/placeholder.svg';
+                                }}
+                              />
+                            ) : (
+                              <div className={cn(
+                                "w-full h-full flex items-center justify-center",
+                                theme === "dark" ? "bg-dseza-dark-hover" : "bg-dseza-light-hover"
+                              )}>
+                                <Building2 className={cn(
+                                  "w-8 h-8",
+                                  secondaryTextColor
+                                )} />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Content Section - Mobile */}
+                          <div className="flex-1 p-3">
+                            {/* Title */}
+                            <h3 className={cn(
+                              "font-montserrat font-bold text-base mb-2 line-clamp-2 leading-tight transition-colors duration-300",
+                              textColor,
+                              theme === "dark" ? "group-hover:text-dseza-dark-primary-accent" : "group-hover:text-dseza-light-primary-accent"
+                            )}>
+                              {zone.title}
+                            </h3>
+                            
+                            {/* Summary - Mobile */}
+                            {zone.summary && (
+                              <p className={cn(
+                                "text-xs mb-2 line-clamp-2",
+                                secondaryTextColor
+                              )}>
+                                {zone.summary}
+                              </p>
+                            )}
+
+                            {/* Mobile Statistics - Compact */}
+                            <div className="flex items-center space-x-3 text-xs">
+                              {zone.enterprises > 0 && (
+                                <div className="flex items-center space-x-1">
+                                  <Users className={cn(
+                                    "w-3 h-3",
+                                    theme === "dark" ? "text-dseza-dark-primary-accent" : "text-dseza-light-primary-accent"
+                                  )} />
+                                  <span className={cn("font-medium", textColor)}>
+                                    {zone.enterprises}
+                                  </span>
+                                </div>
+                              )}
+                              
+                              {zone.area && (
+                                <div className="flex items-center space-x-1">
+                                  <MapPin className={cn(
+                                    "w-3 h-3",
+                                    theme === "dark" ? "text-dseza-dark-secondary-accent" : "text-dseza-light-secondary-accent"
+                                  )} />
+                                  <span className={cn("font-medium", textColor)}>
+                                    {zone.area}
+                                  </span>
+                                </div>
+                              )}
+                              
+                              {zone.occupancyRate > 0 && (
+                                <div className="flex items-center space-x-1">
+                                  <TrendingUp className={cn(
+                                    "w-3 h-3",
+                                    theme === "dark" ? "text-orange-400" : "text-orange-600"
+                                  )} />
+                                  <span className={cn("font-medium", textColor)}>
+                                    {zone.occupancyRate}%
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Mobile Status Badges - Compact */}
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {zone.occupancyRate >= 90 && (
+                                <Badge variant="default" className="bg-red-500 hover:bg-red-600 text-white text-xs px-1.5 py-0.5">
+                                  Gần đầy
+                                </Badge>
+                              )}
+                              {zone.occupancyRate >= 70 && zone.occupancyRate < 90 && (
+                                <Badge variant="default" className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-1.5 py-0.5">
+                                  Tỉ lệ cao
+                                </Badge>
+                              )}
+                              {zone.occupancyRate >= 40 && zone.occupancyRate < 70 && (
+                                <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-1.5 py-0.5">
+                                  Trung bình
+                                </Badge>
+                              )}
+                              {zone.occupancyRate < 40 && zone.occupancyRate > 0 && (
+                                <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white text-xs px-1.5 py-0.5">
+                                  Còn trống
+                                </Badge>
+                              )}
+                              {zone.enterprises >= 50 && (
+                                <Badge variant="outline" className={cn(
+                                  "border-current text-xs px-1.5 py-0.5",
+                                  theme === "dark" ? "text-dseza-dark-secondary-accent border-dseza-dark-secondary-accent" : "text-dseza-light-secondary-accent border-dseza-light-secondary-accent"
+                                )}>
+                                  Quy mô lớn
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+
+                  {/* Footer Note - Mobile */}
+                  <div className="mt-6 text-center">
+                    <p className={cn("text-xs opacity-70", textColor)}>
+                      {t('functionalZones.dataSource') || 'Dữ liệu được cập nhật từ hệ thống DSEZA'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </article>
+          </main>
+
+          {/* Footer */}
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Desktop Layout (original)
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Complete Header Structure */}
@@ -47,19 +306,19 @@ const FunctionalZonesListPage: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 pt-52">
         {/* Breadcrumb */}
-        <div className={`py-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary'}`}>
+        <div className={`py-3 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'} border-b ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${secondaryTextColor}`}>
               <Link 
                 to="/" 
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary-accent' : 'hover:text-dseza-light-primary-accent'}`}
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Trang chủ
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
                 to="/gioi-thieu" 
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary-accent' : 'hover:text-dseza-light-primary-accent'}`}
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Giới thiệu
               </Link>

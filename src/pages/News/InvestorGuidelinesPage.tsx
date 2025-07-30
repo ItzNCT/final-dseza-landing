@@ -11,14 +11,17 @@ import {
   Users
 } from 'lucide-react';
 import { useTheme } from "@/context/ThemeContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
 import Footer from "@/components/Footer";
+import MobileLayout from "@/components/mobile/MobileLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const InvestorGuidelinesPage = () => {
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
 
   // Investor guidelines categories data
   const investorCategories = [
@@ -70,6 +73,251 @@ const InvestorGuidelinesPage = () => {
     }
   ];
 
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          {/* Main Content - Mobile optimized */}
+          <main className="flex-1 px-4 py-4 space-y-4">
+            
+            {/* Mobile Breadcrumb */}
+            <div className={`py-1 px-2 rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50' : 'bg-dseza-light-secondary-bg/50'}`}>
+              <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <Link 
+                  to="/" 
+                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  Trang chủ
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <Link 
+                  to="/tin-tuc" 
+                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  Tin tức
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  Dành cho nhà đầu tư
+                </span>
+              </nav>
+            </div>
+
+            {/* Page Header - Mobile optimized */}
+            <div className="text-center py-3">
+              <h1 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                Dành Cho Nhà Đầu Tư
+              </h1>
+              <div className={`w-12 h-0.5 mx-auto mb-2 rounded-full ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></div>
+              <p className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                Thông tin toàn diện về quy trình đầu tư và hỗ trợ tại DSEZA
+              </p>
+            </div>
+
+            {/* Main Categories - Mobile single column */}
+            <div className="space-y-4">
+              {investorCategories.map((category) => {
+                const IconComponent = category.icon;
+                
+                return (
+                  <Link 
+                    key={category.id}
+                    to={category.url}
+                    className="block group"
+                  >
+                    <Card className={`transition-all duration-200 active:scale-[0.98] ${
+                      theme === 'dark' 
+                        ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
+                        : 'bg-white border-dseza-light-border'
+                    }`}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start space-x-3">
+                          <div className={`w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 ${category.bgColor}`}>
+                            <IconComponent className={`h-7 w-7 ${category.color}`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className={`font-bold text-lg mb-2 ${
+                              theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                            }`}>
+                              {category.title}
+                            </h3>
+                            <p className={`text-sm leading-relaxed mb-3 ${
+                              theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
+                            }`}>
+                              {category.description}
+                            </p>
+                            <div className="flex items-center">
+                              <span className={`text-sm font-medium ${category.color}`}>
+                                Xem chi tiết
+                              </span>
+                              <ArrowRight className={`h-4 w-4 ml-2 transition-transform group-active:translate-x-1 ${category.color}`} />
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Quick Resources - Mobile grid */}
+            <Card className={`${
+              theme === 'dark' 
+                ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
+                : 'bg-white border-dseza-light-border'
+            }`}>
+              <CardHeader className="pb-4">
+                <CardTitle className={`text-lg text-center ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  Tài Liệu Hỗ Trợ
+                </CardTitle>
+                <p className={`text-sm text-center ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                  Các tài liệu và dịch vụ hỗ trợ nhà đầu tư
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3">
+                  {quickResources.map((resource, index) => {
+                    const IconComponent = resource.icon;
+                    
+                    return (
+                      <Link 
+                        key={index}
+                        to={resource.url}
+                        className="block group"
+                      >
+                        <Card className={`h-full transition-all duration-200 active:scale-[0.98] ${
+                          theme === 'dark' 
+                            ? 'bg-dseza-dark-main-bg border-dseza-dark-border' 
+                            : 'bg-dseza-light-main-bg border-dseza-light-border'
+                        }`}>
+                          <CardContent className="p-3 text-center">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 ${
+                              theme === 'dark' ? 'bg-dseza-dark-primary/20' : 'bg-dseza-light-primary/20'
+                            }`}>
+                              <IconComponent className={`h-5 w-5 ${
+                                theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'
+                              }`} />
+                            </div>
+                            <h4 className={`font-semibold text-sm mb-1 ${
+                              theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+                            }`}>
+                              {resource.title}
+                            </h4>
+                            <p className={`text-xs line-clamp-2 ${
+                              theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
+                            }`}>
+                              {resource.description}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Investment Highlights - Mobile optimized */}
+            <Card className={`${
+              theme === 'dark' 
+                ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
+                : 'bg-white border-dseza-light-border'
+            }`}>
+              <CardHeader className="pb-4">
+                <CardTitle className={`text-lg text-center ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  Tại Sao Chọn DSEZA?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className={`text-2xl font-bold mb-1 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>
+                      400+
+                    </div>
+                    <h4 className={`text-sm font-semibold mb-1 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                      Doanh nghiệp
+                    </h4>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      Đã tin tướng đầu tư
+                    </p>
+                  </div>
+                  <div>
+                    <div className={`text-2xl font-bold mb-1 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>
+                      $8B+
+                    </div>
+                    <h4 className={`text-sm font-semibold mb-1 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                      Vốn đầu tư
+                    </h4>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      Tổng vốn thu hút
+                    </p>
+                  </div>
+                  <div>
+                    <div className={`text-2xl font-bold mb-1 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>
+                      150k+
+                    </div>
+                    <h4 className={`text-sm font-semibold mb-1 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                      Việc làm
+                    </h4>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      Cơ hội đã tạo ra
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Call to Action - Mobile optimized */}
+            <Card className={`${
+              theme === 'dark' 
+                ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
+                : 'bg-white border-dseza-light-border'
+            }`}>
+              <CardContent className="p-4 text-center">
+                <h3 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  Sẵn Sàng Đầu Tư?
+                </h3>
+                <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                  Liên hệ với chúng tôi để được tư vấn chi tiết về cơ hội đầu tư
+                </p>
+                <div className="space-y-3">
+                  <Link 
+                    to="/lien-he"
+                    className={`inline-flex items-center justify-center w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 active:scale-[0.98] ${
+                      theme === 'dark' 
+                        ? 'bg-dseza-dark-primary text-dseza-dark-main-text' 
+                        : 'bg-dseza-light-primary text-white'
+                    }`}
+                  >
+                    Liên hệ ngay
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                  <Link 
+                    to="/cam-nang-dau-tu"
+                    className={`inline-flex items-center justify-center w-full px-4 py-3 rounded-lg border font-medium transition-all duration-200 active:scale-[0.98] ${
+                      theme === 'dark' 
+                        ? 'border-dseza-dark-border text-dseza-dark-main-text' 
+                        : 'border-dseza-light-border text-dseza-light-main-text'
+                    }`}
+                  >
+                    Tải cẩm nang đầu tư
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+          </main>
+
+          {/* Footer */}
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Desktop Layout (original)
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}

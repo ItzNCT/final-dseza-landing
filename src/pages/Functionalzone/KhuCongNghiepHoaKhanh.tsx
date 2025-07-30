@@ -7,14 +7,17 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useTheme } from "@/context/ThemeContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
 import Footer from "@/components/Footer";
+import MobileLayout from "@/components/mobile/MobileLayout";
 import { Button } from "@/components/ui/button";
 
 const KhuCongNghiepHoaKhanh = () => {
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
 
   const handleDownload = () => {
     console.log('Downloading document...');
@@ -37,6 +40,183 @@ const KhuCongNghiepHoaKhanh = () => {
     window.print();
   };
 
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          {/* Mobile Content */}
+          <div className="px-4 py-2 space-y-3">
+            {/* Breadcrumb - Mobile */}
+            <nav className={`flex items-center text-xs space-x-1 py-1 px-2 rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50 text-dseza-dark-secondary-text' : 'bg-dseza-light-secondary-bg/50 text-dseza-light-secondary-text'}`}>
+              <Link
+                to="/"
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
+                Trang chủ
+              </Link>
+              <ChevronRight className="h-2.5 w-2.5" />
+              <Link
+                to="/gioi-thieu"
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
+                Giới thiệu
+              </Link>
+              <ChevronRight className="h-2.5 w-2.5" />
+              <Link
+                to="/gioi-thieu/cac-khu-chuc-nang"
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
+                Các khu chức năng
+              </Link>
+              <ChevronRight className="h-2.5 w-2.5" />
+              <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                Khu công nghiệp Hòa Khánh
+              </span>
+            </nav>
+
+            {/* Article Header - Mobile */}
+            <header className="mb-4">
+              <h1 className={`font-montserrat text-lg font-bold mb-2 leading-tight ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                Khu công nghiệp Hòa Khánh
+              </h1>
+            </header>
+
+            {/* Article Content - Mobile */}
+            <div className={`text-sm font-inter ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <p className="mb-3 text-justify">Khu công nghiệp Hòa Khánh được thành lập theo Quyết định số 3698/QĐ-UB ngày 12/12/1996 của Chủ tịch Ủy ban nhân dân tỉnh Quảng Nam Đà Nẵng (cũ), thuộc phường Hòa Khánh, quận - Liên Chiểu, nằm cách sân bay quốc tế Đà Nẵng 10km, cảng biển Tiên Sa 20km, cảng Sông Hàn 13km, cảng biển Liên Chiểu 5km.</p>
+                <div className="my-4 rounded-lg overflow-hidden shadow-lg">
+                    <img
+                        src="/media/Functionalmap/ban-do-khu-cong-nghiep-hoa-khanh.jpg"
+                        alt="Bản đồ Khu công nghiệp Hòa Khánh"
+                        className="w-full h-auto object-cover"
+                    />
+                </div>
+                <div className="space-y-4 text-justify">
+                    <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>1. Vị trí địa lí</h2>
+                        <p className="mb-2">quận Liên Chiểu, thành phố Đà Nẵng.</p>
+                        <ul className="list-disc pl-4 mt-1 space-y-1 text-xs">
+                            <li>Cách cảng biển Tiên Sa: 20 km</li>
+                            <li>Cách Sân bay Quốc tế Đà Nẵng: 10 km</li>
+                            <li>Cách Trung tâm thành phố Đà Nẵng: 10 km</li>
+                            <li>Cách ga đường sắt: 09 km</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>2. Tổng diện tích</h2>
+                        <p>394 ha, trong đó có 303,93 ha đất công nghiệp có thể cho thuê.</p>
+                    </section>
+                    <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>3. Giá cho thuê lại đất và tiền sử dụng hạ tầng</h2>
+                        <p className="text-xs italic mb-2">Ngày cập nhật: 05/2020</p>
+                        <p className="text-xs italic mb-3">Giá có tính tham khảo, mọi chi tiết xin liên hệ Công ty Phát triển và Khai thác hạ tầng Khu công nghiệp Đà Nẵng.</p>
+                        
+                        <div className="mt-3">
+                            <h3 className={`font-montserrat text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>3.1. Giá cho thuê lại đất: (Đến năm 2046)</h3>
+                            <div className="overflow-x-auto">
+                                <table className={`min-w-full border-collapse border text-xs ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                                    <thead className={`${theme === 'dark' ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary'}`}>
+                                        <tr>
+                                            <th className={`p-2 text-left font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Phương thức thanh toán</th>
+                                            <th className={`p-2 text-left font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Đơn giá (đồng/m2/năm)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                                        <tr className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+                                            <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>Trả tiền thuê đất từng năm (ổn định trong 5 năm)</td>
+                                            <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>23.000</td>
+                                        </tr>
+                                        <tr className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg' : 'bg-dseza-light-secondary-bg'}`}>
+                                            <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>Trả tiền thuê lại đất một lần cho cả thời hạn thuê</td>
+                                            <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>17.400</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p className="mt-2 text-xs italic">(*) Nếu Dự án có mục đích kinh doanh dịch vụ thì đơn giá thuê lại đất cao hơn 30% so với đơn giá nêu trên</p>
+                        </div>
+                        
+                        <div className="mt-4">
+                            <h3 className={`font-montserrat text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>3.2. Giá thu tiền sử dụng hạ tầng:</h3>
+                            <div className="overflow-x-auto">
+                                <table className={`min-w-full border-collapse border text-xs ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                                    <thead className={`${theme === 'dark' ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary'}`}>
+                                        <tr>
+                                            <th className={`p-2 text-left font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Chi phí</th>
+                                            <th className={`p-2 text-left font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Đơn giá (đồng)</th>
+                                            <th className={`p-2 text-left font-semibold border ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text' : 'border-dseza-light-border text-dseza-light-main-text'}`}>Phương thức thanh toán</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                                        <tr className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+                                            <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>Tiền sử dụng hạ tầng</td>
+                                            <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>8.000 (đồng/m2/năm)</td>
+                                            <td className={`p-2 border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>Trả tiền hàng năm, kể từ ngày dự án đăng ký đầu tư đi vào hoạt động.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p className="mt-2 text-xs italic">Lưu ý: Đơn giá thuê lại đất và tiền sử dụng hạ tầng tại các Khu công nghiệp nêu trên là đơn giá tính đến thời điểm hiện tại; có thể thay đổi theo thời gian bởi quyết định của cơ quan có thẩm quyền và các Công ty kinh doanh hạ tầng.</p>
+                        </div>
+                    </section>
+                    <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>4. Giá xử lý nước thải</h2>
+                        <p>6.873 đồng/m3 (Trả hàng tháng, theo hợp đồng).</p>
+                    </section>
+                    <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>5. Chủ đầu tư kinh doanh hạ tầng</h2>
+                        <p className="font-semibold mb-2">Công ty Phát triển và Khai thác hạ tầng Khu Công nghiệp</p>
+                        <ul className="list-none pl-0 mt-1 space-y-1 text-xs">
+                            <li><strong>Địa chỉ:</strong> Tầng 3,4 số 58 Nguyễn Chí Thanh, quận Hải Châu, Thành phố Đà Nẵng.</li>
+                            <li><strong>Điện thoại:</strong> 0236- 3.886.159</li>
+                            <li><strong>Fax:</strong> 0236- 3.886.157</li>
+                            <li><strong>Email:</strong> daizico@danang.gov.vn</li>
+                        </ul>
+                    </section>
+                     <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>6. Hiện trạng quy hoạch sử dụng đất</h2>
+                        <ul className="list-disc pl-4 mt-1 space-y-1 text-xs">
+                            <li>Tổng diện tích đất theo quy hoạch : 394 ha</li>
+                            <li>Diện tích đất công nghiệp có thể cho thuê : 303,93 ha</li>
+                            <li>Diện tích đất công nghiệp đã cho thuê: 303,93 ha</li>
+                            <li>Diện tích đất công nghiệp còn lại : 0,00 ha</li>
+                            <li>Diện tích đất công nghiệp chưa có hạ tầng 0,00 ha</li>
+                            <li>Tỷ lệ lắp đầy : 100%</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>7. Bản đồ quy hoạch KCN Hòa Khánh</h2>
+                        <a href="#" className={`font-semibold text-xs ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary-hover' : 'text-dseza-light-primary hover:text-dseza-light-primary-hover'} underline`}>
+                            (Xem tại đây)
+                        </a>
+                    </section>
+                </div>
+            </div>
+
+            {/* Share Section - Mobile */}
+            <div className={`mt-6 pt-4 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+              <h3 className={`font-montserrat text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                Chia sẻ trang:
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs h-7">
+                  Tải xuống
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleShare} className="text-xs h-7">
+                  Chia sẻ
+                </Button>
+                <Button variant="outline" size="sm" onClick={handlePrint} className="text-xs h-7">
+                  In
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </MobileLayout>
+    );
+  }
+
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}
@@ -47,26 +227,26 @@ const KhuCongNghiepHoaKhanh = () => {
       {/* Main Content */}
       <main className="flex-1 pt-52">
         {/* Breadcrumb */}
-        <div className={`py-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
+        <div className={`py-3 border-b ${theme === 'dark' ? 'bg-dseza-dark-secondary/50 border-dseza-dark-border' : 'bg-dseza-light-secondary/50 border-dseza-light-border'}`}>
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
               <Link
                 to="/"
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Trang chủ
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link
                 to="/gioi-thieu"
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Giới thiệu
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link
                 to="/gioi-thieu/cac-khu-chuc-nang"
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Các khu chức năng
               </Link>

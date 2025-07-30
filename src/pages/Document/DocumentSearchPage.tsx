@@ -40,6 +40,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useDocuments, DocumentFilters } from "@/api/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/context/ThemeContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /**
  * DocumentSearchPage component for searching legal documents
@@ -56,6 +57,7 @@ const DocumentSearchPage: React.FC = () => {
     (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
   const { toast } = useToast();
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
   
   const [filters, setFilters] = useState<DocumentFilters>({
     documentNumber: "",
@@ -588,10 +590,10 @@ const DocumentSearchPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className={isMobile ? "p-4" : "p-6"}>
         {/* Category Header */}
-        <div className="mb-6">
-          <h2 className={`text-xl font-semibold ${
+        <div className={isMobile ? "mb-4" : "mb-6"}>
+          <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold ${
             theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
           }`}>
             {getCategoryDisplayName()}
@@ -599,12 +601,12 @@ const DocumentSearchPage: React.FC = () => {
         </div>
 
         {/* Search Filters Section */}
-        <div className={`p-6 rounded-lg mb-8 ${
+        <div className={`${isMobile ? 'p-4' : 'p-6'} rounded-lg ${isMobile ? 'mb-6' : 'mb-8'} ${
           theme === 'dark' 
             ? 'bg-dseza-dark-hover border border-dseza-dark-border' 
             : 'bg-dseza-light-hover border border-dseza-light-border'
         }`}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 ${isMobile ? '' : 'md:grid-cols-2'} lg:grid-cols-3 gap-4`}>
             {/* Document Number/Symbol */}
             <div className="space-y-2">
               <Label 
@@ -648,17 +650,17 @@ const DocumentSearchPage: React.FC = () => {
             </div>
 
             {/* Search Button */}
-            <div className="space-y-2 flex items-end">
+            <div className={`space-y-2 ${isMobile ? 'col-span-1' : 'flex items-end'}`}>
               <Button 
                 onClick={handleSearch}
-                className={`w-full ${
+                className={`w-full ${isMobile ? 'h-11' : ''} ${
                   theme === 'dark' 
                     ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary-hover' 
                     : 'bg-dseza-light-primary text-dseza-light-main-bg hover:bg-dseza-light-primary-hover'
                 }`}
                 disabled={isLoading}
               >
-                <Search className="h-4 w-4 mr-2" />
+                <Search className={`h-4 w-4 mr-2`} />
                 {isLoading ? "Đang tìm kiếm..." : "Tìm kiếm"}
               </Button>
             </div>

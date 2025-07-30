@@ -7,14 +7,17 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useTheme } from "@/context/ThemeContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
 import Footer from "@/components/Footer";
+import MobileLayout from "@/components/mobile/MobileLayout";
 import { Button } from "@/components/ui/button";
 
 const KhuCongNghiepDaNang = () => {
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
 
   const handleDownload = () => {
     console.log('Downloading document...');
@@ -37,6 +40,139 @@ const KhuCongNghiepDaNang = () => {
     window.print();
   };
 
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          {/* Mobile Content */}
+          <div className="px-4 py-2 space-y-3">
+            {/* Breadcrumb - Mobile */}
+            <nav className={`flex items-center text-xs space-x-1 py-1 px-2 rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50 text-dseza-dark-secondary-text' : 'bg-dseza-light-secondary-bg/50 text-dseza-light-secondary-text'}`}>
+              <Link
+                to="/"
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
+                Trang chủ
+              </Link>
+              <ChevronRight className="h-2.5 w-2.5" />
+              <Link
+                to="/gioi-thieu"
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
+                Giới thiệu
+              </Link>
+              <ChevronRight className="h-2.5 w-2.5" />
+              <Link
+                to="/gioi-thieu/cac-khu-chuc-nang"
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
+                Các khu chức năng
+              </Link>
+              <ChevronRight className="h-2.5 w-2.5" />
+              <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                Khu công nghiệp Đà Nẵng
+              </span>
+            </nav>
+
+            {/* Article Header - Mobile */}
+            <header className="mb-4">
+              <h1 className={`font-montserrat text-lg font-bold mb-2 leading-tight ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                Khu công nghiệp Đà Nẵng
+              </h1>
+            </header>
+
+            {/* Article Content - Mobile */}
+            <div className={`text-sm font-inter ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                 <p className="mb-3 text-justify">Khu Công nghiệp Đà Nẵng được thành lập theo Giấy Phép đầu tư số 689/GP ngày 21/10/1993 của UBNN về Hợp tác và Đầu tư (nay là Bộ Kế hoạch và Đầu tư) tại quận Sơn Trà, nằm cách cảng biển Tiên Sa 6 Km về phía Nam, cách Sân bay quốc tế Đà Nẵng 5km về phía Đông và cách trung tâm thành phố Đà Nẵng gần 2km. Dự án do Công ty Liên doanh MASSDA làm chủ đầu tư.</p>
+                 <p className="mb-3 text-justify">Toàn bộ các công trình hạ tầng như hệ thống cấp điện, cấp nước, đường giao thông, thông tin liên lạc ... tại Khu Công nghiệp Đà Nẵng đã được đầu tư xây dựng hoàn chỉnh.</p>
+                <div className="my-4 rounded-lg overflow-hidden shadow-lg">
+                    <img
+                        src="/media/Functionalmap/khu-cong-nghiep-da-nang.jpg"
+                        alt="Khu công nghiệp Đà Nẵng"
+                        className="w-full h-auto object-cover"
+                    />
+                </div>
+                <div className="space-y-4 text-justify">
+                    <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>1. Vị trí địa lí</h2>
+                        <p className="mb-2">quận Sơn Trà, thành phố Đà Nẵng.</p>
+                        <ul className="list-disc pl-4 mt-1 space-y-1 text-xs">
+                            <li>Cách cảng biển Tiên Sa: 06 km</li>
+                            <li>Cách Sân bay Quốc tế Đà Nẵng: 04 km</li>
+                            <li>Cách Trung tâm thành phố Đà Nẵng: 02 km</li>
+                            <li>Cách ga đường sắt: 03 km</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>2. Tổng diện tích</h2>
+                        <p>50,1 ha, trong đó có 41.87 ha đất công nghiệp có thể cho thuê. Hiện tại, Khu công nghiệp đã lấp đầy 100% diện tích và không còn đất để cho thuê. Ngoài ra Thủ tướng Chính phủ đã đồng ý chuyển đổi sang Khu đô thị.</p>
+                    </section>
+                    <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>3. Giá cho thuê lại đất và sử dụng hạ tầng</h2>
+                        <p>Hiện nay đất tại Khu công nghiệp Đà Nẵng đã được cho thuê hết nên Công ty TNHH Massda Land không thực hiện đăng ký.</p>
+                    </section>
+                    <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>4. Chủ đầu tư kinh doanh hạ tầng</h2>
+                        <p className="font-semibold mb-2">Công ty TNHH Massda Land</p>
+                        <ul className="list-none pl-0 mt-1 space-y-1 text-xs">
+                            <li><strong>Địa chỉ:</strong> KCN Đà Nẵng, quận Sơn Trà, Thành phố Đà Nẵng.</li>
+                            <li><strong>Điện thoại:</strong> 84-511-3.844.375</li>
+                            <li><strong>Fax:</strong> 84-511-3.844.374</li>
+                            <li><strong>Email:</strong> massda@dng.vnn.vn</li>
+                        </ul>
+                    </section>
+                     <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>5. Hiện trạng quy hoạch sử dụng đất</h2>
+                        <ul className="list-disc pl-4 mt-1 space-y-1 text-xs">
+                            <li>Tổng diện tích đất theo quy hoạch : 50,10 ha</li>
+                            <li>Diện tích đất công nghiệp có thể cho thuê : 41,87 ha</li>
+                            <li>Diện tích đất công nghiệp đã cho thuê: 41,87 ha</li>
+                            <li>Diện tích đất công nghiệp còn lại : 0,00 ha</li>
+                            <li>Diện tích đất công nghiệp chưa có hạ tầng 0,00 ha</li>
+                            <li>Tỷ lệ lắp đầy : 100%</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>6. Bản đồ quy hoạch KCN Đà Nẵng</h2>
+                        <p className="mb-1">Tính đến tháng 3 năm 2021 (có file đính kèm)</p>
+                        <a href="#" className={`font-semibold text-xs ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary-hover' : 'text-dseza-light-primary hover:text-dseza-light-primary-hover'} underline`}>
+                            (Xem tại đây)
+                        </a>
+                    </section>
+                     <section>
+                        <h2 className={`font-montserrat text-base font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>7. Bản đồ quy hoạch Tổng mặt bằng 1/2000 Khu đô thị An Đồn</h2>
+                        <p className="mb-1">UBND thành phố phê duyệt tại Quyết định số 1382/QĐ-UBND ngày 15/3/2017</p>
+                        <a href="#" className={`font-semibold text-xs ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary-hover' : 'text-dseza-light-primary hover:text-dseza-light-primary-hover'} underline`}>
+                           (Xem tại đây)
+                        </a>
+                    </section>
+                </div>
+            </div>
+
+            {/* Share Section - Mobile */}
+            <div className={`mt-6 pt-4 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+              <h3 className={`font-montserrat text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                Chia sẻ trang:
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs h-7">
+                  Tải xuống
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleShare} className="text-xs h-7">
+                  Chia sẻ
+                </Button>
+                <Button variant="outline" size="sm" onClick={handlePrint} className="text-xs h-7">
+                  In
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </MobileLayout>
+    );
+  }
+
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}
@@ -47,26 +183,26 @@ const KhuCongNghiepDaNang = () => {
       {/* Main Content */}
       <main className="flex-1 pt-52">
         {/* Breadcrumb */}
-        <div className={`py-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
+        <div className={`py-3 border-b ${theme === 'dark' ? 'bg-dseza-dark-secondary/50 border-dseza-dark-border' : 'bg-dseza-light-secondary/50 border-dseza-light-border'}`}>
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
               <Link
                 to="/"
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Trang chủ
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link
                 to="/gioi-thieu"
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Giới thiệu
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link
                 to="/gioi-thieu/cac-khu-chuc-nang"
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Các khu chức năng
               </Link>

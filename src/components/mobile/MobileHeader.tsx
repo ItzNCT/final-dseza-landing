@@ -5,7 +5,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { Menu, X, Map, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
   Collapsible,
   CollapsibleContent,
@@ -152,18 +152,24 @@ const MobileHeader: React.FC = () => {
 
   // Logo component - changes based on theme
   const Logo = () => (
-    <img
-      src={theme === "dark" ? "/media/darklogo3.png" : "/media/lightlogo3.png"}
-      alt="DSEZA Logo"
-      className="h-8"
-    />
+    <a 
+      href={`/${language}`} 
+      className="flex items-center"
+      aria-label="Về trang chủ"
+    >
+      <img
+        src={theme === "dark" ? "/media/darklogo3.png" : "/media/lightlogo3.png"}
+        alt="DSEZA Logo"
+        className="h-[60px]"
+      />
+    </a>
   );
 
   return (
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 w-full h-16 z-50",
+          "fixed top-0 left-0 w-full h-20 z-50",
           getBgColor(),
           getShadowColor(),
           "shadow-md"
@@ -194,6 +200,7 @@ const MobileHeader: React.FC = () => {
                 getBgColor()
               )}
             >
+              <SheetTitle className="sr-only">Mobile Navigation Menu</SheetTitle>
               <div className="flex flex-col h-full">
                 {/* Menu Header */}
                 <div className={cn(
@@ -413,7 +420,7 @@ const MobileHeader: React.FC = () => {
       </header>
       
       {/* Spacer to offset the fixed header */}
-      <div className="h-16"></div>
+      <div className="h-10"></div>
     </>
   );
 };

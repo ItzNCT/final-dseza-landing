@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { 
   MapPin, 
   Phone, 
@@ -10,6 +11,7 @@ import {
   Clock,
   Users,
   ChevronRight,
+  ChevronDown,
   Loader2
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
@@ -35,22 +37,32 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import { useSubmitContactForm } from "@/api/hooks";
 import { useDepartmentsWithStaff } from "@/hooks/use-departments-with-staff";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileLayout from "@/components/mobile/MobileLayout";
 
 /**
  * ContactPage component with comprehensive contact information and forms
+ * Responsive design that adapts to mobile (<768px) automatically
  */
 const ContactPage: React.FC = () => {
   const { toast } = useToast();
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
   const [contactForm, setContactForm] = useState({
     hoTen: "",
     email: "",
     tieuDe: "",
     noiDung: "",
   });
+  const [isDepartmentsOpen, setIsDepartmentsOpen] = useState(false);
 
   // Use the contact form submission hook
   const { mutate, isPending, isSuccess, isError, error, reset } = useSubmitContactForm();
@@ -105,32 +117,380 @@ const ContactPage: React.FC = () => {
     }
   }, [isError, error, toast]);
 
-  const leaders = [
-    {
-      id: 1,
-      name: "Ông Nguyễn Văn A",
-      position: "Giám đốc Ban Quản lý",
-      phone: "0236.3666.101",
-      email: "giamdoc@dseza.danang.gov.vn",
-    },
-    {
-      id: 2,
-      name: "Bà Trần Thị B", 
-      position: "Phó Giám đốc",
-      phone: "0236.3666.102",
-      email: "phogiamdoc@dseza.danang.gov.vn",
-    },
-    {
-      id: 3,
-      name: "Ông Lê Văn C",
-      position: "Phó Giám đốc",
-      phone: "0236.3666.103", 
-      email: "phogiamdoc2@dseza.danang.gov.vn",
-    },
-  ];
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          {/* Main Content - Mobile optimized with padding and spacing */}
+        <main className="flex-1 px-4 py-4 space-y-4">
+          
+          {/* Mobile Breadcrumb */}
+          <div className={`py-1 px-2 rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50' : 'bg-dseza-light-secondary-bg/50'}`}>
+            <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+              <Link 
+                to="/" 
+                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+              >
+                Trang chủ
+              </Link>
+              <ChevronRight className="h-2.5 w-2.5" />
+              <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                Liên hệ
+              </span>
+            </nav>
+          </div>
+          
+          {/* Page Header - Mobile optimized */}
+          <div className="text-center py-3">
+            <h1 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+              Liên hệ với chúng tôi
+            </h1>
+            <div className={`w-12 h-0.5 mx-auto mb-2 rounded-full ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></div>
+            <p className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+              Ban quản lý Khu Kinh tế Đà Nẵng
+            </p>
+          </div>
 
+          {/* Quick Contact Info - Priority for mobile */}
+          <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+            <CardHeader className="pb-4">
+              <CardTitle className={`flex items-center gap-2 text-lg ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                <Phone className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                Liên hệ nhanh
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              
+              {/* Phone - Most important for mobile */}
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-opacity-50 bg-gray-100 dark:bg-gray-800">
+                <Phone className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                <div className="flex-1">
+                  <p className={`font-medium text-sm ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Điện thoại</p>
+                  <a 
+                    href="tel:02363666117" 
+                    className={`text-lg font-semibold ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}
+                  >
+                    0236 3666117
+                  </a>
+                </div>
+              </div>
 
+              {/* Email */}
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-opacity-50 bg-gray-100 dark:bg-gray-800">
+                <Mail className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                <div className="flex-1">
+                  <p className={`font-medium text-sm ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Email</p>
+                  <a 
+                    href="mailto:dseza@danang.gov.vn" 
+                    className={`text-base font-semibold break-all ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}
+                  >
+                    dseza@danang.gov.vn
+                  </a>
+                </div>
+              </div>
 
+              {/* Working Hours */}
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-opacity-50 bg-gray-100 dark:bg-gray-800">
+                <Clock className={`h-5 w-5 mt-0.5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                <div className="flex-1">
+                  <p className={`font-medium text-sm ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Giờ làm việc</p>
+                  <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                    T2-T6: 7:30-11:30, 13:30-17:00<br />
+                    T7: 7:30-11:30
+                  </p>
+                </div>
+              </div>
+
+            </CardContent>
+          </Card>
+
+          {/* Contact Form - Mobile optimized */}
+          <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+            <CardHeader className="pb-4">
+              <CardTitle className={`flex items-center gap-2 text-lg ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                <Send className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                Gửi tin nhắn
+              </CardTitle>
+              <CardDescription className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                Để lại thông tin, chúng tôi sẽ phản hồi sớm nhất
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                
+                {/* Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="hoTen" className={`text-sm font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    Họ và tên *
+                  </Label>
+                  <Input
+                    id="hoTen"
+                    placeholder="Nhập họ và tên của bạn"
+                    value={contactForm.hoTen}
+                    onChange={(e) => handleInputChange("hoTen", e.target.value)}
+                    className={`h-11 text-sm ${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                    disabled={isPending}
+                    required
+                  />
+                </div>
+                
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="email" className={`text-sm font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    Email *
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="example@email.com"
+                    value={contactForm.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    className={`h-11 text-sm ${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                    disabled={isPending}
+                    required
+                  />
+                </div>
+
+                {/* Subject */}
+                <div className="space-y-2">
+                  <Label htmlFor="tieuDe" className={`text-sm font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    Tiêu đề *
+                  </Label>
+                  <Input
+                    id="tieuDe"
+                    placeholder="Nhập tiêu đề email"
+                    value={contactForm.tieuDe}
+                    onChange={(e) => handleInputChange("tieuDe", e.target.value)}
+                    className={`h-11 text-sm ${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                    disabled={isPending}
+                    required
+                  />
+                </div>
+
+                {/* Message */}
+                <div className="space-y-2">
+                  <Label htmlFor="noiDung" className={`text-sm font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    Nội dung *
+                  </Label>
+                  <Textarea
+                    id="noiDung"
+                    placeholder="Nhập nội dung chi tiết..."
+                    rows={5}
+                    value={contactForm.noiDung}
+                    onChange={(e) => handleInputChange("noiDung", e.target.value)}
+                    className={`text-sm resize-none ${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
+                    disabled={isPending}
+                    required
+                  />
+                </div>
+
+                {/* Submit Button - Mobile optimized */}
+                <Button 
+                  type="submit" 
+                  className={`w-full h-11 text-sm font-medium ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'}`}
+                  disabled={isPending}
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Đang gửi...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Gửi tin nhắn
+                    </>
+                  )}
+                </Button>
+
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Address & Map */}
+          <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+            <CardHeader className="pb-4">
+              <CardTitle className={`flex items-center gap-2 text-lg ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                <MapPin className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                Địa chỉ & Bản đồ
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              
+              {/* Address */}
+              <div className="p-3 rounded-lg bg-opacity-50 bg-gray-100 dark:bg-gray-800">
+                <p className={`font-medium text-sm mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  Địa chỉ
+                </p>
+                <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                  Lô A17, đường Trung tâm, Khu công nghệ cao,
+                  xã Hòa Liên, huyện Hòa Vang, 
+                  Thành phố Đà Nẵng, Việt Nam
+                </p>
+              </div>
+
+              {/* Google Map - Mobile optimized height */}
+              <div className="rounded-lg overflow-hidden">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3833.4418592568395!2d108.0822033!3d16.0944277!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31421f89a43bfb03%3A0x40f66e6ba7346b99!2zQmFuIHF14bqjbiBsw70gS2h1IGPDtG5nIG5naOG7hyBjYW8gdsOgIGPDoWMgS2h1IGPDtG5nIG5naGnhu4dwIMSQw6AgTuG6tW5n!5e0!3m2!1svi!2s!4v1736085791335!5m2!1svi!2s" 
+                  width="100%" 
+                  height="200" 
+                  style={{border: 0}} 
+                  allowFullScreen={true} 
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Ban quản lý Khu công nghệ cao và các Khu công nghiệp Đà Nẵng"
+                />
+              </div>
+
+            </CardContent>
+          </Card>
+
+          {/* Departments - Collapsible for mobile */}
+          <Collapsible open={isDepartmentsOpen} onOpenChange={setIsDepartmentsOpen}>
+            <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+              <CollapsibleTrigger asChild>
+                <CardHeader className="pb-4 cursor-pointer hover:bg-opacity-50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <CardTitle className={`flex items-center justify-between text-lg ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    <div className="flex items-center gap-2">
+                      <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                      Thông tin phòng ban
+                    </div>
+                    <ChevronDown 
+                      className={`h-5 w-5 transform transition-transform ${isDepartmentsOpen ? 'rotate-180' : ''} ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} 
+                    />
+                  </CardTitle>
+                  <CardDescription className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                    Nhấn để xem chi tiết các phòng ban
+                  </CardDescription>
+                </CardHeader>
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent>
+                <CardContent>
+                  {isDepartmentsLoading ? (
+                    <div className="space-y-4">
+                      {[...Array(3)].map((_, index) => (
+                        <div key={index} className="space-y-3">
+                          <Skeleton className={`h-16 w-full ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : isDepartmentsError ? (
+                    <div className={`text-center py-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      <p>Không thể tải thông tin phòng ban</p>
+                    </div>
+                  ) : departments && departments.length > 0 ? (
+                    <div className="space-y-4">
+                      {departments.map((department) => (
+                        <div
+                          key={department.id}
+                          className={`p-4 rounded-lg border ${theme === 'dark' ? 'border-dseza-dark-border bg-dseza-dark-main-bg/30' : 'border-dseza-light-border bg-dseza-light-main-bg/30'}`}
+                        >
+                          <div className="flex items-center gap-3 mb-3">
+                            {department.icon ? (
+                              <img
+                                src={department.icon.url}
+                                alt={department.icon.alt}
+                                className="w-8 h-8 object-contain"
+                              />
+                            ) : (
+                              <Building className={`w-6 h-6 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} />
+                            )}
+                            <h4 className={`font-semibold text-base ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                              {department.title}
+                            </h4>
+                          </div>
+                          
+                          {department.description && (
+                            <div 
+                              className={`text-sm mb-3 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}
+                              dangerouslySetInnerHTML={{ __html: department.description }} 
+                            />
+                          )}
+                          
+                          {department.staff && department.staff.length > 0 && (
+                            <div className="space-y-3">
+                              <p className={`text-sm font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                                Danh sách nhân sự ({department.staff.length})
+                              </p>
+                              <div className="space-y-3">
+                                {department.staff.map((staff) => (
+                                  <div key={staff.id} className={`p-3 rounded-lg border ${theme === 'dark' ? 'border-dseza-dark-border/30 bg-dseza-dark-main-bg/20' : 'border-dseza-light-border/30 bg-dseza-light-main-bg/20'}`}>
+                                    <div className="flex items-center gap-3 mb-2">
+                                      {staff.avatar && (
+                                        <img
+                                          src={staff.avatar}
+                                          alt={staff.name}
+                                          className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                                        />
+                                      )}
+                                      <div className="flex-1">
+                                        <h5 className={`font-medium text-base ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                                          {staff.name}
+                                        </h5>
+                                        {staff.position && (
+                                          <p className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                                            {staff.position}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Contact Information */}
+                                    <div className="space-y-2">
+                                      {staff.email && (
+                                        <div className="flex items-center gap-2">
+                                          <Mail className={`h-4 w-4 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                                          <a 
+                                            href={`mailto:${staff.email}`} 
+                                            className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
+                                          >
+                                            {staff.email}
+                                          </a>
+                                        </div>
+                                      )}
+                                      {staff.phone && (
+                                        <div className="flex items-center gap-2">
+                                          <Phone className={`h-4 w-4 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
+                                          <a 
+                                            href={`tel:${staff.phone}`} 
+                                            className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
+                                          >
+                                            {staff.phone}
+                                          </a>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={`text-center py-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      <p>Chưa có thông tin phòng ban</p>
+                    </div>
+                  )}
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+
+        </main>
+
+          {/* Footer */}
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Desktop Layout (original)
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}

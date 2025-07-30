@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileLayout from "@/components/mobile/MobileLayout";
 import CommentSection from "@/components/comments/CommentSection";
 
 /**
@@ -101,6 +103,7 @@ const sanitizeHTML = (html: string | null | undefined): string => {
 const ArticleDetailPage: React.FC = () => {
   const { toast } = useToast();
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
   const { uuid } = useParams<{ uuid: string }>();
   const { data, isLoading, isError, error } = useArticleDetail(uuid || '');
   
@@ -889,6 +892,43 @@ const ArticleDetailPage: React.FC = () => {
   };
 
   if (isLoading) {
+    // Mobile Loading State
+    if (isMobile) {
+      return (
+        <MobileLayout>
+          <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+            <main className="flex-1 px-4 py-2 space-y-3">
+              {/* Title Skeleton */}
+              <div className="space-y-3">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-6 w-3/4" />
+                <div className="flex flex-wrap gap-3">
+                  <Skeleton className="h-5 w-20" />
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-5 w-16" />
+                </div>
+              </div>
+
+              {/* Image Skeleton */}
+              <Skeleton className="w-full h-48 rounded-lg" />
+
+              {/* Content Skeleton */}
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+              </div>
+            </main>
+
+            <Footer />
+          </div>
+        </MobileLayout>
+      );
+    }
+
+    // Desktop Loading State
     return (
       <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
         {/* Header */}
@@ -939,6 +979,35 @@ const ArticleDetailPage: React.FC = () => {
   }
 
   if (isError) {
+    // Mobile Error State
+    if (isMobile) {
+      return (
+        <MobileLayout>
+          <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+            <main className="flex-1 px-4 py-2">
+              <div className="text-center">
+                <h1 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+                  Không thể tải bài viết
+                </h1>
+                <p className={`mb-6 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                  {error?.message || "Đã có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau."}
+                </p>
+                <Button 
+                  onClick={() => window.history.back()}
+                  className={`w-full ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80'}`}
+                >
+                  Quay lại
+                </Button>
+              </div>
+            </main>
+
+            <Footer />
+          </div>
+        </MobileLayout>
+      );
+    }
+
+    // Desktop Error State
     return (
       <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
         {/* Header */}
@@ -971,6 +1040,45 @@ const ArticleDetailPage: React.FC = () => {
   }
 
   if (!data?.data) {
+    // Mobile Not Found State
+    if (isMobile) {
+      return (
+        <MobileLayout>
+          <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+            <main className="flex-1 px-4 py-2">
+              <div className="text-center">
+                <h1 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  Không tìm thấy bài viết
+                </h1>
+                <p className={`mb-6 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                  Bài viết bạn tìm kiếm không tồn tại hoặc đã bị xóa.
+                </p>
+                <Button 
+                  onClick={() => window.history.back()}
+                  className={`w-full mb-4 ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80'}`}
+                >
+                  Quay lại
+                </Button>
+                
+                {/* Compact debug info for mobile */}
+                <div className={`text-xs p-3 rounded border ${theme === 'dark' ? 'text-dseza-dark-secondary-text border-dseza-dark-border bg-dseza-dark-secondary-bg/50' : 'text-dseza-light-secondary-text border-dseza-light-border bg-dseza-light-secondary-bg/30'}`}>
+                  <p className="font-medium mb-1">UUID: {uuid}</p>
+                  <p>Thử: 
+                    <a href="/vi/bai-viet/1" className={`mx-1 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>1</a>
+                    <a href="/vi/bai-viet/2" className={`mx-1 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>2</a>
+                    <a href="/vi/bai-viet/3" className={`mx-1 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>3</a>
+                  </p>
+                </div>
+              </div>
+            </main>
+
+            <Footer />
+          </div>
+        </MobileLayout>
+      );
+    }
+
+    // Desktop Not Found State
     return (
       <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
         {/* Header */}
@@ -1055,6 +1163,219 @@ const ArticleDetailPage: React.FC = () => {
   const articleContent = getArticleContent();
   const pdfDocument = getPdfDocument();
 
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          {/* Main Content - Mobile optimized */}
+          <main className="flex-1 px-4 py-2 space-y-3">
+            <article className="space-y-4">
+              {/* Article Header - Mobile optimized */}
+              <header className="space-y-3">
+                <h1 className={`text-xl font-bold leading-tight ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  {article.attributes.title}
+                </h1>
+                
+                {/* Featured Badge */}
+                {isFeatured && (
+                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${theme === 'dark' ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary border border-dseza-dark-primary/30' : 'bg-dseza-light-primary/10 text-dseza-light-primary border border-dseza-light-primary/30'}`}>
+                    <Star className="h-3 w-3" />
+                    <span>Sự kiện tiêu điểm</span>
+                  </div>
+                )}
+                
+                {/* Meta Description */}
+                {metaDescription && (
+                  <p className={`text-base italic ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                    {metaDescription}
+                  </p>
+                )}
+                
+                {/* Meta Information - Mobile stacked */}
+                <div className={`space-y-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(article.attributes.created)}</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Eye className="h-4 w-4" />
+                    <span>
+                      {viewCountLoading ? (
+                        <span className="inline-block w-8 h-4 bg-gray-300 rounded animate-pulse"></span>
+                      ) : (
+                        `${viewCount.toLocaleString('vi-VN')} lượt xem`
+                      )}
+                    </span>
+                  </div>
+                  
+                  {categories.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Tag className="h-4 w-4" />
+                      <div className="flex gap-1 flex-wrap">
+                        {categories.map((category) => (
+                          <Badge 
+                            key={category.id} 
+                            variant="secondary" 
+                            className={`text-xs ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg text-dseza-dark-main-text' : 'bg-dseza-light-secondary-bg text-dseza-light-main-text'}`}
+                          >
+                            {category.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </header>
+
+              {/* Article Content - Mobile optimized */}
+              <div className={`prose prose-sm max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`}>
+                <div
+                  className={`rich-content-article ${theme === 'dark' ? 'dark' : 'light'}`}
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHTML(articleContent)
+                  }}
+                />
+              </div>
+
+              {/* PDF Document Viewer - Mobile optimized */}
+              {pdfDocument.url && (
+                <div className={`pt-6 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                  <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    <FileText className="h-5 w-5" />
+                    Tài liệu đính kèm
+                  </h3>
+                  
+                  <div className={`rounded-lg p-4 border ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                    <h4 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                      {pdfDocument.name}
+                    </h4>
+                    {pdfDocument.description && (
+                      <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                        {pdfDocument.description}
+                      </p>
+                    )}
+                    
+                    {/* Mobile Action Buttons */}
+                    <div className="space-y-2">
+                      <Button 
+                        size="sm" 
+                        onClick={() => window.open(pdfDocument.url!, '_blank')}
+                        className={`w-full flex items-center justify-center gap-2 ${
+                          theme === 'dark' 
+                            ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary-hover' 
+                            : 'bg-dseza-light-primary hover:bg-dseza-light-primary-hover'
+                        }`}
+                      >
+                        <ZoomIn className="h-4 w-4" />
+                        Xem toàn màn hình
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = pdfDocument.url!;
+                          link.download = pdfDocument.name;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                        className="w-full flex items-center justify-center gap-2"
+                      >
+                        <Download className="h-4 w-4" />
+                        Tải xuống PDF
+                      </Button>
+                    </div>
+                    
+                    {/* Mobile PDF Preview - smaller height */}
+                    <div className="mt-4 relative w-full" style={{ height: '300px' }}>
+                      <iframe
+                        src={`${pdfDocument.url}#view=FitH&toolbar=0&navpanes=0`}
+                        className={`w-full h-full border rounded ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}
+                        title={pdfDocument.name}
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Share Section - Mobile optimized */}
+              <div className={`pt-6 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                <h3 className={`font-semibold mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  <Share2 className="h-4 w-4" />
+                  Chia sẻ:
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full flex items-center justify-center gap-2"
+                    >
+                      <Facebook className="h-4 w-4 text-blue-600" />
+                      Facebook
+                    </Button>
+                  </a>
+                  <a
+                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(article.attributes.title)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full flex items-center justify-center gap-2"
+                    >
+                      <Twitter className="h-4 w-4 text-sky-500" />
+                      Twitter
+                    </Button>
+                  </a>
+                  <a
+                    href={`mailto:?subject=${encodeURIComponent(article.attributes.title)}&body=${encodeURIComponent(`Xem bài viết này: ${window.location.href}`)}`}
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full flex items-center justify-center gap-2"
+                    >
+                      <Mail className="h-4 w-4 text-gray-600" />
+                      Email
+                    </Button>
+                  </a>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShare('copy')}
+                    className="w-full flex items-center justify-center gap-2"
+                  >
+                    <Copy className="h-4 w-4" />
+                    Sao chép
+                  </Button>
+                </div>
+              </div>
+
+              {/* Comments Section - Mobile optimized */}
+              <div className={`pt-6 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
+                <CommentSection articleId={uuid || ''} />
+              </div>
+            </article>
+          </main>
+
+          {/* Footer */}
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Desktop Layout (original)
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}

@@ -2,8 +2,10 @@ import { Link, useParams } from "react-router-dom";
 import { useArticles } from "../../hooks/useArticles";
 import { useAllNewsCategories } from "../../hooks/useNewsCategories";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
-import { ChevronRight, Calendar, ArrowRight, Star } from "lucide-react";
+import { ChevronRight, ChevronLeft, Calendar, ArrowRight, Star, Filter } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileLayout from "@/components/mobile/MobileLayout";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
@@ -79,6 +81,7 @@ const ArticleListPage = () => {
   const { data: articles, isLoading, isError } = useArticles();
   const { data: categoriesData } = useAllNewsCategories(); // Use ALL categories instead of just event categories
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
 
   // Tạo tiêu đề động với real categories
   const pageTitle = subcategory 
@@ -102,6 +105,28 @@ const ArticleListPage = () => {
 
   // Loading state
   if (isLoading) {
+    // Mobile Loading State
+    if (isMobile) {
+      return (
+        <MobileLayout>
+          <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+            <main className="flex-1 px-4 py-6">
+              <div className="flex justify-center items-center h-64">
+                <div className="flex flex-col items-center space-y-4">
+                  <LoadingSpinner size="lg" />
+                  <p className={`text-base ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                    Đang tải tin tức...
+                  </p>
+                </div>
+              </div>
+            </main>
+            <Footer />
+          </div>
+        </MobileLayout>
+      );
+    }
+
+    // Desktop Loading State
     return (
       <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
         <TopBar />
@@ -126,6 +151,26 @@ const ArticleListPage = () => {
 
   // Error state
   if (isError) {
+    // Mobile Error State
+    if (isMobile) {
+      return (
+        <MobileLayout>
+          <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+            <main className="flex-1 px-4 py-6">
+              <div className="text-center py-12">
+                <div className={`text-red-500 mb-4`}>
+                  <p className="text-lg font-semibold mb-2">Có lỗi xảy ra</p>
+                  <p className="text-sm">Không thể tải tin tức. Vui lòng thử lại sau.</p>
+                </div>
+              </div>
+            </main>
+            <Footer />
+          </div>
+        </MobileLayout>
+      );
+    }
+
+    // Desktop Error State
     return (
       <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
         <TopBar />
@@ -146,6 +191,242 @@ const ArticleListPage = () => {
     );
   }
 
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          {/* Main Content - Mobile optimized */}
+          <main className="flex-1 px-4 py-4 space-y-4">
+            
+            {/* Mobile Breadcrumb */}
+            <div className={`py-1 px-2 rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50' : 'bg-dseza-light-secondary-bg/50'}`}>
+              <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <Link 
+                  to="/" 
+                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  Trang chủ
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                
+                {isSubcategoryOfSuKien ? (
+                  <>
+                    <Link 
+                      to="/tin-tuc/su-kien" 
+                      className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                    >
+                      Tin tức & Sự kiện
+                    </Link>
+                    <ChevronRight className="h-2.5 w-2.5" />
+                    <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                      {formatTitle(subcategory!, categoriesData)}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Link 
+                      to="/tin-tuc" 
+                      className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                    >
+                      Tin tức
+                    </Link>
+                    {category && (
+                      <>
+                        <ChevronRight className="h-2.5 w-2.5" />
+                        <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                          {formatTitle(category, categoriesData)}
+                        </span>
+                      </>
+                    )}
+                  </>
+                )}
+              </nav>
+            </div>
+
+            {/* Page Header - Mobile optimized */}
+            <div className="text-center py-3">
+              <h1 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                {pageTitle}
+              </h1>
+              <div className={`w-12 h-0.5 mx-auto mb-2 rounded-full ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></div>
+              <p className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                {getPageDescription()}
+              </p>
+            </div>
+
+            {/* Results Summary - Mobile optimized */}
+            {articles && articles.length > 0 && (
+              <div className="flex items-center justify-between py-1">
+                <div className="flex items-center space-x-1.5">
+                                     <Badge 
+                     variant="secondary" 
+                     className={`px-2 py-0.5 text-xs ${
+                       theme === 'dark' 
+                         ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary border-dseza-dark-primary/30' 
+                         : 'bg-dseza-light-primary/20 text-dseza-light-primary border-dseza-light-primary/30'
+                     }`}
+                   >
+                     <Filter className="h-2.5 w-2.5 mr-1" />
+                     {articles.length} bài viết
+                   </Badge>
+                  
+                  {/* Featured articles count */}
+                  {articles.filter(article => article.is_featured).length > 0 && (
+                                         <Badge 
+                       variant="secondary" 
+                       className={`px-1.5 py-0.5 text-xs ${
+                         theme === 'dark' 
+                           ? 'bg-yellow-900/20 text-yellow-300 border-yellow-400/30' 
+                           : 'bg-yellow-100/80 text-yellow-800 border-yellow-300/30'
+                       }`}
+                     >
+                       <Star className="h-2.5 w-2.5 mr-1" />
+                       {articles.filter(article => article.is_featured).length}
+                     </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Articles List - Mobile optimized single column */}
+            {articles && articles.length > 0 ? (
+                             <div className="space-y-4">
+                {articles.map((article) => (
+                  <Link 
+                    to={article.path} 
+                    key={article.id} 
+                    className="block group"
+                  >
+                    <article className={`overflow-hidden rounded-lg shadow-md transition-all duration-200 group-hover:shadow-lg active:scale-[0.98] ${
+                      theme === 'dark' 
+                        ? 'bg-dseza-dark-secondary border border-dseza-dark-border' 
+                        : 'bg-white border border-dseza-light-border'
+                    }`}>
+                      {/* Image and content in mobile card layout */}
+                      <div className="flex">
+                        {/* Image Container - smaller for mobile */}
+                        <div className="relative flex-shrink-0 w-24 h-24 overflow-hidden">
+                          <img 
+                            src={article.imageUrl || '/placeholder.svg'} 
+                            alt={article.title} 
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                          {/* Featured Badge */}
+                          {article.is_featured && (
+                            <div className="absolute top-1 right-1">
+                              <div className={`p-1 rounded-full ${
+                                theme === 'dark' 
+                                  ? 'bg-yellow-900/80' 
+                                  : 'bg-yellow-100'
+                              }`}>
+                                <Star className={`h-3 w-3 ${
+                                  theme === 'dark' ? 'text-yellow-300' : 'text-yellow-800'
+                                }`} />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 p-3">
+                          {/* Category and Date */}
+                          <div className="flex items-center justify-between mb-2">
+                            <Badge 
+                              variant="secondary" 
+                              className={`px-2 py-1 text-xs ${
+                                theme === 'dark' 
+                                  ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary' 
+                                  : 'bg-dseza-light-primary/20 text-dseza-light-primary'
+                              }`}
+                            >
+                              {article.categories.length > 0 ? article.categories[0] : formatTitle(subcategory || category!, categoriesData)}
+                            </Badge>
+                            <span className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                              {formatDate(article.published_date)}
+                            </span>
+                          </div>
+
+                          {/* Title */}
+                          <h2 className={`text-base font-semibold mb-2 line-clamp-2 leading-tight ${
+                            theme === 'dark' 
+                              ? 'text-dseza-dark-main-text' 
+                              : 'text-dseza-light-main-text'
+                          }`}>
+                            {article.title}
+                          </h2>
+
+                          {/* Summary */}
+                          <p className={`text-sm line-clamp-2 leading-relaxed ${
+                            theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
+                          }`}>
+                            {article.summary}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              /* Empty State - Mobile optimized */
+              <div className="text-center py-12">
+                <div className={`mb-6 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                  <div className="w-16 h-16 mx-auto mb-4 opacity-50">
+                    <svg fill="currentColor" viewBox="0 0 24 24" className="w-full h-full">
+                      <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                    </svg>
+                  </div>
+                  <h3 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    Chưa có bài viết nào
+                  </h3>
+                  <p className="text-sm mb-4">
+                    Hiện tại chưa có bài viết nào trong "{pageTitle}".
+                  </p>
+                  <Link 
+                    to="/tin-tuc" 
+                    className={`inline-flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                      theme === 'dark' 
+                        ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary/80' 
+                        : 'bg-dseza-light-primary text-white hover:bg-dseza-light-primary/80'
+                    }`}
+                  >
+                    Xem tất cả tin tức
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* Back Button - Mobile optimized */}
+            {!isSuKienMainPage && (
+                             <div className="pt-6">
+                <Link 
+                  to={isSubcategoryOfSuKien ? "/tin-tuc/su-kien" : "/tin-tuc"}
+                  className={`inline-flex items-center px-4 py-3 rounded-lg border font-medium transition-all duration-200 active:scale-[0.95] ${
+                    theme === 'dark' 
+                      ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-dseza-dark-secondary-bg' 
+                      : 'border-dseza-light-border text-dseza-light-main-text hover:bg-dseza-light-secondary-bg'
+                  }`}
+                                 >
+                   <ChevronLeft className="h-4 w-4 mr-2" />
+                   {isSubcategoryOfSuKien ? "Quay lại Tin tức & Sự kiện" : "Quay lại danh mục tin tức"}
+                 </Link>
+              </div>
+            )}
+
+          </main>
+
+          {/* Footer */}
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Desktop Layout (original)
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}

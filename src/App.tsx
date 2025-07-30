@@ -33,7 +33,7 @@ import { DepartmentsPage } from "./pages/Introduction/DepartmentsPage";
 import { AffiliatedUnitsPage } from "./pages/Introduction/AffiliatedUnitsPage";
 import WelcomeLetterPage from "./pages/Introduction/WelcomeLetterPage";
 import DanangOverviewPage from "./pages/Introduction/DanangOverviewPage";
-import FunctionalZonesListPage from "./pages/Introduction/FunctionalZonesListPage";
+import FunctionalZonesListPage from "./pages/Functionalzone/FunctionalZonesListPage";
 import FunctionalzoneDetailPage from "./pages/Functionalzone/FunctionalzoneDetailPage";
 import FunctionalzoneLayout from "./pages/Functionalzone/FunctionalzoneLayout";
 // Import 10 Industrial Zone Components
@@ -124,6 +124,7 @@ const App: React.FC = () => (
                         {/* Contact and auth routes */}
                         <Route path="lien-he" element={<ContactPage />} />
                         <Route path="contact" element={<ContactPage />} />
+                        
                         <Route path="dang-nhap" element={<LoginPage />} />
                         <Route path="dang-ky" element={<RegisterPage />} />
                         <Route path="ho-so" element={<ProfilePage />} />
