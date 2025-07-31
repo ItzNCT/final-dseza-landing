@@ -15,6 +15,8 @@ import {
   Loader2
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useTranslation } from "@/utils/translations";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
@@ -55,6 +57,8 @@ import MobileLayout from "@/components/mobile/MobileLayout";
 const ContactPage: React.FC = () => {
   const { toast } = useToast();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [contactForm, setContactForm] = useState({
     hoTen: "",
@@ -88,8 +92,8 @@ const ContactPage: React.FC = () => {
   useEffect(() => {
     if (isSuccess) {
       toast({
-        title: "Email đã được gửi thành công!",
-        description: "Chúng tôi sẽ phản hồi bạn trong vòng 24 giờ.",
+        title: t("contact.successTitle"),
+        description: t("contact.successDesc"),
         variant: "default",
       });
       
@@ -104,18 +108,18 @@ const ContactPage: React.FC = () => {
       // Reset mutation state
       reset();
     }
-  }, [isSuccess, toast, reset]);
+  }, [isSuccess, toast, reset, t]);
 
   // Handle submission error
   useEffect(() => {
     if (isError) {
       toast({
-        title: "Có lỗi xảy ra!",
-        description: error?.message || "Vui lòng thử lại sau.",
+        title: t("contact.errorTitle"),
+        description: error?.message || t("contact.errorDesc"),
         variant: "destructive",
       });
     }
-  }, [isError, error, toast]);
+  }, [isError, error, toast, t]);
 
   // Mobile Layout
   if (isMobile) {
@@ -129,14 +133,14 @@ const ContactPage: React.FC = () => {
           <div className={`py-1 px-2 rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50' : 'bg-dseza-light-secondary-bg/50'}`}>
             <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
               <Link 
-                to="/" 
+                to={`/${language}`} 
                 className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {t("common.home")}
               </Link>
               <ChevronRight className="h-2.5 w-2.5" />
               <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Liên hệ
+                {t("nav.contact")}
               </span>
             </nav>
           </div>
@@ -144,11 +148,11 @@ const ContactPage: React.FC = () => {
           {/* Page Header - Mobile optimized */}
           <div className="text-center py-3">
             <h1 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-              Liên hệ với chúng tôi
+              {t("contact.contactWithUs")}
             </h1>
             <div className={`w-12 h-0.5 mx-auto mb-2 rounded-full ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></div>
             <p className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-              Ban quản lý Khu Kinh tế Đà Nẵng
+              {t("contact.managementBoard")}
             </p>
           </div>
 
@@ -157,7 +161,7 @@ const ContactPage: React.FC = () => {
             <CardHeader className="pb-4">
               <CardTitle className={`flex items-center gap-2 text-lg ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 <Phone className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
-                Liên hệ nhanh
+                {t("contact.quickContact")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -166,12 +170,12 @@ const ContactPage: React.FC = () => {
               <div className="flex items-center gap-3 p-3 rounded-lg bg-opacity-50 bg-gray-100 dark:bg-gray-800">
                 <Phone className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
                 <div className="flex-1">
-                  <p className={`font-medium text-sm ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Điện thoại</p>
+                  <p className={`font-medium text-sm ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{t("contact.phone")}</p>
                   <a 
                     href="tel:02363666117" 
                     className={`text-lg font-semibold ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}
                   >
-                    0236 3666117
+                    {t("contact.phoneNumber")}
                   </a>
                 </div>
               </div>
@@ -180,12 +184,12 @@ const ContactPage: React.FC = () => {
               <div className="flex items-center gap-3 p-3 rounded-lg bg-opacity-50 bg-gray-100 dark:bg-gray-800">
                 <Mail className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
                 <div className="flex-1">
-                  <p className={`font-medium text-sm ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Email</p>
+                  <p className={`font-medium text-sm ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{t("contact.email")}</p>
                   <a 
                     href="mailto:dseza@danang.gov.vn" 
                     className={`text-base font-semibold break-all ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}
                   >
-                    dseza@danang.gov.vn
+                    {t("contact.emailAddress")}
                   </a>
                 </div>
               </div>
@@ -194,10 +198,10 @@ const ContactPage: React.FC = () => {
               <div className="flex items-start gap-3 p-3 rounded-lg bg-opacity-50 bg-gray-100 dark:bg-gray-800">
                 <Clock className={`h-5 w-5 mt-0.5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
                 <div className="flex-1">
-                  <p className={`font-medium text-sm ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Giờ làm việc</p>
+                  <p className={`font-medium text-sm ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{t("contact.workingHours")}</p>
                   <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                    T2-T6: 7:30-11:30, 13:30-17:00<br />
-                    T7: 7:30-11:30
+                    {t("contact.workingTimeMobile")}<br />
+                    {t("contact.workingTimeMobileSat")}
                   </p>
                 </div>
               </div>
@@ -210,10 +214,10 @@ const ContactPage: React.FC = () => {
             <CardHeader className="pb-4">
               <CardTitle className={`flex items-center gap-2 text-lg ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 <Send className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
-                Gửi tin nhắn
+                {t("contact.sendMessage")}
               </CardTitle>
               <CardDescription className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                Để lại thông tin, chúng tôi sẽ phản hồi sớm nhất
+                {t("contact.contactDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -222,11 +226,11 @@ const ContactPage: React.FC = () => {
                 {/* Name */}
                 <div className="space-y-2">
                   <Label htmlFor="hoTen" className={`text-sm font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                    Họ và tên *
+                    {t("contact.name")} {t("contact.required")}
                   </Label>
                   <Input
                     id="hoTen"
-                    placeholder="Nhập họ và tên của bạn"
+                    placeholder={t("contact.namePlaceholder")}
                     value={contactForm.hoTen}
                     onChange={(e) => handleInputChange("hoTen", e.target.value)}
                     className={`h-11 text-sm ${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
@@ -238,12 +242,12 @@ const ContactPage: React.FC = () => {
                 {/* Email */}
                 <div className="space-y-2">
                   <Label htmlFor="email" className={`text-sm font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                    Email *
+                    {t("contact.email")} {t("contact.required")}
                   </Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="example@email.com"
+                    placeholder={t("contact.emailPlaceholder")}
                     value={contactForm.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     className={`h-11 text-sm ${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
@@ -255,11 +259,11 @@ const ContactPage: React.FC = () => {
                 {/* Subject */}
                 <div className="space-y-2">
                   <Label htmlFor="tieuDe" className={`text-sm font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                    Tiêu đề *
+                    {t("contact.subject")} {t("contact.required")}
                   </Label>
                   <Input
                     id="tieuDe"
-                    placeholder="Nhập tiêu đề email"
+                    placeholder={t("contact.subjectPlaceholder")}
                     value={contactForm.tieuDe}
                     onChange={(e) => handleInputChange("tieuDe", e.target.value)}
                     className={`h-11 text-sm ${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
@@ -271,11 +275,11 @@ const ContactPage: React.FC = () => {
                 {/* Message */}
                 <div className="space-y-2">
                   <Label htmlFor="noiDung" className={`text-sm font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                    Nội dung *
+                    {t("contact.content")} {t("contact.required")}
                   </Label>
                   <Textarea
                     id="noiDung"
-                    placeholder="Nhập nội dung chi tiết..."
+                    placeholder={t("contact.contentPlaceholder")}
                     rows={5}
                     value={contactForm.noiDung}
                     onChange={(e) => handleInputChange("noiDung", e.target.value)}
@@ -294,12 +298,12 @@ const ContactPage: React.FC = () => {
                   {isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Đang gửi...
+                      {t("contact.sending")}
                     </>
                   ) : (
                     <>
                       <Send className="h-4 w-4 mr-2" />
-                      Gửi tin nhắn
+                      {t("contact.sendMessage")}
                     </>
                   )}
                 </Button>
@@ -313,7 +317,7 @@ const ContactPage: React.FC = () => {
             <CardHeader className="pb-4">
               <CardTitle className={`flex items-center gap-2 text-lg ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 <MapPin className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
-                Địa chỉ & Bản đồ
+                {t("contact.mapAndAddress")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -321,12 +325,10 @@ const ContactPage: React.FC = () => {
               {/* Address */}
               <div className="p-3 rounded-lg bg-opacity-50 bg-gray-100 dark:bg-gray-800">
                 <p className={`font-medium text-sm mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                  Địa chỉ
+                  {t("contact.address")}
                 </p>
                 <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                  Lô A17, đường Trung tâm, Khu công nghệ cao,
-                  xã Hòa Liên, huyện Hòa Vang, 
-                  Thành phố Đà Nẵng, Việt Nam
+                  {t("contact.addressFull")}
                 </p>
               </div>
 
@@ -355,14 +357,14 @@ const ContactPage: React.FC = () => {
                   <CardTitle className={`flex items-center justify-between text-lg ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                     <div className="flex items-center gap-2">
                       <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
-                      Thông tin phòng ban
+                      {t("contact.departmentInfo")}
                     </div>
                     <ChevronDown 
                       className={`h-5 w-5 transform transition-transform ${isDepartmentsOpen ? 'rotate-180' : ''} ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`} 
                     />
                   </CardTitle>
                   <CardDescription className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                    Nhấn để xem chi tiết các phòng ban
+                    {t("contact.clickToViewDepartments")}
                   </CardDescription>
                 </CardHeader>
               </CollapsibleTrigger>
@@ -379,7 +381,7 @@ const ContactPage: React.FC = () => {
                     </div>
                   ) : isDepartmentsError ? (
                     <div className={`text-center py-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                      <p>Không thể tải thông tin phòng ban</p>
+                      <p>{t("contact.loadDepartmentsError")}</p>
                     </div>
                   ) : departments && departments.length > 0 ? (
                     <div className="space-y-4">
@@ -413,7 +415,7 @@ const ContactPage: React.FC = () => {
                           {department.staff && department.staff.length > 0 && (
                             <div className="space-y-3">
                               <p className={`text-sm font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                                Danh sách nhân sự ({department.staff.length})
+                                {t("contact.staffList")} ({department.staff.length})
                               </p>
                               <div className="space-y-3">
                                 {department.staff.map((staff) => (
@@ -473,7 +475,7 @@ const ContactPage: React.FC = () => {
                     </div>
                   ) : (
                     <div className={`text-center py-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                      <p>Chưa có thông tin phòng ban</p>
+                      <p>{t("contact.noDepartments")}</p>
                     </div>
                   )}
                 </CardContent>
@@ -504,15 +506,15 @@ const ContactPage: React.FC = () => {
         <div className={`py-2 ${theme === 'dark' ? 'bg-dseza-dark-secondary/50' : 'bg-dseza-light-secondary/50'}`}>
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-              <a 
-                href="/" 
+              <Link 
+                to={`/${language}`} 
                 className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
-              </a>
+                {t("common.home")}
+              </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Liên hệ
+                {t("nav.contact")}
               </span>
             </nav>
           </div>
@@ -522,7 +524,7 @@ const ContactPage: React.FC = () => {
         <div className="container mx-auto px-4 py-8 md:py-12">
           {/* Page Title */}
           <h1 className={`text-3xl md:text-4xl font-bold text-center mb-12 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-            Thông tin Liên hệ
+            {t("contact.pageTitle")}  
           </h1>
 
           {/* Main Grid */}
@@ -536,10 +538,10 @@ const ContactPage: React.FC = () => {
                 <CardHeader>
                   <CardTitle className={`flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                     <Building className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
-                    Thông tin chung
+                    {t("contact.generalInfo")}
                   </CardTitle>
                   <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
-                    Ban quản lý khu công nghệ cao và các khu công nghiệp Đà Nẵng
+                    {t("contact.managementBoard")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -547,10 +549,9 @@ const ContactPage: React.FC = () => {
                   <div className="flex items-start gap-3">
                     <MapPin className={`h-5 w-5 mt-0.5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
                     <div>
-                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Địa chỉ</p>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{t("contact.address")}</p>
                       <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                      Lô A17, đường Trung tâm, Khu công nghệ cao,<br />
-                        xã Hòa Liên, huyện Hòa Vang, Thành phố Đà Nẵng, Việt Nam
+                        {t("contact.addressFull")}
                       </p>
                     </div>
                   </div>
@@ -558,34 +559,34 @@ const ContactPage: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <Phone className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
                     <div>
-                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Điện thoại</p>
-                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>0236 3666117</p>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{t("contact.phone")}</p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>{t("contact.phoneNumber")}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <Mail className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
                     <div>
-                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Email</p>
-                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>dseza@danang.gov.vn</p>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{t("contact.email")}</p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>{t("contact.emailAddress")}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <Printer className={`h-5 w-5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
                     <div>
-                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Fax</p>
-                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>0236 383011</p>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{t("contact.fax")}</p>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>{t("contact.faxNumber")}</p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <Clock className={`h-5 w-5 mt-0.5 flex-shrink-0 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
                     <div>
-                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Giờ làm việc</p>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{t("contact.workingHours")}</p>
                       <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                        Thứ 2 - Thứ 6: 7:30 - 11:30, 13:30 - 17:00<br />
-                        Thứ 7: 7:30 - 11:30
+                        {t("contact.workingTime")}<br />
+                        {t("contact.workingTimeSat")}
                       </p>
                     </div>
                   </div>
@@ -598,10 +599,10 @@ const ContactPage: React.FC = () => {
                 <CardHeader>
                   <CardTitle className={`flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                     <MapPin className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
-                    Bản đồ
+                    {t("contact.mapTitle")}
                   </CardTitle>
                   <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
-                    Vị trí Ban Quản lý Khu Kinh tế Đà Nẵng
+                    {t("contact.mapDesc")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -630,10 +631,10 @@ const ContactPage: React.FC = () => {
                 <CardHeader>
                   <CardTitle className={`flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                     <Send className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
-                    Gửi Email Liên hệ
+                    {t("contact.sendEmail")}
                   </CardTitle>
                   <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
-                    Để lại thông tin, chúng tôi sẽ phản hồi bạn sớm nhất
+                    {t("contact.contactDescription")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -641,10 +642,10 @@ const ContactPage: React.FC = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="hoTen" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Họ và tên *</Label>
+                        <Label htmlFor="hoTen" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>{t("contact.name")} {t("contact.required")}</Label>
                         <Input
                           id="hoTen"
-                          placeholder="Nhập họ và tên của bạn"
+                            placeholder={t("contact.namePlaceholder")}
                           value={contactForm.hoTen}
                           onChange={(e) => handleInputChange("hoTen", e.target.value)}
                           className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
@@ -654,11 +655,11 @@ const ContactPage: React.FC = () => {
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="email" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Email *</Label>
+                        <Label htmlFor="email" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>{t("contact.email")} {t("contact.required")}</Label>
                         <Input
                           id="email"
                           type="email"
-                          placeholder="example@email.com"
+                          placeholder={t("contact.emailPlaceholder")}
                           value={contactForm.email}
                           onChange={(e) => handleInputChange("email", e.target.value)}
                           className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
@@ -669,10 +670,10 @@ const ContactPage: React.FC = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="tieuDe" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Tiêu đề *</Label>
+                      <Label htmlFor="tieuDe" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>{t("contact.subject")} {t("contact.required")}</Label>
                       <Input
                         id="tieuDe"
-                        placeholder="Nhập tiêu đề email"
+                        placeholder={t("contact.subjectPlaceholder")}
                         value={contactForm.tieuDe}
                         onChange={(e) => handleInputChange("tieuDe", e.target.value)}
                         className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
@@ -682,10 +683,10 @@ const ContactPage: React.FC = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="noiDung" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>Nội dung *</Label>
+                      <Label htmlFor="noiDung" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>{t("contact.content")} {t("contact.required")}</Label>
                       <Textarea
                         id="noiDung"
-                        placeholder="Nhập nội dung chi tiết..."
+                        placeholder={t("contact.contentPlaceholder")}
                         rows={6}
                         value={contactForm.noiDung}
                         onChange={(e) => handleInputChange("noiDung", e.target.value)}
@@ -703,12 +704,12 @@ const ContactPage: React.FC = () => {
                       {isPending ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Đang gửi...
+                          {t("contact.sending")}
                         </>
                       ) : (
                         <>
                           <Send className="h-4 w-4 mr-2" />
-                          Gửi đi
+                            {t("contact.send")}
                         </>
                       )}
                     </Button>
@@ -722,10 +723,10 @@ const ContactPage: React.FC = () => {
                 <CardHeader>
                   <CardTitle className={`flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                     <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
-                    Thông tin liên hệ
+                    {t("contact.contactInfo")}
                   </CardTitle>
                   <CardDescription className={theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}>
-                    Thông tin liên hệ với các phòng ban chuyên môn
+                    {t("contact.contactInfoWithDepts")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -740,7 +741,7 @@ const ContactPage: React.FC = () => {
                     </div>
                   ) : isDepartmentsError ? (
                     <div className={`text-center py-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                      <p>Không thể tải thông tin phòng ban. Vui lòng thử lại sau.</p>
+                      <p>{t("contact.loadDepartmentsError")}</p>
                     </div>
                   ) : departments && departments.length > 0 ? (
                     <Accordion type="single" collapsible className="w-full">
@@ -780,23 +781,23 @@ const ContactPage: React.FC = () => {
                             {department.staff && department.staff.length > 0 ? (
                               <div className="space-y-4">
                                 <h4 className={`font-semibold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                                  Danh sách nhân sự
+                                  {t("contact.staffList")}
                                 </h4>
                                 <div className="overflow-x-auto">
                                   <table className={`w-full text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                                     <thead>
                                       <tr className={`border-b ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
                                         <th className={`text-left py-2 px-3 font-semibold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                                          Họ tên
+                                          {t("contact.nameColumn")}
                                         </th>
                                         <th className={`text-left py-2 px-3 font-semibold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                                          Chức vụ
+                                          {t("contact.positionColumn")}
                                         </th>
                                         <th className={`text-left py-2 px-3 font-semibold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                                          Email
+                                          {t("contact.emailColumn")}
                                         </th>
                                         <th className={`text-left py-2 px-3 font-semibold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                                          Số điện thoại
+                                          {t("contact.phoneColumn")}
                                         </th>
                                       </tr>
                                     </thead>
@@ -855,7 +856,7 @@ const ContactPage: React.FC = () => {
                               </div>
                             ) : (
                               <p className={`text-center py-4 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                                Chưa có thông tin nhân sự
+                                {t("contact.noStaff")}
                               </p>
                             )}
                           </AccordionContent>
@@ -864,7 +865,7 @@ const ContactPage: React.FC = () => {
                     </Accordion>
                   ) : (
                     <div className={`text-center py-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                      <p>Chưa có thông tin phòng ban</p>
+                      <p>{t("contact.noDepartments")}</p>
                     </div>
                   )}
                 </CardContent>

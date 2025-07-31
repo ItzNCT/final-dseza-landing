@@ -9,17 +9,36 @@ import {
   ChevronRight 
 } from 'lucide-react';
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useTranslation } from "@/utils/translations";
+import { useIsMobile } from "@/hooks/use-mobile";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import MobileLayout from "@/components/mobile/MobileLayout";
+import { useToast } from "@/hooks/use-toast";
 
+/**
+ * DepartmentsPage component with comprehensive mobile and multilingual support
+ * Responsive design that adapts to mobile (<768px) automatically
+ */
 export const DepartmentsPage = () => {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const { t } = useTranslation();
+  const isMobile = useIsMobile();
+  const { toast } = useToast();
 
   const handleDownload = () => {
     // Logic tải xuống - có thể tải PDF hoặc Word
+    toast({
+      title: t("departments.downloadingTitle"),
+      description: t("departments.downloadingTitle"),
+      variant: "default",
+    });
     console.log('Downloading document...');
   };
 
@@ -27,14 +46,18 @@ export const DepartmentsPage = () => {
     // Logic chia sẻ
     if (navigator.share) {
       navigator.share({
-        title: 'Các phòng Ban - DSEZA',
-        text: 'Thông tin về các phòng ban chuyên môn thuộc Ban Quản lý Khu công nghệ cao và các khu công nghiệp Đà Nẵng',
+        title: `${t("departments.title")} - DSEZA`,
+        text: t("departments.pageTitle"),
         url: window.location.href,
       });
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
-      alert('Đã sao chép link vào clipboard!');
+      toast({
+        title: t("departments.shareSuccess"),
+        description: t("departments.shareSuccess"),
+        variant: "default",
+      });
     }
   };
 
@@ -43,6 +66,224 @@ export const DepartmentsPage = () => {
     window.print();
   };
 
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          {/* Main Content - Mobile optimized */}
+          <main className="flex-1 px-4 py-4 space-y-4">
+            
+            {/* Mobile Breadcrumb */}
+            <div className={`py-1 px-2 rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50' : 'bg-dseza-light-secondary-bg/50'}`}>
+              <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <Link 
+                  to={`/${language}`} 
+                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  {t("common.home")}
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                  {t("nav.intro")}
+                </span>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                  Tổng quan về Ban Quản lý
+                </span>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  {t("departments.title")}
+                </span>
+              </nav>
+            </div>
+            
+            {/* Page Header - Mobile optimized */}
+            <div className="text-center py-3">
+              <h1 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                {t("departments.pageTitle")}
+              </h1>
+              <div className={`w-12 h-0.5 mx-auto mb-2 rounded-full ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></div>
+            </div>
+
+            {/* Article Content - Mobile Cards */}
+            <div className="space-y-4">
+              
+              {/* Office Section */}
+              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                <CardContent className="p-4">
+                  <h2 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>
+                    I. VĂN PHÒNG
+                  </h2>
+                  <div className={`p-3 rounded-lg mb-4 ${theme === 'dark' ? 'bg-dseza-dark-main-bg/30' : 'bg-dseza-light-main-bg/30'}`}>
+                    <div className="space-y-2 text-sm">
+                      <div><strong>Tel:</strong> 0236 3830017</div>
+                      <div><strong>Fax:</strong> 0236 3830015</div>
+                      <div><strong>Email:</strong> dhpiza@danang.gov.vn</div>
+                      <div><strong>Tiếp nhận hồ sơ:</strong> 0236.3881888 (nhánh 830)</div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      <strong>Chức năng chính:</strong> Tham mưu quản lý công tác tổ chức, cán bộ; quản lý tài chính; thực hiện công tác văn thư, lưu trữ; điều hành các hoạt động của Ban Quản lý.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Investment Management Department */}
+              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                <CardContent className="p-4">
+                  <h2 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>
+                    II. PHÒNG QUẢN LÝ, XÚC TIẾN VÀ HỖ TRỢ ĐẦU TƯ
+                  </h2>
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                        Chức năng:
+                      </h3>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                        Tham mưu về xúc tiến đầu tư, quản lý dự án, hỗ trợ nhà đầu tư, đối ngoại và hợp tác quốc tế.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                        Nhiệm vụ chính:
+                      </h3>
+                      <ul className={`text-sm space-y-1 list-disc list-inside ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                        <li>Xúc tiến đầu tư và quảng bá</li>
+                        <li>Cấp Giấy chứng nhận đầu tư</li>
+                        <li>Quản lý các dự án đầu tư</li>
+                        <li>Hỗ trợ nhà đầu tư</li>
+                        <li>Hợp tác quốc tế</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Business and Labor Management */}
+              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                <CardContent className="p-4">
+                  <h2 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>
+                    III. PHÒNG QUẢN LÝ DOANH NGHIỆP VÀ LAO ĐỘNG
+                  </h2>
+                  <div className="space-y-2">
+                    <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      <strong>Nhiệm vụ chính:</strong>
+                    </p>
+                    <ul className={`text-sm space-y-1 list-disc list-inside ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      <li>Cấp giấy chứng nhận xuất xứ hàng hóa</li>
+                      <li>Tiếp nhận báo cáo thống kê của doanh nghiệp</li>
+                      <li>Theo dõi hoạt động sản xuất kinh doanh</li>
+                      <li>Quản lý các hoạt động dịch vụ trong KCN</li>
+                      <li>Báo cáo tình hình an ninh trật tự</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Planning and Construction */}
+              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                <CardContent className="p-4">
+                  <h2 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>
+                    IV. PHÒNG QUẢN LÝ QUY HOẠCH VÀ XÂY DỰNG
+                  </h2>
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                        Chức năng:
+                      </h3>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                        Tham mưu về quy hoạch, kiến trúc, xây dựng công trình, đấu nối hạ tầng và đất đai.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                        Nhiệm vụ chính:
+                      </h3>
+                      <ul className={`text-sm space-y-1 list-disc list-inside ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                        <li>Quản lý quy hoạch và kiến trúc</li>
+                        <li>Quản lý xây dựng công trình</li>
+                        <li>Quản lý đất đai</li>
+                        <li>Phòng cháy chữa cháy</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Environment and Technology */}
+              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                <CardContent className="p-4">
+                  <h2 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>
+                    V. PHÒNG QUẢN LÝ MÔI TRƯỜNG, KHOA HỌC - CÔNG NGHỆ
+                  </h2>
+                  <div className="space-y-2">
+                    <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      <strong>Nhiệm vụ chính:</strong>
+                    </p>
+                    <ul className={`text-sm space-y-1 list-disc list-inside ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      <li>Hướng dẫn thực hiện bảo vệ môi trường</li>
+                      <li>Thẩm định báo cáo đánh giá tác động môi trường</li>
+                      <li>Kiểm tra và xử lý vi phạm môi trường</li>
+                      <li>Báo cáo công tác bảo vệ môi trường</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Share Section - Mobile optimized */}
+              <Card className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+                <CardContent className="p-4">
+                  <h3 className={`text-base font-semibold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                    <Share2 className="h-4 w-4" />
+                    {t("departments.shareTitle")}
+                  </h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleDownload}
+                      className={`text-xs h-9 ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-dseza-dark-main-bg' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-dseza-light-main-bg'}`}
+                    >
+                      <Download className="w-3 h-3 mr-1" />
+                      {t("departments.download")}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleShare}
+                      className={`text-xs h-9 ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-dseza-dark-main-bg' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-dseza-light-main-bg'}`}
+                    >
+                      <Share2 className="w-3 h-3 mr-1" />
+                      {t("departments.share")}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handlePrint}
+                      className={`text-xs h-9 ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-dseza-dark-main-bg' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-dseza-light-main-bg'}`}
+                    >
+                      <Printer className="w-3 h-3 mr-1" />
+                      {t("departments.print")}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+            </div>
+
+          </main>
+
+          {/* Footer */}
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Desktop Layout (original but with multilingual support)
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}
@@ -57,18 +298,15 @@ export const DepartmentsPage = () => {
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
               <Link 
-                to="/" 
+                to={`/${language}`} 
                 className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {t("common.home")}
               </Link>
               <ChevronRight className="h-4 w-4" />
-              <Link 
-                to="/gioi-thieu" 
-                className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
-              >
-                Giới thiệu
-              </Link>
+              <span className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                {t("nav.intro")}
+              </span>
               <ChevronRight className="h-4 w-4" />
               <Link 
                 to="/gioi-thieu/gioi-thieu-chung/tong-quan-ve-ban-quan-ly" 
@@ -78,7 +316,7 @@ export const DepartmentsPage = () => {
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Cơ cấu tổ chức
+                {t("departments.title")}
               </span>
             </nav>
           </div>

@@ -17,6 +17,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/utils/translations";
 import { useMultilingualMenu } from '@/api/hooks';
 import type { MenuLinkWithSubtree } from '@/api/hooks';
+import { extractPathWithoutLanguage, createLanguageUrl, useLanguageRoutes } from '@/utils/routes';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 // Type for mobile menu item (mapped from API data)
 type MobileMenuItem = {
@@ -35,12 +37,21 @@ type MobileMenuItem = {
 };
 
 // Function to map API data to mobile menu structure
-const mapApiDataToMobileMenu = (apiMenuLinks: MenuLinkWithSubtree[]): MobileMenuItem[] => {
+const mapApiDataToMobileMenu = (apiMenuLinks: MenuLinkWithSubtree[], currentLanguage: 'vi' | 'en'): MobileMenuItem[] => {
+  console.log(`📱 Processing mobile menu URLs for language: ${currentLanguage}`);
+
   return apiMenuLinks.map((linkItem, index) => {
+    // Extract path without language prefix and create new URL with current language
+    const rawPath = linkItem.link.url.path;
+    const pathWithoutLanguage = extractPathWithoutLanguage(rawPath);
+    const languageAwareUrl = createLanguageUrl(pathWithoutLanguage, currentLanguage);
+
+    console.log(`📱 Mobile URL transformation: "${rawPath}" -> "${pathWithoutLanguage}" -> "${languageAwareUrl}"`);
+
     const menuItem: MobileMenuItem = {
       id: `menu-${index}`,
       title: linkItem.link.label,
-      url: linkItem.link.url.path,
+      url: languageAwareUrl, // Use language-aware URL
       isExpandable: !!(linkItem.subtree && linkItem.subtree.length > 0),
     };
 
@@ -50,21 +61,37 @@ const mapApiDataToMobileMenu = (apiMenuLinks: MenuLinkWithSubtree[]): MobileMenu
       menuItem.items = [{
         heading: linkItem.link.label, // Use parent title as heading
         links: linkItem.subtree.map((level2Item) => {
+          // Process level 2 URLs with language awareness
+          const level2RawPath = level2Item.link.url.path;
+          const level2PathWithoutLanguage = extractPathWithoutLanguage(level2RawPath);
+          const level2LanguageAwareUrl = createLanguageUrl(level2PathWithoutLanguage, currentLanguage);
+
+          console.log(`📱   Level 2 URL: "${level2RawPath}" -> "${level2LanguageAwareUrl}"`);
+
           const link: {
             title: string;
             url: string;
             children?: { title: string; url: string }[];
           } = {
             title: level2Item.link.label,
-            url: level2Item.link.url.path,
+            url: level2LanguageAwareUrl, // Use language-aware URL
           };
 
           // If level 2 has children (level 3), add them
           if (level2Item.subtree && level2Item.subtree.length > 0) {
-            link.children = level2Item.subtree.map((level3Item) => ({
-              title: level3Item.link.label,
-              url: level3Item.link.url.path,
-            }));
+            link.children = level2Item.subtree.map((level3Item) => {
+              // Process level 3 URLs with language awareness
+              const level3RawPath = level3Item.link.url.path;
+              const level3PathWithoutLanguage = extractPathWithoutLanguage(level3RawPath);
+              const level3LanguageAwareUrl = createLanguageUrl(level3PathWithoutLanguage, currentLanguage);
+
+              console.log(`📱     Level 3 URL: "${level3RawPath}" -> "${level3LanguageAwareUrl}"`);
+
+              return {
+                title: level3Item.link.label,
+                url: level3LanguageAwareUrl, // Use language-aware URL
+              };
+            });
           }
 
           return link;
@@ -98,6 +125,14 @@ const MobileHeader: React.FC = () => {
   
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const navigate = useNavigate();
+  
+  // Navigation handler
+  const handleNavigation = (url: string) => {
+    console.log(`📱 Mobile Navigation: ${url} [Language: ${language}]`);
+    navigate(url);
+    setIsMenuOpen(false); // Close menu after navigation
+  };
   
   // Use multilingual menu hook like desktop NavigationBar
   const { isLoading, isError, error, getMenuLinks, hasMenuData } = useMultilingualMenu();
@@ -108,7 +143,7 @@ const MobileHeader: React.FC = () => {
   // Map API data to mobile menu format
   const mobileMenuData: MobileMenuItem[] = isLoading || isError || !hasMenuData
     ? [] 
-    : mapApiDataToMobileMenu(apiMenuLinks);
+    : mapApiDataToMobileMenu(apiMenuLinks, language);
 
   // Debug log to see menu data
   React.useEffect(() => {
@@ -152,8 +187,8 @@ const MobileHeader: React.FC = () => {
 
   // Logo component - changes based on theme
   const Logo = () => (
-    <a 
-      href={`/${language}`} 
+    <button 
+      onClick={() => handleNavigation(`/${language}`)}
       className="flex items-center"
       aria-label="Về trang chủ"
     >
@@ -162,7 +197,7 @@ const MobileHeader: React.FC = () => {
         alt="DSEZA Logo"
         className="h-[60px]"
       />
-    </a>
+    </button>
   );
 
   return (
@@ -308,34 +343,32 @@ const MobileHeader: React.FC = () => {
                                           {/* Child items */}
                                           <div className="pl-8">
                                             {link.children.map((child, childIdx) => (
-                                              <a
+                                              <button
                                                 key={childIdx}
-                                                href={child.url}
+                                                onClick={() => handleNavigation(child.url)}
                                                 className={cn(
-                                                  "block py-2 pl-4 pr-2 font-inter text-sm transition-colors duration-200",
+                                                  "block py-2 pl-4 pr-2 font-inter text-sm transition-colors duration-200 w-full text-left",
                                                   getTextColor(),
                                                   theme === "dark" ? "hover:text-dseza-dark-primary-accent" : "hover:text-dseza-light-primary-accent"
                                                 )}
-                                                onClick={() => setIsMenuOpen(false)}
                                               >
                                                 {child.title}
-                                              </a>
+                                              </button>
                                             ))}
                                           </div>
                                         </>
                                       ) : (
                                         // Single item without children
-                                        <a
-                                          href={link.url}
+                                        <button
+                                          onClick={() => handleNavigation(link.url)}
                                           className={cn(
-                                            "block py-2 pl-4 pr-2 font-inter text-sm transition-colors duration-200",
+                                            "block py-2 pl-4 pr-2 font-inter text-sm transition-colors duration-200 w-full text-left",
                                             getTextColor(),
                                             theme === "dark" ? "hover:text-dseza-dark-primary-accent" : "hover:text-dseza-light-primary-accent"
                                           )}
-                                          onClick={() => setIsMenuOpen(false)}
                                         >
                                           {link.title}
-                                        </a>
+                                        </button>
                                       )}
                                     </div>
                                   ))}
@@ -345,20 +378,19 @@ const MobileHeader: React.FC = () => {
                           </CollapsibleContent>
                         </Collapsible>
                       ) : (
-                        <a 
-                          href={item.url}
+                        <button 
+                          onClick={() => handleNavigation(item.url!)}
                           className={cn(
-                            "block py-3 px-2 transition-colors duration-200",
+                            "block py-3 px-2 transition-colors duration-200 w-full text-left",
                             getTextColor(),
                             "font-montserrat font-semibold text-lg",
                             getBorderColor(),
                             "border-b",
                             theme === "dark" ? "hover:text-dseza-dark-primary-accent" : "hover:text-dseza-light-primary-accent"
                           )}
-                          onClick={() => setIsMenuOpen(false)}
                         >
                           {item.title}
-                        </a>
+                        </button>
                       )}
                     </div>
                   ))}
@@ -427,8 +459,11 @@ const MobileHeader: React.FC = () => {
 
 // Language Switcher Component
 const LanguageSwitcher = () => {
-  const { language, toggleLanguage } = useLanguage();
+  const { language } = useLanguage();
   const { theme } = useTheme();
+  const { switchLanguageUrl } = useLanguageRoutes();
+  const location = useLocation();
+  const navigate = useNavigate();
   
   const getActiveClass = (lang: string) => {
     const isActive = language === lang;
@@ -440,10 +475,17 @@ const LanguageSwitcher = () => {
     );
   };
   
+  const handleLanguageSwitch = (targetLang: "vi" | "en") => {
+    if (language !== targetLang) {
+      const newUrl = switchLanguageUrl(targetLang, location.pathname);
+      navigate(newUrl);
+    }
+  };
+  
   return (
     <div className="flex items-center">
       <button 
-        onClick={toggleLanguage} 
+        onClick={() => handleLanguageSwitch("vi")}
         className={getActiveClass("vi")}
       >
         Tiếng Việt
@@ -455,7 +497,7 @@ const LanguageSwitcher = () => {
         /
       </span>
       <button 
-        onClick={toggleLanguage} 
+        onClick={() => handleLanguageSwitch("en")}
         className={getActiveClass("en")}
       >
         English

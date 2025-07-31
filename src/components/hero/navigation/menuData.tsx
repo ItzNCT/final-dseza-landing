@@ -19,35 +19,35 @@ export const getNavigationMenuItems = (): MenuItem[] => {
               {
                 title: "Thư ngỏ",
                 titleEn: "Welcome Letter",
-                url: "/gioi-thieu/thu-ngo",
+                url: "/gioi-thieu/gioi-thieu-chung/thu-ngo",
                 iconName: "general-partner"
               },
               {
                 title: "Tổng quan về Đà Nẵng",
                 titleEn: "Overview of Da Nang",
-                url: "/gioi-thieu/tong-quan-ve-da-nang",
+                url: "/gioi-thieu/gioi-thieu-chung/tong-quan-ve-da-nang",
                 iconName: "real-estate"
               },
               {
                 title: "Tổng quan về Ban Quản lý",
                 titleEn: "Overview of the Authority",
+                url: "/gioi-thieu/gioi-thieu-chung/tong-quan-ve-ban-quan-ly",
                 iconName: "business-development",
-                // url: "https://dseza.danang.gov.vn/danh-sach-tin-tuc/gioi-thieu/tong-quan-ve-ban-quan-ly/", // URL có thể bỏ nếu mục này chỉ để mở dropdown
                 items: [
                   {
                     title: "Chức năng, nhiệm vụ",
                     titleEn: "Functions and Duties",
-                    url: "/tong-quan-ban-quan-ly/chuc-nang-nhiem-vu"
+                    url: "/gioi-thieu/gioi-thieu-chung/chuc-nang-nhiem-vu"
                   },
                   {
                     title: "Các phòng ban",
                     titleEn: "Departments",
-                    url: "/tong-quan-ban-quan-ly/cac-phong-ban"
+                    url: "/gioi-thieu/gioi-thieu-chung/co-cau-to-chuc"
                   },
                   {
                     title: "Đơn vị trực thuộc",
                     titleEn: "Affiliated Units",
-                    url: "/tong-quan-ban-quan-ly/don-vi-truc-thuoc"
+                    url: "/gioi-thieu/gioi-thieu-chung/don-vi-truc-thuoc"
                   },
                 ]
               },

@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { MenuItem } from './types/megaMenu';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTranslation } from '@/utils/translations';
+import { useNavigate } from 'react-router-dom';
 
 type NavigationMenuItemProps = {
   item: MenuItem;
@@ -21,13 +22,18 @@ const NavigationMenuItem = ({
   const isActive = activeMenuIndex === index;
   const { language } = useLanguage();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   
   const handleClick = (e: React.MouseEvent) => {
     if (item.megaMenuConfig) {
       e.preventDefault();
       onMenuClick(index);
+    } else {
+      // For regular menu items, use React Router navigation
+      e.preventDefault();
+      console.log(`🔗 Navigating to: ${item.url} [Language: ${language}]`);
+      navigate(item.url);
     }
-    // Nếu không có megaMenuConfig, link sẽ hoạt động bình thường
   };
 
   const getItemTitle = () => {

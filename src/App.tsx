@@ -119,6 +119,9 @@ const App: React.FC = () => (
                         <Route path="tien-ich/hoi-dap/tao-moi" element={<CreateQuestionPage />} />
                         <Route path="tien-ich/hoi-dap" element={<QnAListPage />} />
                         <Route path="tien-ich/cau-hoi-thuong-gap" element={<FaqPage />} />
+                        <Route path="utilities/qa/:id" element={<QnADetailPage />} />
+                        <Route path="utilities/qa" element={<QnAListPage />} />
+                        <Route path="utilities/frequently-asked-questions" element={<FaqPage />} />
                         <Route path="faq" element={<FaqPage />} />
                         
                         {/* Contact and auth routes */}
@@ -130,23 +133,37 @@ const App: React.FC = () => (
                         <Route path="ho-so" element={<ProfilePage />} />
                         
                         {/* Introduction routes */}
+                        <Route path="gioi-thieu/gioi-thieu-chung" element={<Navigate to="tong-quan-ve-ban-quan-ly" replace />} />
                         <Route path="gioi-thieu/gioi-thieu-chung/thu-ngo" element={<WelcomeLetterPage />} />
                         <Route path="gioi-thieu/gioi-thieu-chung/tong-quan-ve-da-nang" element={<DanangOverviewPage />} />
                         <Route path="gioi-thieu/gioi-thieu-chung/tong-quan-ve-ban-quan-ly" element={<ManagementBoardOverviewPage />} />
                         <Route path="gioi-thieu/gioi-thieu-chung/chuc-nang-nhiem-vu" element={<FunctionsDutiesPage />} />
                         <Route path="gioi-thieu/gioi-thieu-chung/co-cau-to-chuc" element={<DepartmentsPage />} />
                         <Route path="gioi-thieu/gioi-thieu-chung/don-vi-truc-thuoc" element={<AffiliatedUnitsPage />} />
+                        
+                        {/* English Introduction routes */}
+                        <Route path="introduction/general-introduction" element={<Navigate to="overview-of-management-board" replace />} />
+                        <Route path="introduction/general-introduction/welcome-letter" element={<WelcomeLetterPage />} />
+                        <Route path="introduction/general-introduction/overview-of-da-nang" element={<DanangOverviewPage />} />
+                        <Route path="introduction/general-introduction/overview-of-management-board" element={<ManagementBoardOverviewPage />} />
+                        <Route path="introduction/general-introduction/functions-and-tasks" element={<FunctionsDutiesPage />} />
+                        <Route path="introduction/general-introduction/departments" element={<DepartmentsPage />} />
+                        <Route path="introduction/general-introduction/subordinate-units" element={<AffiliatedUnitsPage />} />
+                        
+                        {/* Functional zones routes */}
+                        <Route path="introduction/functional-zones" element={<FunctionalZonesListPage />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang" element={<FunctionalZonesListPage />} />
                         
                         {/* Investment guide routes */}
                         <Route path="cam-nang-dau-tu" element={<InvestmentGuidePage />} />
                         <Route path="cam-nang-dau-tu/chinh-sach-uu-dai" element={<InvestmentPolicyPage />} />
                         <Route path="cam-nang-dau-tu/brochure" element={<BrochurePage />} />
+                        <Route path="investment-handbook" element={<InvestmentGuidePage />} />
                         
-                        {/* 10 Industrial Zone Specific Routes */}
+                        {/* Vietnamese Functional Zone Specific Routes */}
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghe-cao-da-nang" element={<KhuCongNgheCaoDaNang />} />
-                        <Route path="gioi-thieu/cac-khu-chuc-nang/khu-thuong-mai-tu-do-da-nang" element={<KhuThuongMaiTuDoDaNang />} />
-                        <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cntt-tap-trung" element={<KhuCNTTTapTrung />} />
+                        <Route path="gioi-thieu/cac-khu-chuc-nang/khu-mau-dich-tu-do-da-nang" element={<KhuThuongMaiTuDoDaNang />} />
+                        <Route path="gioi-thieu/cac-khu-chuc-nang/khu-tap-trung-cong-nghe-thong-tin" element={<KhuCNTTTapTrung />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-khanh" element={<KhuCongNghiepHoaKhanh />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-khanh-mo-rong" element={<KhuCongNghiepHoaKhanhMoRong />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-da-nang" element={<KhuCongNghiepDaNang />} />
@@ -154,6 +171,18 @@ const App: React.FC = () => (
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-cam" element={<KhuCongNghiepHoaCam />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-lien-chieu" element={<KhuCongNghiepLienChieu />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-ninh" element={<KhuCongNghiepHoaNinh />} />
+                        
+                        {/* English Functional Zone Specific Routes */}
+                        <Route path="introduction/functional-zones/da-nang-hi-tech-park" element={<KhuCongNgheCaoDaNang />} />
+                        <Route path="introduction/functional-zones/da-nang-free-trade-zone" element={<KhuThuongMaiTuDoDaNang />} />
+                        <Route path="introduction/functional-zones/it-concentration-zone" element={<KhuCNTTTapTrung />} />
+                        <Route path="introduction/functional-zones/hoa-khanh-industrial-park" element={<KhuCongNghiepHoaKhanh />} />
+                        <Route path="introduction/functional-zones/hoa-khanh-expanded-industrial-park" element={<KhuCongNghiepHoaKhanhMoRong />} />
+                        <Route path="introduction/functional-zones/da-nang-industrial-park" element={<KhuCongNghiepDaNang />} />
+                        <Route path="introduction/functional-zones/da-nang-seafood-service-industrial-park" element={<KhuCongNghiepDichVuThuySanDaNang />} />
+                        <Route path="introduction/functional-zones/hoa-cam-industrial-park" element={<KhuCongNghiepHoaCam />} />
+                        <Route path="introduction/functional-zones/lien-chieu-industrial-park" element={<KhuCongNghiepLienChieu />} />
+                        <Route path="introduction/functional-zones/hoa-ninh-industrial-park" element={<KhuCongNghiepHoaNinh />} />
                         
                         {/* Functional Zone Detail Pages */}
                         <Route path="functionalzone/:slug" element={<FunctionalzoneDetailPage />} />

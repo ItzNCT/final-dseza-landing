@@ -8,6 +8,7 @@ import {
 import { cn } from "@/lib/utils";
 import { MegaMenuConfigType, MegaMenuContentType } from './types/megaMenu'; // Đã sửa: MegaMenuItem không được sử dụng trực tiếp ở đây
 import { useLanguage } from '@/context/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 
 const iconMap: Record<string, any> = {
   "general-partner": User,
@@ -33,9 +34,15 @@ type MegaMenuProps = {
 const MegaMenu = ({ config }: MegaMenuProps) => {
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
   const { language } = useLanguage();
+  const navigate = useNavigate();
 
   const toggleDropdown = (id: string) => {
     setOpenDropdowns(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleNavigation = (url: string) => {
+    console.log(`🔗 MegaMenu Navigation: ${url} [Language: ${language}]`);
+    navigate(url);
   };
 
   const gridCols = config.columns.length <= 2 ?
@@ -87,18 +94,19 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
                         )}
                         onClick={() => content.items && toggleDropdown(dropdownId)}
                       >
-                        <a
-                          href={content.items ? undefined : content.url || "#"}
-                          className={cn(
-                            "flex items-center gap-3 flex-grow",
-                            "transition-colors duration-200",
-                            "hover:text-dseza-light-primary dark:hover:text-dseza-dark-primary"
-                          )}
-                          onClick={(e) => {
-                            if (content.items) {
-                              e.preventDefault();
+                        <button
+                          onClick={() => {
+                            if (content.url) {
+                              handleNavigation(content.url);
                             }
                           }}
+                          className={cn(
+                            "flex items-center gap-3 flex-grow text-left",
+                            "transition-colors duration-200",
+                            "hover:text-dseza-light-primary dark:hover:text-dseza-dark-primary",
+                            { "cursor-pointer": !content.items }
+                          )}
+                          disabled={!!content.items}
                         >
                           {content.iconName && iconMap[content.iconName] && (
                             <span className={cn(
@@ -112,7 +120,7 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
                           <span className="font-medium">
                             {getLocalizedTitle(content.title, content.titleEn)}
                           </span>
-                        </a>
+                        </button>
                         {content.items && (
                           <button
                             aria-expanded={isDropdownOpen}
@@ -132,10 +140,10 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
                         <ul className="ml-6 mt-2 space-y-1 pl-6 border-l-2 border-dseza-light-primary/30 dark:border-dseza-dark-primary/30">
                           {content.items.map((item, itemIndex) => (
                             <li key={itemIndex}>
-                              <a
-                                href={item.url}
+                              <button
+                                onClick={() => handleNavigation(item.url)}
                                 className={cn(
-                                  "block py-2.5 px-4 rounded-lg text-sm",
+                                  "block py-2.5 px-4 rounded-lg text-sm w-full text-left",
                                   "transition-all duration-200 ease-in-out",
                                   "hover:bg-dseza-light-hover/60 dark:hover:bg-dseza-dark-hover/60",
                                   "hover:text-dseza-light-primary dark:hover:text-dseza-dark-primary",
@@ -147,7 +155,7 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
                                 )}
                               >
                                 {getLocalizedTitle(item.title, item.titleEn)}
-                              </a>
+                              </button>
                             </li>
                           ))}
                         </ul>

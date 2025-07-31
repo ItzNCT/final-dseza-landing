@@ -7,6 +7,7 @@ import { useMultilingualMenu } from '@/api/hooks';
 import { useLanguage } from '@/context/LanguageContext';
 import { MenuItem as NavigationMenuItemType, MegaMenuContentType } from './types/megaMenu';
 import type { MenuLinkWithSubtree } from '@/api/hooks';
+import { extractPathWithoutLanguage, createLanguageUrl } from '@/utils/routes';
 
 const TOP_BAR_HEIGHT_STRING = "3rem"; 
 const INITIAL_NAV_TOP_STRING = "9rem";
@@ -22,12 +23,21 @@ const MenuItemSkeleton: React.FC = () => (
 );
 
 // Function to map API data from GraphQL to NavigationMenuItemType
-const mapApiDataToMenuItems = (apiMenuLinks: MenuLinkWithSubtree[]): NavigationMenuItemType[] => {
+const mapApiDataToMenuItems = (apiMenuLinks: MenuLinkWithSubtree[], currentLanguage: 'vi' | 'en'): NavigationMenuItemType[] => {
+  console.log(`🔄 Processing menu URLs for language: ${currentLanguage}`);
+  
   return apiMenuLinks.map((linkItem) => {
+    // Extract path without language prefix and create new URL with current language
+    const rawPath = linkItem.link.url.path;
+    const pathWithoutLanguage = extractPathWithoutLanguage(rawPath);
+    const languageAwareUrl = createLanguageUrl(pathWithoutLanguage, currentLanguage);
+
+    console.log(`🔗 URL transformation: "${rawPath}" -> "${pathWithoutLanguage}" -> "${languageAwareUrl}"`);
+
     // Basic mapping from GraphQL structure to NavigationMenuItemType
     const navigationItem: NavigationMenuItemType = {
       title: linkItem.link.label,
-      url: linkItem.link.url.path,
+      url: languageAwareUrl, // Use language-aware URL
       translatable: false, // API data doesn't have this field, set default
     };
 
@@ -40,19 +50,33 @@ const mapApiDataToMenuItems = (apiMenuLinks: MenuLinkWithSubtree[]): NavigationM
             title: linkItem.link.label, // Use parent title as column title
             titleEn: linkItem.link.label, // Fallback to same title
             contents: linkItem.subtree.map((level2Item) => {
+              // Process level 2 URLs with language awareness
+              const level2RawPath = level2Item.link.url.path;
+              const level2PathWithoutLanguage = extractPathWithoutLanguage(level2RawPath);
+              const level2LanguageAwareUrl = createLanguageUrl(level2PathWithoutLanguage, currentLanguage);
+
+              console.log(`  🔗 Level 2 URL: "${level2RawPath}" -> "${level2LanguageAwareUrl}"`);
+
               const content: MegaMenuContentType = {
                 title: level2Item.link.label,
                 titleEn: level2Item.link.label,
-                url: level2Item.link.url.path,
+                url: level2LanguageAwareUrl, // Use language-aware URL
               };
 
               // If level 2 has subtree (level 3), map them as items
               if (level2Item.subtree && level2Item.subtree.length > 0) {
                 content.items = level2Item.subtree.map((level3Item) => {
+                  // Process level 3 URLs with language awareness
+                  const level3RawPath = level3Item.link.url.path;
+                  const level3PathWithoutLanguage = extractPathWithoutLanguage(level3RawPath);
+                  const level3LanguageAwareUrl = createLanguageUrl(level3PathWithoutLanguage, currentLanguage);
+
+                  console.log(`    🔗 Level 3 URL: "${level3RawPath}" -> "${level3LanguageAwareUrl}"`);
+
                   const item = {
                     title: level3Item.link.label,
                     titleEn: level3Item.link.label,
-                    url: level3Item.link.url.path,
+                    url: level3LanguageAwareUrl, // Use language-aware URL
                   };
 
                   // Note: Level 4 (level3Item.subtree) is available but not used in current MegaMenu structure
@@ -112,7 +136,7 @@ const NavigationBar: React.FC = () => {
   // Map API data to the expected format for NavigationMenuItem components
   const menuItems: NavigationMenuItemType[] = isLoading || isError || !hasMenuData
     ? [] 
-    : mapApiDataToMenuItems(menuLinks);
+    : mapApiDataToMenuItems(menuLinks, language);
 
   useEffect(() => {
     const handleScroll = () => {

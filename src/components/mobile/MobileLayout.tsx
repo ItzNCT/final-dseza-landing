@@ -21,7 +21,23 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
                         location.pathname.includes('tin-tuc') ||
                         location.pathname.includes('news') ||
                         location.pathname.includes('cac-khu-chuc-nang') ||
-                        location.pathname.includes('functional');
+                        location.pathname.includes('functional') ||
+                        location.pathname.includes('thu-ngo') ||
+                        location.pathname.includes('welcome') ||
+                        location.pathname.includes('open-letter') ||
+                        location.pathname.includes('introduction') ||
+                        location.pathname.includes('gioi-thieu') ||
+                        location.pathname.includes('don-vi-truc-thuoc') ||
+                        location.pathname.includes('affiliated-units') ||
+                        location.pathname.includes('subsidiary-units') ||
+                        location.pathname.includes('co-cau-to-chuc') ||
+                        location.pathname.includes('departments') ||
+                        location.pathname.includes('chuc-nang-nhiem-vu') ||
+                        location.pathname.includes('functions-duties') ||
+                        location.pathname.includes('tong-quan-ve-ban-quan-ly') ||
+                        location.pathname.includes('management-overview') ||
+                        location.pathname.includes('tong-quan-ve-da-nang') ||
+                        location.pathname.includes('danang-overview');
   
   // Only render mobile components if on mobile device
   if (!isMobile) {
