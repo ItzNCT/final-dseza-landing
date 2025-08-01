@@ -8,7 +8,7 @@ import { useTranslation } from "@/utils/translations";
 import { useLanguage } from "@/context/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHomepageData } from "@/hooks/useHomepageData";
-import { getImageWithFallback } from "@/utils/drupal";
+import { getImageWithFallback, generateArticleUrl } from "@/utils/drupal";
 
 // Define types for event data
 interface EventCardProps {
@@ -19,18 +19,20 @@ interface EventCardProps {
   titleEn?: string;
   excerpt?: string;
   excerptEn?: string;
+  path_alias?: string;
   url?: string;
 }
 
-// Format date function
-const formatDate = (dateString: string): string => {
+// Format date function with language support
+const formatDate = (dateString: string, language: 'vi' | 'en' = 'vi'): string => {
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const locale = language === 'en' ? 'en-US' : 'vi-VN';
+    const options: Intl.DateTimeFormatOptions = language === 'en' 
+      ? { month: 'long', day: 'numeric', year: 'numeric' }
+      : { day: '2-digit', month: '2-digit', year: 'numeric' };
+    
+    return date.toLocaleDateString(locale, options);
   } catch (error) {
     return dateString;
   }
@@ -40,14 +42,14 @@ const formatDate = (dateString: string): string => {
  * Individual mobile event card component
  */
 const MobileEventCard: React.FC<EventCardProps> = ({ 
-  id, image, date, title, titleEn, excerpt, excerptEn, url = "#" 
+  id, image, date, title, titleEn, excerpt, excerptEn, path_alias, url 
 }) => {
   const { theme } = useTheme();
   const { language } = useLanguage();
   
-  // Use translated content if available
-  const displayTitle = language === 'en' && titleEn ? titleEn : title;
-  const displayExcerpt = language === 'en' && excerptEn ? excerptEn : excerpt;
+  // Use title and excerpt directly since they're already from the correct language API endpoint
+  const displayTitle = title; // title is already in the correct language from API endpoint
+  const displayExcerpt = excerpt; // excerpt is already in the correct language from API endpoint
   
   // Theme-specific styles using dseza variables
   const cardBg = theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-dseza-light-secondary-bg";
@@ -59,7 +61,7 @@ const MobileEventCard: React.FC<EventCardProps> = ({
   
   return (
     <Link
-      to={`/bai-viet/${id}`}
+      to={url || generateArticleUrl({ id, path_alias }, language)}
       className={cn(
         "group block rounded-xl overflow-hidden border transition-all duration-300 ease-in-out",
         cardBg,
@@ -141,7 +143,8 @@ const EventCardSkeleton: React.FC = () => {
 const MobileFeaturedEvents: React.FC = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const { data, isLoading, isError } = useHomepageData();
+  const { language } = useLanguage();
+  const { data, isLoading, isError } = useHomepageData(language);
   
   // Theme-specific styles using dseza variables to match PC version
   const sectionBg = theme === "dark" ? "bg-[#2C363F]" : "bg-[#F2F2F2]";
@@ -186,11 +189,12 @@ const MobileFeaturedEvents: React.FC = () => {
               key={event.id}
               id={event.id}
               image={getImageWithFallback(event.featured_image)}
-              date={formatDate(event.start_date)}
+              date={formatDate(event.start_date, language)}
               title={event.title}
-              titleEn={event.title} // API doesn't have separate English titles yet
+              titleEn={event.titleEn}
               excerpt={event.description}
-              excerptEn={event.description} // API doesn't have separate English descriptions yet
+              excerptEn={event.descriptionEn}
+              path_alias={event.path_alias}
             />
           ))}
         </div>

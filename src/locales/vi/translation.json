@@ -435,19 +435,140 @@
     "downloadingTitle": "Đang tải xuống tài liệu...",
     "shareSuccess": "Đã sao chép link vào clipboard!"
   },
-  "danangOverview": {
-    "title": "Tổng quan về Đà Nẵng",
-    "pageTitle": "Tổng quan về Đà Nẵng",
-    "download": "Tải xuống",
-    "share": "Chia sẻ",
-    "print": "In",
-    "shareTitle": "Chia sẻ trang:",
-    "downloadingTitle": "Đang tải xuống tài liệu...",
-    "shareSuccess": "Đã sao chép link vào clipboard!"
-  },
   "departments": {
     "title": "Cơ cấu tổ chức",
     "pageTitle": "Cơ cấu tổ chức - Các phòng ban",
+    "breadcrumbGeneral": "Tổng quan về Ban Quản lý",
+    "office": {
+      "title": "I. VĂN PHÒNG",
+      "mainFunction": "Chức năng chính: Tham mưu quản lý công tác tổ chức, cán bộ; quản lý tài chính; thực hiện công tác văn thư, lưu trữ; điều hành các hoạt động của Ban Quản lý.",
+      "documentReceiving": "Tiếp nhận hồ sơ",
+      "detailedDuties": [
+        "Tham mưu, quản lý về công tác tổ chức, cán bộ.",
+        "Tham mưu xây dựng các quy chế, quy định nội bộ của Ban Quản lý.",
+        "Tham mưu công tác bảo vệ bí mật nhà nước.",
+        "Tham mưu, dự toán ngân sách, kinh phí hoạt động hàng năm của Ban Quản lý; hướng dẫn, giám sát kế toán tài chính các đơn vị trực thuộc Ban Quản lý.",
+        "Tham mưu, tổ chức, theo dõi phong trào thi đua – khen thưởng Ban Quản lý, doanh nghiệp KCN.",
+        "Tham mưu, tổ chức thực hiện nhiệm vụ công tác cải cách hành chính nhà nước về lĩnh vực thuộc thẩm quyền của Ban Quản lý.",
+        "Điều hành Bộ phận tiếp nhận và trả kết quả.",
+        "Tổ chức thực hiện công tác văn thư, lưu trữ; quản lý và sử dụng con dấu của cơ quan.",
+        "Rà soát văn bản đi trước khi trình Lãnh đạo Ban ký.",
+        "Tham mưu quản lý, điều hành hệ thống mạng LAN, hệ thống quản lý văn bản và điều hành, trang thông tin điện tử của Ban Quản lý, các công tác liên quan đến ứng dụng công nghệ thông tin.",
+        "Theo dõi công tác xây dựng, áp dụng và cải tiến hệ thống quản lý chất lượng theo tiêu chuẩn TCVN ISO 9001: 2008 Ban Quản lý.",
+        "Triển khai, theo dõi công tác dân chủ cơ sở, cơ quan văn hóa và các công tác về nề nếp làm việc, tinh thần trách nhiệm của cán bộ công chức.",
+        "Chủ trì tham mưu tổ chức các cuộc họp giao ban với các doanh nghiệp trong KCN; giao ban định kỳ của Ban Quản lý.",
+        "Tổng hợp báo cáo tuần, báo cáo giao ban và thông báo kết luận giao ban hàng tháng của Lãnh đạo Ban.",
+        "Thực hiện công tác công tác lễ tân, tổ chức hội nghị, hội thảo và các hoạt động lễ hội của Ban Quản lý, các cấp phát động.",
+        "Quản lý điều hành các phương tiện, đầu mối quản lý tài sản trang thiết bị của cơ quan.",
+        "Thực hiện các công việc khác do Lãnh đạo Ban giao."
+      ]
+    },
+    "investmentDept": {
+      "title": "II. PHÒNG QUẢN LÝ, XÚC TIẾN VÀ HỖ TRỢ ĐẦU TƯ",
+      "function": "Chức năng:",
+      "functionDesc": "Tham mưu về xúc tiến đầu tư, quản lý dự án, hỗ trợ nhà đầu tư, đối ngoại và hợp tác quốc tế.",
+      "duties": "Nhiệm vụ chính:",
+      "dutiesDesc": "Xúc tiến đầu tư và quảng bá, Cấp Giấy chứng nhận đầu tư, Quản lý các dự án đầu tư, Hỗ trợ nhà đầu tư, Hợp tác quốc tế",
+      "fullFunctionDesc": "Tham mưu cho Lãnh đạo Ban Quản lý Khu CNC và các KCN về các lĩnh vực: Xúc tiến đầu tư; quản lý dự án đầu tư; hỗ trợ nhà đầu tư; đối ngoại, hợp tác quốc tế.",
+      "detailedSections": {
+        "investmentPromotion": {
+          "title": "a) Công tác xúc tiến đầu tư",
+          "duties": [
+            "- Tham mưu xây dựng và tổ chức thực hiện kế hoạch, chương trình xúc tiến đầu tư hàng năm, 05 năm và dài hạn của Khu CNC và các KCN.",
+            "- Tổ chức đón tiếp các nhà đầu tư và các đoàn khách trong và ngoài nước đến thăm và tìm hiểu cơ hội đầu tư tại Khu CNC và các KCN.",
+            "- Chủ trì tổ chức hoặc tham gia các hội nghị, hội thảo, sự kiện về xúc tiến đầu tư; đề xuất tổ chức các đoàn công tác xúc tiến đầu tư trong nước và nước ngoài; tổ chức tuyên truyền, quảng bá thông tin, hình ảnh Khu CNC và các KCN.",
+            "- Thiết kế các công cụ, biên soạn và quản lý các tài liệu xúc tiến đầu tư phục vụ công tác xúc tiến đầu tư.",
+            "- Chủ trì, phối hợp với Văn phòng nghiên cứu triển khai các công cụ, phần mềm trên máy tính và môi trường Internet để nâng cao hiệu quả hoạt động hỗ trợ và xúc tiến đầu tư.",
+            "- Quản trị và thực hiện các báo cáo tình hình hoạt động đối với Website Khu CNC phiên bản tiếng Anh, tiếng Nhật và tiếng Hàn; thực hiện nhiệm vụ Thư ký Ban biên tập Website."
+          ]
+        },
+        "investmentCertificate": {
+          "title": "b) Cấp Giấy chứng nhận đăng ký đầu tư",
+          "description": "- Chủ trì tham mưu giải quyết các thủ tục hành chính; cấp Giấy chứng nhận đăng ký đầu tư hoặc quyết định chủ trương đầu tư."
+        },
+        "projectManagement": {
+          "title": "c) Công tác quản lý các dự án đầu tư",
+          "duties": [
+            "- Tham mưu xây dựng, giải quyết các thủ tục thuộc thẩm quyền của Ban Quản lý Khu CNC và các KCN trong lĩnh vực đầu tư.",
+            "- Chủ trì tham mưu giải quyết các vấn đề phát sinh đối với dự án đầu tư sau cấp phép đầu tư.",
+            "- Tham mưu, đề xuất trong việc xây dựng các văn bản quy phạm pháp luật, chính sách có liên quan đến hoạt động đầu tư.",
+            "- Định kỳ kiểm tra, đôn đốc, nhắc nhở việc thực hiện dự án đầu tư."
+          ]
+        },
+        "investorSupport": {
+          "title": "d) Công tác hỗ trợ nhà đầu tư",
+          "duties": [
+            "- Hỗ trợ nhà đầu tư tìm hiểu thông tin, khảo sát môi trường đầu tư của thành phố Đà Nẵng và Khu CNC và các KCN.",
+            "- Hỗ trợ cung cấp thông tin, hướng dẫn, tư vấn cho nhà đầu tư các quy định về pháp luật liên quan đến hoạt động đầu tư vào Khu CNC và các KCN.",
+            "- Đầu mối liên lạc với các sở, ban, ngành liên quan trong việc hỗ trợ nhà đầu tư thực hiện các thủ tục đầu tư vào Khu CNC và các KCN."
+          ]
+        },
+        "internationalCooperation": {
+          "title": "đ) Đối ngoại, hợp tác quốc tế",
+          "duties": [
+            "- Tham mưu thiết lập, duy trì triển khai các hoạt động hợp tác với các cá nhân, tổ chức trong và ngoài nước trong lĩnh vực đầu tư.",
+            "- Tham mưu cho Lãnh đạo Ban ký kết các thỏa thuận hợp tác, biên bản ghi nhớ giữa Ban Quản lý Khu CNC và các KCN với các đối tác, nhà đầu tư trong và ngoài nước về các lĩnh vực đầu tư.",
+            "- Tham mưu thực hiện công tác đối ngoại nhân dân theo Chương trình, Kế hoạch của thành phố.",
+            "- Định kỳ kiểm tra, đánh giá, báo cáo việc thực hiện."
+          ]
+        }
+      }
+    },
+    "businessDept": {
+      "title": "III. PHÒNG QUẢN LÝ DOANH NGHIỆP VÀ LAO ĐỘNG",
+      "duties": "Nhiệm vụ chính:",
+      "dutiesDesc": "Cấp giấy chứng nhận xuất xứ hàng hóa, Tiếp nhận báo cáo thống kê của doanh nghiệp, Theo dõi hoạt động sản xuất kinh doanh, Quản lý các hoạt động dịch vụ trong KCN, Báo cáo tình hình an ninh trật tự"
+    },
+    "planningDept": {
+      "title": "IV. PHÒNG QUẢN LÝ QUY HOẠCH VÀ XÂY DỰNG",
+      "function": "Chức năng:",
+      "functionDesc": "Tham mưu về quy hoạch, kiến trúc, xây dựng công trình, đấu nối hạ tầng và đất đai.",
+      "duties": "Nhiệm vụ chính:",
+      "dutiesDesc": "Quản lý quy hoạch và kiến trúc, Quản lý xây dựng công trình, Quản lý đất đai, Phòng cháy chữa cháy",
+      "fullFunctionDesc": "Tham mưu cho Lãnh đạo Ban Quản lý Khu CNC và các KCN về các lĩnh vực: Quy hoạch, Kiến trúc, Xây dựng công trình, Đấu nối hạ tầng kỹ thuật và Đất đai, phòng cháy chữa cháy, cứu nạn cứu hộ.",
+      "detailedSections": {
+        "planningArchitecture": {
+          "title": "a) Công tác quản lý Quy hoạch, Kiến trúc, Đấu nối hạ tầng kỹ thuật",
+          "description": "Tham mưu, đề xuất về việc tổ chức lập, thẩm định các loại quy hoạch; có ý kiến chấp thuận quy hoạch tổng mặt bằng, phương án kiến trúc và đấu nối hạ tầng kỹ thuật..."
+        },
+        "constructionManagement": {
+          "title": "b) Công tác quản lý Xây dựng công trình",
+          "description": "Có ý kiến chấp thuận đối với thiết kế cơ sở; cấp Thỏa thuận thiết kế tổng mặt bằng; tổ chức kiểm tra xác nhận hoàn thành công trình..."
+        },
+        "landManagement": {
+          "title": "c) Công tác quản lý Đất đai",
+          "description": "Tham mưu lập Quy hoạch, kế hoạch sử dụng đất chi tiết; thẩm định nhu cầu sử dụng đất; tham mưu quyết định giao đất, cho thuê đất..."
+        },
+        "decentralizedTasks": {
+          "title": "d) Thực hiện các nhiệm vụ theo phân cấp, ủy quyền",
+          "description": "Điều chỉnh quy hoạch chi tiết xây dựng; phê duyệt nhiệm vụ và đồ án quy hoạch; cấp, điều chỉnh, gia hạn Giấy phép quy hoạch xây dựng..."
+        },
+        "firePreventionRescue": {
+          "title": "e) Theo dõi công tác phòng cháy chữa cháy, cứu nạn cứu hộ trong Khu CNC và các KCN."
+        },
+        "otherTasks": {
+          "title": "f) Thực hiện các công việc khác do Lãnh đạo Ban giao."
+        }
+      }
+    },
+    "environmentDept": {
+      "title": "V. PHÒNG QUẢN LÝ MÔI TRƯỜNG, KHOA HỌC - CÔNG NGHỆ",
+      "duties": "Nhiệm vụ chính:",
+      "dutiesDesc": "Hướng dẫn thực hiện bảo vệ môi trường, Thẩm định báo cáo đánh giá tác động môi trường, Kiểm tra và xử lý vi phạm môi trường, Báo cáo công tác bảo vệ môi trường",
+      "fullTitle": "V. PHÒNG QUẢN LÝ MÔI TRƯỜNG, KHOA HỌC - CÔNG NGHỆ VÀ ƯƠM TẠO",
+      "detailedDuties": [
+        "Hướng dẫn, kiểm tra chủ đầu tư xây dựng và kinh doanh hạ tầng KCN, các cơ sở sản xuất, kinh doanh, dịch vụ trong KCN thực hiện các quy định bảo vệ môi trường; Phát hiện và kịp thời báo cáo với cơ quan quản lý nhà nước có thẩm quyền để giải quyết, xử lý các hành vi vi phạm pháp luật về bảo vệ môi trường.",
+        "Định kỳ báo cáo công tác bảo vệ môi trường của khu kinh tế, KCN gửi Ủy ban nhân dân thành phố và Bộ Tài nguyên và Môi trường.",
+        "Công khai thông tin về bảo vệ môi trường KCN; tuyên truyền, phổ biến các văn bản quy phạm pháp luật về bảo vệ môi trường cho chủ đầu tư xây dựng và kinh doanh hạ tầng KCN.",
+        "Phối hợp với cơ quan chức năng giải quyết các tranh chấp về môi trường giữa các cơ sở sản xuất, kinh doanh dịch vụ trong KCN hoặc với các tổ chức, cá nhân ngoài phạm vi KCN.",
+        "Phối hợp kiểm tra, thanh tra và xử lý vi phạm về bảo vệ môi trường đối với các hoạt động của chủ đầu tư xây dựng và kinh doanh hạ tầng KCN và các cơ sở sản xuất, kinh doanh, dịch vụ trong KCN.",
+        "Tổ chức thẩm định và trình phê duyệt Báo cáo đánh giá tác động môi trường đối với dự án trong KCN theo ủy quyền của UBND thành phố.",
+        "Tổ chức đăng ký và xác nhận kế hoạch bảo vệ môi trường cho các đối tượng thuộc diện đăng ký trong KCN theo ủy quyền của Sở Tài nguyên và Môi trường hoặc của UBND nhân dân cấp quận.",
+        "Tổ chức thẩm định và trình phê duyệt đề án bảo vệ môi trường chi tiết, đề án bảo vệ môi trường đơn giản của các dự án trong KCN theo ủy quyền của cơ quan có thẩm quyền.",
+        "Tổ chức kiểm tra và trình Lãnh đạo Ban xác nhận hoàn thành công trình bảo vệ môi trường phục vụ giai đoạn vận hành dự án đối với dự án đầu tư trong KCN theo pháp luật về bảo vệ môi trường.",
+        "Thực hiện các công việc khác do Lãnh đạo Ban giao."
+      ]
+    },
     "download": "Tải xuống",
     "share": "Chia sẻ",
     "print": "In",
@@ -458,25 +579,33 @@
   "functions": {
     "title": "Chức năng, nhiệm vụ",
     "pageTitle": "Chức năng, nhiệm vụ, quyền hạn Ban Quản lý",
-    "download": "Tải xuống",
-    "share": "Chia sẻ",
-    "print": "In",
-    "shareTitle": "Chia sẻ trang:",
-    "downloadingTitle": "Đang tải xuống tài liệu...",
-    "shareSuccess": "Đã sao chép link vào clipboard!"
-  },
-  "welcome": {
-    "title": "Thư ngỏ",
-    "pageTitle": "Thư ngỏ",
-    "greeting": "Chào mừng quý vị đã đến với DSEZA chúng tôi,",
-    "introduction": "Lời đầu tiên, Ban Quản lý Khu công nghệ cao và các khu công nghiệp Đà Nẵng (DSEZA) xin được gửi đến Quý tổ chức, doanh nghiệp, nhà đầu tư, cá nhân lời chào trân trọng, lời chúc sức khỏe, an khang và thịnh vượng.",
-    "paragraph1": "Ban Quản lý Khu công nghệ cao và các khu công nghiệp Đà Nẵng được thành lập dựa trên cơ sở hợp nhất Ban Quản lý các khu công nghiệp và chế xuất Đà Nẵng và Ban Quản lý Khu công nghệ cao Đà Nẵng, từ tháng 10/2018 nhằm đáp ứng với chủ trương của Chính phủ, Nhà nước và phù hợp với yêu cầu phát triển kinh tế - xã hội của thành phố Đà Nẵng.",
-    "paragraph2": "Ngày 29/4/2025, UBND TP.Đà Nẵng ban hành quyết định số 34/2025/QĐ-UBND quy định chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức của ban quản lý, trong đó đáng chú ý là chức năng mới quan trọng trong việc quy định chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức của Ban Quản lý Khu Công nghệ cao và các KCN Đà Nẵng - đơn vị trực thuộc UBND thành phố.",
-    "paragraph3": "Ban Quản lý là cơ quan trực thuộc Ủy ban nhân dân thành phố Đà Nẵng, thực hiện chức năng quản lý nhà nước trực tiếp đối với khu công nghệ cao Đà Nẵng; quản lý và tổ chức thực hiện chức năng cung ứng dịch vụ hành chính công và dịch vụ hỗ trợ khác có liên quan đến hoạt động đầu tư và sản xuất, kinh doanh cho nhà đầu tư trong khu công nghệ cao, khu công nghiệp thông tin tập trung Đà Nẵng và các khu công nghiệp trên địa bàn thành phố Đà Nẵng theo quy định của pháp luật.",
-    "paragraph4": "Với thần thái hiện đại của mình tại khu công nghệ cao, khu công nghệ thông tin tập trung Đà Nẵng và các khu công nghiệp trên địa bàn thành phố Đà Nẵng. DSEZA cam kết luôn đồng hành cùng các tổ chức, doanh nghiệp, nhà đầu tư, cá nhân khi đạt niềm tin, lựa chọn khu công nghệ cao, khu công nghệ thông tin tập trung Đà Nẵng và các khu công nghiệp trên địa bàn thành phố Đà Nẵng làm điểm đến trong thời gian qua, cũng như hiện tại và tương lai",
-    "paragraph5": "Với tình thần thiện chí của mình tại khu công nghệ cao, khu công nghệ thông tin tập trung Đà Nẵng và các khu công nghiệp trên địa bàn thành phố Đà Nẵng. DSEZA cam kết luôn đồng hành cùng các tổ chức, doanh nghiệp, nhà đầu tư, cá nhân khi đạt niềm tin, lựa chọn khu công nghệ cao, khu công nghệ thông tin tập trung Đà Nẵng và các khu công nghiệp trên địa bàn thành phố Đà Nẵng làm điểm đến trong thời gian qua, cũng như hiện tại và tương lai",
-    "closing": "Trân trọng cảm ơn!",
-    "signature": "Lãnh đạo Ban Quản lý",
+    "breadcrumbGeneral": "Tổng quan về Ban Quản lý",
+    "generalIntroduction": "Giới thiệu chung",
+    "section1Title": "1. Chức năng",
+    "section2Title": "2. Nhiệm vụ và Quyền hạn",
+    "section3Title": "3. Sơ đồ tổ chức",
+    "introduction1": "Ban Quản lý Khu công nghệ cao và các khu công nghiệp Đà Nẵng được thành lập theo Quyết định số 1296/QĐ-TTg ngày 03/10/2018 của Thủ tướng Chính phủ.",
+    "introduction2": "Đây là đầu mối thống nhất quản lý các KCN trên địa bàn thành phố và xúc tiến đầu tư.",
+    "functionMain": "Chức năng chính: Cơ quan trực thuộc UBND thành phố, thực hiện chức năng quản lý nhà nước trực tiếp đối với Khu công nghệ cao và các khu công nghiệp.",
+    "functionPoint1": "Quản lý và cung ứng dịch vụ hành chính công",
+    "functionPoint2": "Hỗ trợ hoạt động đầu tư và sản xuất kinh doanh",
+    "functionPoint3": "Có tư cách pháp nhân và tài khoản riêng",
+    "legalBasis": "Căn cứ pháp lý:",
+    "legalPoint1": "Điều 35 Nghị định số 99/2003/NĐ-CP (Quy chế Khu công nghệ cao)",
+    "legalPoint2": "Điều 63 Nghị định số 82/2018/NĐ-CP (Quản lý KCN và khu kinh tế)",
+    "legalPoint3": "Các văn bản pháp luật khác có liên quan",
+    "organizationChart": "SƠ ĐỒ TỔ CHỨC BAN QUẢN LÝ",
+    "organizationSubtitle": "KHU CÔNG NGHỆ CAO VÀ CÁC KHU CÔNG NGHIỆP ĐÀ NẴNG",
+    "organizationUpdating": "Sơ đồ tổ chức chi tiết đang được cập nhật...",
+    "detailedIntro1": "Ban quản lý Khu công nghệ cao và các Khu công nghiệp Đà Nẵng (sau đây viết tắt là Ban Quản lý) là cơ quan trực thuộc UBND thành phố, thực hiện chức năng quản lý nhà nước trực tiếp đối với Khu công nghệ cao và các khu công nghiệp trên địa bàn Đà Nẵng; quản lý và tổ chức thực hiện chức năng cung ứng dịch vụ hành chính công và dịch vụ hỗ trợ khác có liên quan đến hoạt động đầu tư và sản xuất, kinh doanh cho nhà đầu tư trong khu công nghệ cao và các khu công nghiệp.",
+    "detailedIntro2": "Ban Quản lý chịu sự chỉ đạo và quản lý về tổ chức, biên chế, chương trình kế hoạch công tác và kinh phí hoạt động của Ủy ban nhân dân thành phố; chịu sự chỉ đạo, hướng dẫn và kiểm tra về chuyên môn nghiệp vụ của các Bộ, ngành quản lý về lĩnh vực có liên quan.",
+    "detailedIntro3": "Ban Quản lý có tư cách pháp nhân; có con dấu mang hình quốc huy và tài khoản riêng; kinh phí quản lý hành chính nhà nước, kinh phí hoạt động sự nghiệp và vốn đầu tư phát triển do ngân sách nhà nước cấp theo kế hoạch hàng năm.",
+    "dutiesIntro": "Ban Quản lý thực hiện nhiệm vụ, quyền hạn theo quy định tại:",
+    "dutiesPoint1": "Điều 35 Nghị định số 99/2003/NĐ-CP ngày 28 tháng 8 năm 2003 của Chính phủ về việc ban hành Quy chế Khu công nghệ cao.",
+    "dutiesPoint2": "Điều 63 Nghị định số 82/2018/NĐ-CP ngày 22 tháng 5 năm 2018 của Chính phủ quy định về quản lý khu công nghiệp và khu kinh tế.",
+    "dutiesPoint3": "Các văn bản pháp luật khác có liên quan.",
+    "organizationFullTitle": "SƠ ĐỒ TỔ CHỨC BAN QUẢN LÝ KHU CÔNG NGHỆ CAO VÀ CÁC KHU CÔNG NGHIỆP ĐÀ NẴNG",
+    "organizationNote": "Sơ đồ tổ chức chi tiết đang được cập nhật...",
     "download": "Tải xuống",
     "share": "Chia sẻ",
     "print": "In",

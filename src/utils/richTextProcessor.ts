@@ -239,4 +239,40 @@ export function extractFirstImageFromRichText(richTextHtml: string, includedData
   }
 
   return null;
+}
+
+/**
+ * Convert HTML content to plain text summary for cards/previews
+ * @param htmlContent - HTML content to convert
+ * @param maxLength - Maximum length of the summary (default: 200)
+ * @returns Plain text summary with "..." if truncated
+ */
+export function createPlainTextSummary(htmlContent: string, maxLength: number = 200): string {
+  if (!htmlContent) return '';
+
+  // First sanitize and remove dangerous content
+  const sanitized = DOMPurify.sanitize(htmlContent, {
+    ALLOWED_TAGS: [], // No tags allowed - we want plain text
+    ALLOWED_ATTR: []
+  });
+
+  // Remove extra whitespace and line breaks
+  const cleaned = sanitized
+    .replace(/\s+/g, ' ') // Replace multiple whitespace with single space
+    .trim();
+
+  // Truncate if necessary
+  if (cleaned.length <= maxLength) {
+    return cleaned;
+  }
+
+  // Find last complete word within limit
+  const truncated = cleaned.substring(0, maxLength);
+  const lastSpaceIndex = truncated.lastIndexOf(' ');
+  
+  if (lastSpaceIndex > maxLength * 0.8) { // If last space is close to end, use it
+    return truncated.substring(0, lastSpaceIndex) + '...';
+  } else {
+    return truncated + '...';
+  }
 } 

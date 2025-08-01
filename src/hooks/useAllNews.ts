@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { extractImageUrl } from '@/utils/drupal';
-import { extractFirstImageFromRichText } from '@/utils/richTextProcessor';
+import { extractFirstImageFromRichText, createPlainTextSummary } from '@/utils/richTextProcessor';
 
 // Use same base URL pattern as useHomepageData
 const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
@@ -11,20 +11,24 @@ const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL ||
 export interface NewsItem {
   id: string;
   title: string;
+  titleEn?: string;
   summary: string;
+  summaryEn?: string;
   published_date: string;
   featured_image?: string;
   category: string;
   category_id?: string;
   all_categories: string[];
   all_category_ids: string[];
+  path_alias?: string; // SEO-friendly URL alias from Drupal
 }
 
 /**
  * Get all event child category IDs (categories that have "Sự kiện" as parent)
  */
-async function getEventChildCategoryIds(): Promise<string[]> {
-  const categoriesUrl = `${DRUPAL_BASE_URL}/jsonapi/taxonomy_term/news_category?include=parent&sort=weight`;
+async function getEventChildCategoryIds(language: 'vi' | 'en' = 'vi'): Promise<string[]> {
+  const languagePrefix = language === 'en' ? '/en' : '/vi';
+  const categoriesUrl = `${DRUPAL_BASE_URL}${languagePrefix}/jsonapi/taxonomy_term/news_category?include=parent&sort=weight`;
   
   const categoriesResponse = await fetch(categoriesUrl, {
     headers: {
@@ -58,18 +62,41 @@ async function getEventChildCategoryIds(): Promise<string[]> {
 }
 
 /**
- * Fetch news articles from JSON:API that belong to event child categories only
+ * Fetch news articles from JSON:API that belong to event child categories only with language support
  */
-async function fetchAllNews(): Promise<NewsItem[]> {
+async function fetchAllNews(language: 'vi' | 'en' = 'vi'): Promise<NewsItem[]> {
   // First, get all event child category IDs
-  const eventChildCategoryIds = await getEventChildCategoryIds();
+  const eventChildCategoryIds = await getEventChildCategoryIds(language);
   
   if (eventChildCategoryIds.length === 0) {
     console.warn('⚠️ No event child categories found, returning empty array');
     return [];
   }
 
-  const url = `${DRUPAL_BASE_URL}/jsonapi/node/bai-viet`
+  const languagePrefix = language === 'en' ? '/en' : '/vi';
+  
+  // Fetch both Vietnamese and English versions for better language support
+  const [viData, enData] = await Promise.allSettled([
+    fetch(`${DRUPAL_BASE_URL}/vi/jsonapi/node/bai-viet?filter[status][value]=1&sort=-created&page[limit]=50&include=field_anh_dai_dien.field_media_image,field_chuyen_muc`, {
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
+        'Accept-Language': 'vi',
+        'Content-Language': 'vi',
+      },
+    }),
+    fetch(`${DRUPAL_BASE_URL}/en/jsonapi/node/bai-viet?filter[status][value]=1&sort=-created&page[limit]=50&include=field_anh_dai_dien.field_media_image,field_chuyen_muc`, {
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
+        'Accept-Language': 'en',
+        'Content-Language': 'en',
+      },
+    })
+  ]);
+
+  // Process primary data (current language)
+  const url = `${DRUPAL_BASE_URL}${languagePrefix}/jsonapi/node/bai-viet`
     + '?filter[status][value]=1'               // Published
     + '&sort=-created'                         // Newest first
     + '&page[limit]=50'                        // Get more articles
@@ -79,6 +106,8 @@ async function fetchAllNews(): Promise<NewsItem[]> {
     headers: {
       'Accept': 'application/vnd.api+json',
       'Content-Type': 'application/vnd.api+json',
+      'Accept-Language': language,
+      'Content-Language': language,
     },
   });
 
@@ -87,6 +116,24 @@ async function fetchAllNews(): Promise<NewsItem[]> {
   }
 
   const data = await response.json();
+  
+  // Process alternative language data for dual language support
+  let viDataResult: any = null;
+  let enDataResult: any = null;
+  
+  if (viData.status === 'fulfilled' && viData.value.ok) {
+    viDataResult = await viData.value.json();
+    console.log('🌐 Bilingual support: Vietnamese data loaded');
+  } else {
+    console.warn('⚠️ Vietnamese data fetch failed');
+  }
+  
+  if (enData.status === 'fulfilled' && enData.value.ok) {
+    enDataResult = await enData.value.json();
+    console.log('🌐 Bilingual support: English data loaded');
+  } else {
+    console.warn('⚠️ English data fetch failed');
+  }
 
   // Filter articles to only include those with event child categories
   const filteredData = data.data?.filter((item: any) => {
@@ -137,28 +184,63 @@ async function fetchAllNews(): Promise<NewsItem[]> {
       featuredImage = extractFirstImageFromRichText(item.attributes.body.processed, data.included);
     }
 
+    // Find corresponding article in other language for dual language support
+    const articleId = item.id;
+    let titleEn: string | undefined;
+    let summaryEn: string | undefined;
+    
+    // Look for English version if current is Vietnamese
+    if (language === 'vi' && enDataResult?.data) {
+      const enArticle = enDataResult.data.find((enItem: any) => 
+        enItem.attributes?.drupal_internal__nid === item.attributes?.drupal_internal__nid
+      );
+      if (enArticle) {
+        titleEn = enArticle.attributes.title;
+        const rawSummary = enArticle.attributes.body?.summary || enArticle.attributes.body?.value || '';
+        summaryEn = createPlainTextSummary(rawSummary);
+      }
+    }
+    
+    // Look for Vietnamese version if current is English  
+    if (language === 'en' && viDataResult?.data) {
+      const viArticle = viDataResult.data.find((viItem: any) => 
+        viItem.attributes?.drupal_internal__nid === item.attributes?.drupal_internal__nid
+      );
+      if (viArticle) {
+        // For English articles, titleEn stores the Vietnamese alternative
+        titleEn = viArticle.attributes.title; // This is Vietnamese text
+        const rawSummary = viArticle.attributes.body?.summary || viArticle.attributes.body?.value || '';
+        summaryEn = createPlainTextSummary(rawSummary);
+      }
+    }
+
+    const rawMainSummary = item.attributes.body?.summary || item.attributes.body?.value || '';
+
     return {
       id: item.id,
       title: item.attributes.title,
-      summary: item.attributes.body?.summary || item.attributes.body?.value?.substring(0, 200) + '...' || '',
+      titleEn,
+      summary: createPlainTextSummary(rawMainSummary),
+      summaryEn,
       published_date: item.attributes.created,
       featured_image: featuredImage,
       category: primaryCategory,
       category_id: primaryCategoryId,
       all_categories: categoryNames,
       all_category_ids: categoryIds,
+      path_alias: item.attributes.path?.alias || null, // Extract path alias for SEO URLs
     };
   });
 }
 
 /**
- * Hook to fetch and cache news articles that belong to event child categories only
+ * Hook to fetch and cache news articles that belong to event child categories only with language support
  * This filters articles to only show those with categories that are children of "Sự kiện" parent category
  */
-export const useAllNews = () => {
+export const useAllNews = (language: 'vi' | 'en' = 'vi') => {
   return useQuery({
-    queryKey: ['allNews'],
-    queryFn: fetchAllNews,
+    queryKey: ['allNews', language],
+    queryFn: () => fetchAllNews(language),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 3,

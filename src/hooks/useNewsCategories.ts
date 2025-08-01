@@ -15,16 +15,37 @@ export interface NewsCategory {
 }
 
 /**
- * Fetch news categories from JSON:API
+ * Fetch news categories from JSON:API with bilingual support
  */
 async function fetchNewsCategories(): Promise<NewsCategory[]> {
-  // Fetch all categories first to get the parent-child relationships
-  const url = `${DRUPAL_BASE_URL}/jsonapi/taxonomy_term/news_category?include=parent&sort=weight`;
+  // Fetch both Vietnamese and English versions for better language support
+  const [viData, enData] = await Promise.allSettled([
+    fetch(`${DRUPAL_BASE_URL}/vi/jsonapi/taxonomy_term/news_category?include=parent&sort=weight`, {
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
+        'Accept-Language': 'vi',
+        'Content-Language': 'vi',
+      },
+    }),
+    fetch(`${DRUPAL_BASE_URL}/en/jsonapi/taxonomy_term/news_category?include=parent&sort=weight`, {
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
+        'Accept-Language': 'en',
+        'Content-Language': 'en',
+      },
+    })
+  ]);
 
+  // Primary data (Vietnamese)
+  const url = `${DRUPAL_BASE_URL}/vi/jsonapi/taxonomy_term/news_category?include=parent&sort=weight`;
   const response = await fetch(url, {
     headers: {
       'Accept': 'application/vnd.api+json',
       'Content-Type': 'application/vnd.api+json',
+      'Accept-Language': 'vi',
+      'Content-Language': 'vi',
     },
   });
 
@@ -33,6 +54,20 @@ async function fetchNewsCategories(): Promise<NewsCategory[]> {
   }
 
   const data = await response.json();
+  
+  // Process alternative language data for dual language support
+  let viDataResult: any = null;
+  let enDataResult: any = null;
+  
+  if (viData.status === 'fulfilled' && viData.value.ok) {
+    viDataResult = await viData.value.json();
+    console.log('🌐 Categories: Vietnamese data loaded');
+  }
+  
+  if (enData.status === 'fulfilled' && enData.value.ok) {
+    enDataResult = await enData.value.json();
+    console.log('🌐 Categories: English data loaded');
+  }
   
   // Debug: Log all categories for inspection
   console.log('🔍 All categories from API:', data.data.map((item: any) => ({
@@ -81,13 +116,28 @@ async function fetchNewsCategories(): Promise<NewsCategory[]> {
     return hasEventsParent && shouldBeHighlighted && isNotExcluded;
   }) || [];
 
-  const result = eventChildCategories.map((item: any) => ({
-    id: item.id,
-    name: item.attributes.name,
-    nameEn: item.attributes.name_en || item.attributes.name, // Fallback to Vietnamese if no English
-    tid: item.attributes.drupal_internal__tid,
-    weight: item.attributes.weight || 0,
-  }));
+  const result = eventChildCategories.map((item: any) => {
+    // Find corresponding English category by tid
+    let nameEn = item.attributes.name; // Fallback to Vietnamese
+    
+    if (enDataResult?.data) {
+      const enCategory = enDataResult.data.find((enItem: any) => 
+        enItem.attributes?.drupal_internal__tid === item.attributes?.drupal_internal__tid
+      );
+      if (enCategory) {
+        nameEn = enCategory.attributes.name;
+        console.log(`✅ Found English name for "${item.attributes.name}": "${nameEn}"`);
+      }
+    }
+
+    return {
+      id: item.id,
+      name: item.attributes.name,
+      nameEn: nameEn,
+      tid: item.attributes.drupal_internal__tid,
+      weight: item.attributes.weight || 0,
+    };
+  });
   
   console.log('✅ Final filtered categories for NewsSection:', result);
   
@@ -95,15 +145,36 @@ async function fetchNewsCategories(): Promise<NewsCategory[]> {
 }
 
 /**
- * Fetch ALL news categories from JSON:API (for routing and filtering)
+ * Fetch ALL news categories from JSON:API with bilingual support (for routing and filtering)
  */
 async function fetchAllNewsCategories(): Promise<NewsCategory[]> {
-  const url = `${DRUPAL_BASE_URL}/jsonapi/taxonomy_term/news_category?sort=weight`;
+  // Fetch both Vietnamese and English versions
+  const [viData, enData] = await Promise.allSettled([
+    fetch(`${DRUPAL_BASE_URL}/vi/jsonapi/taxonomy_term/news_category?sort=weight`, {
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
+        'Accept-Language': 'vi',
+        'Content-Language': 'vi',
+      },
+    }),
+    fetch(`${DRUPAL_BASE_URL}/en/jsonapi/taxonomy_term/news_category?sort=weight`, {
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
+        'Accept-Language': 'en',
+        'Content-Language': 'en',
+      },
+    })
+  ]);
 
+  const url = `${DRUPAL_BASE_URL}/vi/jsonapi/taxonomy_term/news_category?sort=weight`;
   const response = await fetch(url, {
     headers: {
       'Accept': 'application/vnd.api+json',
       'Content-Type': 'application/vnd.api+json',
+      'Accept-Language': 'vi',
+      'Content-Language': 'vi',
     },
   });
 
@@ -112,14 +183,34 @@ async function fetchAllNewsCategories(): Promise<NewsCategory[]> {
   }
 
   const data = await response.json();
+  
+  // Process English data
+  let enDataResult: any = null;
+  if (enData.status === 'fulfilled' && enData.value.ok) {
+    enDataResult = await enData.value.json();
+  }
 
-  return data.data?.map((item: any) => ({
-    id: item.id,
-    name: item.attributes.name,
-    nameEn: item.attributes.name_en || item.attributes.name, // Fallback to Vietnamese if no English
-    tid: item.attributes.drupal_internal__tid,
-    weight: item.attributes.weight || 0,
-  })) || [];
+  return data.data?.map((item: any) => {
+    // Find corresponding English category by tid
+    let nameEn = item.attributes.name; // Fallback to Vietnamese
+    
+    if (enDataResult?.data) {
+      const enCategory = enDataResult.data.find((enItem: any) => 
+        enItem.attributes?.drupal_internal__tid === item.attributes?.drupal_internal__tid
+      );
+      if (enCategory) {
+        nameEn = enCategory.attributes.name;
+      }
+    }
+
+    return {
+      id: item.id,
+      name: item.attributes.name,
+      nameEn: nameEn,
+      tid: item.attributes.drupal_internal__tid,
+      weight: item.attributes.weight || 0,
+    };
+  }) || [];
 }
 
 /**

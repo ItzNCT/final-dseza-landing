@@ -8,7 +8,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useHomepageData } from "@/hooks/useHomepageData";
 import { useNewsCategories, type NewsCategory } from "@/hooks/useNewsCategories";
 import { useAllNews } from "@/hooks/useAllNews";
-import { getImageWithFallback } from "@/utils/drupal";
+import { getImageWithFallback, generateArticleUrl } from "@/utils/drupal";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface NewsCardProps {
@@ -22,15 +22,16 @@ interface NewsCardProps {
   url?: string;
 }
 
-// Format date function
-const formatDate = (dateString: string): string => {
+// Format date function with language support
+const formatDate = (dateString: string, language: 'vi' | 'en' = 'vi'): string => {
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const locale = language === 'en' ? 'en-US' : 'vi-VN';
+    const options: Intl.DateTimeFormatOptions = language === 'en' 
+      ? { month: 'long', day: 'numeric', year: 'numeric' }
+      : { day: '2-digit', month: '2-digit', year: 'numeric' };
+    
+    return date.toLocaleDateString(locale, options);
   } catch (error) {
     return dateString;
   }
@@ -69,9 +70,17 @@ const NewsCard: React.FC<NewsCardProps> = ({ date, title, titleEn, excerpt, exce
   const secondaryTextColor = theme === "dark" ? "text-dseza-dark-secondary-text" : "text-dseza-light-secondary-text";
   const titleHoverColor = theme === "dark" ? "hover:text-dseza-dark-primary-accent" : "hover:text-dseza-light-primary-accent";
 
-  // Use appropriate title and excerpt based on language
-  const displayTitle = language === 'en' && titleEn ? titleEn : title;
-  const displayExcerpt = language === 'en' && excerptEn ? excerptEn : excerpt;
+  // Use title and excerpt directly since they're already from the correct language API endpoint
+  const displayTitle = title; // title is already in the correct language from API endpoint
+  const displayExcerpt = excerpt; // excerpt is already in the correct language from API endpoint
+  
+  // Debug can be removed in production
+  if (title.length > 10 && Math.random() < 0.1) { // Only log occasionally to avoid spam
+    console.log('🔍 NewsCard rendering correctly:', {
+      language,
+      displayTitle: displayTitle?.substring(0, 30) + '...'
+    });
+  }
 
   return (
     <Link
@@ -119,8 +128,14 @@ const NewsSection: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { data: allNewsData, isLoading: newsLoading, isError: newsError } = useAllNews();
+  const { data: allNewsData, isLoading: newsLoading, isError: newsError } = useAllNews(language);
   const { data: categoriesData, isLoading: categoriesLoading, isError: categoriesError } = useNewsCategories();
+
+  // Debug logs (can be removed in production)
+  console.log('📰 NewsSection language & data loaded:', {
+    language,
+    articlesCount: allNewsData?.length || 0
+  });
 
   // Theme-specific styles
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
@@ -134,7 +149,7 @@ const NewsSection: React.FC = () => {
   const categories: NewsCategory[] = [
     {
       id: "all",
-      name: "Tất cả tin tức", 
+      name: language === 'en' ? "All News" : "Tất cả tin tức", 
       nameEn: "All News",
       tid: 0,
       weight: -1
@@ -232,13 +247,13 @@ const NewsSection: React.FC = () => {
             {/* Large news card */}
             <div className="lg:col-span-2">
               <NewsCard
-                date={formatDate(filteredNews[0].published_date)}
+                date={formatDate(filteredNews[0].published_date, language)}
                 title={filteredNews[0].title}
-                titleEn={filteredNews[0].title} // API doesn't have separate English titles yet
+                titleEn={filteredNews[0].titleEn}
                 excerpt={filteredNews[0].summary}
-                excerptEn={filteredNews[0].summary} // API doesn't have separate English excerpts yet
+                excerptEn={filteredNews[0].summaryEn}
                 image={getImageWithFallback(filteredNews[0].featured_image)}
-                url={`/bai-viet/${filteredNews[0].id}`}
+                url={generateArticleUrl(filteredNews[0], language)}
                 isLarge={true}
               />
             </div>
@@ -248,13 +263,13 @@ const NewsSection: React.FC = () => {
               {filteredNews.slice(1, 3).map(article => (
                 <NewsCard
                   key={article.id}
-                  date={formatDate(article.published_date)}
+                  date={formatDate(article.published_date, language)}
                   title={article.title}
-                  titleEn={article.title} // API doesn't have separate English titles yet
+                  titleEn={article.titleEn}
                   excerpt={article.summary}
-                  excerptEn={article.summary} // API doesn't have separate English excerpts yet
+                  excerptEn={article.summaryEn}
                   image={getImageWithFallback(article.featured_image)}
-                  url={`/bai-viet/${article.id}`}
+                  url={generateArticleUrl(article, language)}
                   isLarge={false}
                 />
               ))}
@@ -274,8 +289,8 @@ const NewsSection: React.FC = () => {
         {/* View All Button - Only show when there are articles */}
         {filteredNews.length > 0 && !newsLoading && !newsError && !categoriesLoading && !categoriesError && (
           <div className="flex justify-center mt-8">
-            <a
-              href={`#view-more-${activeCategory}`}
+            <Link
+              to={`${language === 'en' ? '/en' : ''}/tin-tuc`}
               className={cn(
                 "py-2.5 px-6 rounded-full font-inter font-medium text-sm",
                 "border transition-colors duration-200",
@@ -286,7 +301,7 @@ const NewsSection: React.FC = () => {
               )}
             >
               {t('homepage.viewAll') || "XEM TẤT CẢ"}
-            </a>
+            </Link>
           </div>
         )}
       </div>

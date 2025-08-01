@@ -9,17 +9,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAllNews, type NewsItem } from "@/hooks/useAllNews";
 import { useNewsCategories, type NewsCategory } from "@/hooks/useNewsCategories";
-import { getImageWithFallback } from "@/utils/drupal";
+import { getImageWithFallback, generateArticleUrl } from "@/utils/drupal";
 
-// Format date function matching PC version
-const formatDate = (dateString: string): string => {
+// Format date function with language support
+const formatDate = (dateString: string, language: 'vi' | 'en' = 'vi'): string => {
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const locale = language === 'en' ? 'en-US' : 'vi-VN';
+    const options: Intl.DateTimeFormatOptions = language === 'en' 
+      ? { month: 'long', day: 'numeric', year: 'numeric' }
+      : { day: '2-digit', month: '2-digit', year: 'numeric' };
+    
+    return date.toLocaleDateString(locale, options);
   } catch (error) {
     return dateString;
   }
@@ -35,14 +36,15 @@ const NewsCard: React.FC<NewsItem & { titleEn?: string; summaryEn?: string }> = 
   titleEn,
   summary,
   summaryEn,
-  id
+  id,
+  path_alias
 }) => {
   const { theme } = useTheme();
   const { language } = useLanguage();
 
-  // Use translated content if available
-  const displayTitle = language === 'en' && titleEn ? titleEn : title;
-  const displayExcerpt = language === 'en' && summaryEn ? summaryEn : summary;
+  // Use title and summary directly since they're already from the correct language API endpoint
+  const displayTitle = title; // title is already in the correct language from API endpoint
+  const displayExcerpt = summary; // summary is already in the correct language from API endpoint
 
   // Theme-specific styles using dseza variables
   const cardBg = theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-dseza-light-secondary-bg";
@@ -55,7 +57,7 @@ const NewsCard: React.FC<NewsItem & { titleEn?: string; summaryEn?: string }> = 
 
   return (
     <a
-      href={`/bai-viet/${id}`}
+      href={generateArticleUrl({ id, path_alias }, language)}
       className={cn(
         "group block rounded-xl overflow-hidden",
         "border transition-all duration-300 ease-in-out",
@@ -82,7 +84,7 @@ const NewsCard: React.FC<NewsItem & { titleEn?: string; summaryEn?: string }> = 
           <div className="flex items-center gap-2 mb-2">
             <CalendarDays className={cn("h-3.5 w-3.5", secondaryText)} />
             <p className={cn("text-xs font-inter font-normal", secondaryText)}>
-              {formatDate(published_date)}
+              {formatDate(published_date, language)}
             </p>
           </div>
 
@@ -147,7 +149,7 @@ const MobileNewsSection: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>("all");
 
   // Fetch real data from API
-  const { data: allNewsData, isLoading: newsLoading, isError: newsError } = useAllNews();
+  const { data: allNewsData, isLoading: newsLoading, isError: newsError } = useAllNews(language);
   const { data: categoriesData, isLoading: categoriesLoading, isError: categoriesError } = useNewsCategories();
 
   // Theme-specific styles using dseza variables to match PC version
@@ -163,7 +165,7 @@ const MobileNewsSection: React.FC = () => {
   const categories: NewsCategory[] = [
     {
       id: "all",
-      name: "Tất cả tin tức", 
+      name: language === 'en' ? "All News" : "Tất cả tin tức", 
       nameEn: "All News",
       tid: 0,
       weight: -1
@@ -258,8 +260,8 @@ const MobileNewsSection: React.FC = () => {
               <NewsCard
                 key={article.id}
                 {...article}
-                titleEn={article.title} // API doesn't have separate English titles yet
-                summaryEn={article.summary} // API doesn't have separate English excerpts yet
+                titleEn={article.titleEn}
+                summaryEn={article.summaryEn}
               />
             ))
           ) : (

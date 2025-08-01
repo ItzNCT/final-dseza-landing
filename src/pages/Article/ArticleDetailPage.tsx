@@ -8,7 +8,9 @@ import { useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useArticleDetail, useArticleViewCount } from "@/api/hooks";
+import { ArticleDetailPageContext } from "./DynamicArticleHandler";
 import { extractImageUrl } from "@/utils/drupal";
 import { processRichTextContent, extractFirstImageFromRichText } from "@/utils/richTextProcessor";
 import TopBar from "@/components/hero/TopBar";
@@ -22,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileLayout from "@/components/mobile/MobileLayout";
 import CommentSection from "@/components/comments/CommentSection";
+import { useTranslation } from "react-i18next";
 
 /**
  * Secure DOMPurify configuration for XSS protection
@@ -98,14 +101,33 @@ const sanitizeHTML = (html: string | null | undefined): string => {
 };
 
 /**
- * ArticleDetailPage component for displaying detailed article content
+ * ArticleDetailPage component for displaying detailed article content with multi-language support
  */
 const ArticleDetailPage: React.FC = () => {
   const { toast } = useToast();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { uuid } = useParams<{ uuid: string }>();
-  const { data, isLoading, isError, error } = useArticleDetail(uuid || '');
+  
+  // Check if we have pre-fetched data from DynamicArticleHandler
+  const contextData = React.useContext(ArticleDetailPageContext);
+  const shouldUsePrefetchedData = contextData.overrideData && contextData.overrideUuid;
+  const effectiveUuid = shouldUsePrefetchedData ? contextData.overrideUuid! : (uuid || '');
+  
+  // Use language-aware article detail hook (skip if we have pre-fetched data)
+  const { data: fetchedData, isLoading, isError, error } = useArticleDetail(
+    shouldUsePrefetchedData ? '' : effectiveUuid, 
+    language
+  );
+  
+  // Use pre-fetched data if available, otherwise use fetched data
+  const data = shouldUsePrefetchedData ? contextData.overrideData : fetchedData;
+  const finalIsLoading = shouldUsePrefetchedData ? false : isLoading;
+  const finalIsError = shouldUsePrefetchedData ? false : isError;
+  
+  console.log('📊 ArticleDetailPage - Using pre-fetched:', shouldUsePrefetchedData, 'UUID:', effectiveUuid);
   
   // Get node ID from article data for view count
   const nodeId = data?.data?.attributes?.drupal_internal__nid?.toString() || '';
@@ -242,7 +264,7 @@ const ArticleDetailPage: React.FC = () => {
 
 
   // Debug logging
-  // console.log('ArticleDetailPage Debug:', { uuid, nodeId, viewCount, isLoading, isError, error, data });
+  // console.log('ArticleDetailPage Debug:', { uuid: effectiveUuid, nodeId, viewCount, finalIsLoading, finalIsError, error, data, shouldUsePrefetchedData });
 
   const handleShare = (platform: string) => {
     const url = window.location.href;
@@ -261,8 +283,10 @@ const ArticleDetailPage: React.FC = () => {
       case 'copy':
         navigator.clipboard.writeText(url).then(() => {
           toast({
-            title: "Đã sao chép!",
-            description: "Đường dẫn bài viết đã được sao chép vào clipboard.",
+            title: language === 'en' ? "Copied!" : "Đã sao chép!",
+            description: language === 'en' 
+              ? "Article link has been copied to clipboard."
+              : "Đường dẫn bài viết đã được sao chép vào clipboard.",
           });
         });
         break;
@@ -287,10 +311,15 @@ const ArticleDetailPage: React.FC = () => {
     return null;
   };
 
-  // Get raw rich text content for processing
+  // Get raw rich text content for processing - handles both language structures
   const getRichTextContent = (): string => {
+    // For English articles, body content is available directly
+    const bodyContent = data?.data?.attributes?.body?.processed || data?.data?.attributes?.body?.value || '';
+    
+    // Check if we have paragraph content (field_noi_dung_bai_viet)
     if (!data?.data?.relationships?.field_noi_dung_bai_viet?.data || !data?.included) {
-      return data?.data?.attributes?.body?.processed || data?.data?.attributes?.body?.value || '';
+      // If no paragraphs, return body content (English articles may have body content)
+      return bodyContent;
     }
     
     const paragraphIds = data.data.relationships.field_noi_dung_bai_viet.data.map((rel: any) => rel.id);
@@ -302,23 +331,25 @@ const ArticleDetailPage: React.FC = () => {
         return aIndex - bIndex;
       });
     
-    let content = '';
+    let paragraphContent = '';
     
     paragraphs.forEach((paragraph: any) => {
       if (paragraph.type === 'paragraph--rich_text_block') {
         if (paragraph.attributes?.field_rich_text?.processed) {
-          content += paragraph.attributes.field_rich_text.processed;
+          paragraphContent += paragraph.attributes.field_rich_text.processed;
         } else if (paragraph.attributes?.field_text?.processed) {
-          content += paragraph.attributes.field_text.processed;
+          paragraphContent += paragraph.attributes.field_text.processed;
         } else if (paragraph.attributes?.field_content?.processed) {
-          content += paragraph.attributes.field_content.processed;
+          paragraphContent += paragraph.attributes.field_content.processed;
         } else if (paragraph.attributes?.field_body?.processed) {
-          content += paragraph.attributes.field_body.processed;
+          paragraphContent += paragraph.attributes.field_body.processed;
         }
       }
     });
     
-    return content;
+    // For English articles that have both body and paragraphs, prefer paragraphs
+    // For Vietnamese articles that only have paragraphs, use paragraphs
+    return paragraphContent || bodyContent;
   };
 
   // Get categories from included data
@@ -483,16 +514,22 @@ const ArticleDetailPage: React.FC = () => {
     return data?.data?.attributes?.field_su_kien_tieu_bieu || false;
   };
 
-  // Get paragraphs content or fallback to body
+  // Get paragraphs content or fallback to body - handles both language structures
   // SECURITY NOTE: All dynamic content is sanitized to prevent XSS attacks
   const getArticleContent = () => {
+    // For English articles, body content is available directly
+    const bodyContent = data?.data?.attributes?.body?.processed || data?.data?.attributes?.body?.value || '';
+    
+    // Check if we have paragraph content (field_noi_dung_bai_viet)
     if (!data?.data?.relationships?.field_noi_dung_bai_viet?.data || !data?.included) {
-      // No paragraphs available - use body field if available
-      const bodyContent = data?.data?.attributes?.body?.processed || data?.data?.attributes?.body?.value || '';
+      // If no paragraphs available, use body field (common for English articles)
       if (bodyContent) {
         return processRichTextContent(bodyContent, data?.included);
       }
-      return `<p class="${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} italic">Nội dung bài viết đang được cập nhật...</p>`;
+      const emptyMessage = language === 'en' 
+        ? "Article content is being updated..."
+        : "Nội dung bài viết đang được cập nhật...";
+      return `<p class="${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} italic">${emptyMessage}</p>`;
     }
     
     const paragraphIds = data.data.relationships.field_noi_dung_bai_viet.data.map((rel: any) => rel.id);
@@ -664,7 +701,10 @@ const ArticleDetailPage: React.FC = () => {
     });
     
     // Final sanitization layer for all assembled content
-    const finalContent = content || `<p class="${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} italic">Nội dung paragraphs trống.</p>`;
+    const emptyParagraphMessage = language === 'en' 
+      ? "Paragraph content is empty."
+      : "Nội dung paragraphs trống.";
+    const finalContent = content || `<p class="${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} italic">${emptyParagraphMessage}</p>`;
     return finalContent;
   };
 
@@ -891,7 +931,7 @@ const ArticleDetailPage: React.FC = () => {
     });
   };
 
-  if (isLoading) {
+  if (finalIsLoading) {
     // Mobile Loading State
     if (isMobile) {
       return (
@@ -978,7 +1018,7 @@ const ArticleDetailPage: React.FC = () => {
     );
   }
 
-  if (isError) {
+  if (finalIsError) {
     // Mobile Error State
     if (isMobile) {
       return (
@@ -987,16 +1027,18 @@ const ArticleDetailPage: React.FC = () => {
             <main className="flex-1 px-4 py-2">
               <div className="text-center">
                 <h1 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
-                  Không thể tải bài viết
+                  {language === 'en' ? 'Cannot load article' : 'Không thể tải bài viết'}
                 </h1>
                 <p className={`mb-6 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                  {error?.message || "Đã có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau."}
+                  {error?.message || (language === 'en' 
+                    ? "An error occurred while loading the article. Please try again later."
+                    : "Đã có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau.")}
                 </p>
                 <Button 
                   onClick={() => window.history.back()}
                   className={`w-full ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80'}`}
                 >
-                  Quay lại
+                  {language === 'en' ? 'Go back' : 'Quay lại'}
                 </Button>
               </div>
             </main>
@@ -1019,16 +1061,18 @@ const ArticleDetailPage: React.FC = () => {
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className={`text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
-                Không thể tải bài viết
+                {language === 'en' ? 'Cannot load article' : 'Không thể tải bài viết'}
               </h1>
               <p className={`mb-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                {error?.message || "Đã có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau."}
+                {error?.message || (language === 'en' 
+                  ? "An error occurred while loading the article. Please try again later."
+                  : "Đã có lỗi xảy ra khi tải bài viết. Vui lòng thử lại sau.")}
               </p>
               <Button 
                 onClick={() => window.history.back()}
                 className={theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80'}
               >
-                Quay lại
+                {language === 'en' ? 'Go back' : 'Quay lại'}
               </Button>
             </div>
           </div>
@@ -1048,16 +1092,18 @@ const ArticleDetailPage: React.FC = () => {
             <main className="flex-1 px-4 py-2">
               <div className="text-center">
                 <h1 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                  Không tìm thấy bài viết
+                  {language === 'en' ? 'Article not found' : 'Không tìm thấy bài viết'}
                 </h1>
                 <p className={`mb-6 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                  Bài viết bạn tìm kiếm không tồn tại hoặc đã bị xóa.
+                  {language === 'en' 
+                    ? "The article you are looking for does not exist or has been deleted."
+                    : "Bài viết bạn tìm kiếm không tồn tại hoặc đã bị xóa."}
                 </p>
                 <Button 
                   onClick={() => window.history.back()}
                   className={`w-full mb-4 ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80'}`}
                 >
-                  Quay lại
+                  {language === 'en' ? 'Go back' : 'Quay lại'}
                 </Button>
                 
                 {/* Compact debug info for mobile */}
@@ -1090,10 +1136,12 @@ const ArticleDetailPage: React.FC = () => {
           <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className={`text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Không tìm thấy bài viết
+                {language === 'en' ? 'Article not found' : 'Không tìm thấy bài viết'}
               </h1>
               <p className={`mb-8 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                Bài viết bạn tìm kiếm không tồn tại hoặc đã bị xóa.
+                {language === 'en' 
+                  ? "The article you are looking for does not exist or has been deleted."
+                  : "Bài viết bạn tìm kiếm không tồn tại hoặc đã bị xóa."}
               </p>
               {/* Debug: Show current UUID */}
               <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
@@ -1104,7 +1152,7 @@ const ArticleDetailPage: React.FC = () => {
                   onClick={() => window.history.back()}
                   className={theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80'}
                 >
-                  Quay lại
+                  {language === 'en' ? 'Go back' : 'Quay lại'}
                 </Button>
                 
                 {/* Debug: API Information */}
@@ -1181,7 +1229,7 @@ const ArticleDetailPage: React.FC = () => {
                 {isFeatured && (
                   <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${theme === 'dark' ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary border border-dseza-dark-primary/30' : 'bg-dseza-light-primary/10 text-dseza-light-primary border border-dseza-light-primary/30'}`}>
                     <Star className="h-3 w-3" />
-                    <span>Sự kiện tiêu điểm</span>
+                    <span>{language === 'en' ? 'Featured Event' : 'Sự kiện tiêu điểm'}</span>
                   </div>
                 )}
                 
@@ -1205,7 +1253,9 @@ const ArticleDetailPage: React.FC = () => {
                       {viewCountLoading ? (
                         <span className="inline-block w-8 h-4 bg-gray-300 rounded animate-pulse"></span>
                       ) : (
-                        `${viewCount.toLocaleString('vi-VN')} lượt xem`
+                        language === 'en' 
+                          ? `${viewCount.toLocaleString('en-US')} views`
+                          : `${viewCount.toLocaleString('vi-VN')} lượt xem`
                       )}
                     </span>
                   </div>
@@ -1244,7 +1294,7 @@ const ArticleDetailPage: React.FC = () => {
                 <div className={`pt-6 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
                   <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                     <FileText className="h-5 w-5" />
-                    Tài liệu đính kèm
+                    {language === 'en' ? 'Attached Documents' : 'Tài liệu đính kèm'}
                   </h3>
                   
                   <div className={`rounded-lg p-4 border ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
@@ -1269,7 +1319,7 @@ const ArticleDetailPage: React.FC = () => {
                         }`}
                       >
                         <ZoomIn className="h-4 w-4" />
-                        Xem toàn màn hình
+                        {language === 'en' ? 'View fullscreen' : 'Xem toàn màn hình'}
                       </Button>
                       <Button 
                         variant="outline" 
@@ -1285,7 +1335,7 @@ const ArticleDetailPage: React.FC = () => {
                         className="w-full flex items-center justify-center gap-2"
                       >
                         <Download className="h-4 w-4" />
-                        Tải xuống PDF
+                        {language === 'en' ? 'Download PDF' : 'Tải xuống PDF'}
                       </Button>
                     </div>
                     
@@ -1306,7 +1356,7 @@ const ArticleDetailPage: React.FC = () => {
               <div className={`pt-6 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
                 <h3 className={`font-semibold mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                   <Share2 className="h-4 w-4" />
-                  Chia sẻ:
+                  {language === 'en' ? 'Share:' : 'Chia sẻ:'}
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
                   <a
@@ -1356,7 +1406,7 @@ const ArticleDetailPage: React.FC = () => {
                     className="w-full flex items-center justify-center gap-2"
                   >
                     <Copy className="h-4 w-4" />
-                    Sao chép
+                    {language === 'en' ? 'Copy' : 'Sao chép'}
                   </Button>
                 </div>
               </div>
@@ -1390,17 +1440,21 @@ const ArticleDetailPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
               <a 
-                href="/" 
+                href={language === 'en' ? "/en" : "/"} 
                 className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {language === 'en' ? 'Home' : 'Trang chủ'}
               </a>
               <ChevronRight className="h-4 w-4" />
               <a 
-                href="/tin-tuc" 
+                href={language === 'en' ? "/en/news" : "/tin-tuc"} 
                 className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                {isFeatured ? 'Tin tức' : (categories.length > 0 ? categories[0].name : 'Tin tức')}
+                {isFeatured 
+                  ? (language === 'en' ? 'News' : 'Tin tức')
+                  : (categories.length > 0 
+                    ? categories[0].name 
+                    : (language === 'en' ? 'News' : 'Tin tức'))}
               </a>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium line-clamp-1 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
@@ -1423,7 +1477,7 @@ const ArticleDetailPage: React.FC = () => {
               {isFeatured && (
                 <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium mb-4 ${theme === 'dark' ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary border border-dseza-dark-primary/30' : 'bg-dseza-light-primary/10 text-dseza-light-primary border border-dseza-light-primary/30'}`}>
                   <Star className="h-4 w-4" />
-                  <span>Sự kiện tiêu điểm</span>
+                  <span>{language === 'en' ? 'Featured Event' : 'Sự kiện tiêu điểm'}</span>
                 </div>
               )}
               
@@ -1438,17 +1492,21 @@ const ArticleDetailPage: React.FC = () => {
               <div className={`flex flex-wrap items-center gap-4 mb-6 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span>Ngày đăng: {formatDate(article.attributes.created)}</span>
+                  <span>
+                    {language === 'en' ? 'Published: ' : 'Ngày đăng: '}
+                    {formatDate(article.attributes.created)}
+                  </span>
                 </div>
                 
                 {/* View Count */}
                 <div className="flex items-center gap-2">
                   <Eye className="h-4 w-4" />
                   <span>
-                    Lượt xem: {viewCountLoading ? (
+                    {language === 'en' ? 'Views: ' : 'Lượt xem: '}
+                    {viewCountLoading ? (
                       <span className="inline-block w-8 h-4 bg-gray-300 rounded animate-pulse"></span>
                     ) : (
-                      viewCount.toLocaleString('vi-VN')
+                      viewCount.toLocaleString(language === 'en' ? 'en-US' : 'vi-VN')
                     )}
                   </span>
                 </div>
@@ -1456,7 +1514,7 @@ const ArticleDetailPage: React.FC = () => {
                 {categories.length > 0 && (
                   <div className="flex items-center gap-2">
                     <Tag className="h-4 w-4" />
-                    <span>Chuyên mục: </span>
+                    <span>{language === 'en' ? 'Category: ' : 'Chuyên mục: '}</span>
                     <div className="flex gap-1">
                       {categories.map((category, index) => (
                         <Badge 
@@ -1491,7 +1549,7 @@ const ArticleDetailPage: React.FC = () => {
               <div className={`mt-12 pt-8 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
                 <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                   <FileText className="h-5 w-5" />
-                  Tài liệu đính kèm
+                  {language === 'en' ? 'Attached Documents' : 'Tài liệu đính kèm'}
                 </h3>
                 
                 {/* PDF Viewer inspired by BrochurePage */}
@@ -1527,7 +1585,7 @@ const ArticleDetailPage: React.FC = () => {
                         className="flex items-center gap-2"
                       >
                         <Download className="h-4 w-4" />
-                        Tải xuống
+                        {language === 'en' ? 'Download' : 'Tải xuống'}
                       </Button>
                       <Button 
                         variant="outline" 
@@ -1536,7 +1594,7 @@ const ArticleDetailPage: React.FC = () => {
                         className="flex items-center gap-2"
                       >
                         <ZoomIn className="h-4 w-4" />
-                        Xem toàn màn hình
+                        {language === 'en' ? 'View fullscreen' : 'Xem toàn màn hình'}
                       </Button>
                       <Button 
                         variant="outline" 
@@ -1545,14 +1603,18 @@ const ArticleDetailPage: React.FC = () => {
                           if (navigator.share) {
                             navigator.share({
                               title: pdfDocument.name,
-                              text: `Xem tài liệu: ${pdfDocument.name}`,
+                              text: language === 'en' 
+                                ? `View document: ${pdfDocument.name}`
+                                : `Xem tài liệu: ${pdfDocument.name}`,
                               url: pdfDocument.url!,
                             }).catch(console.error);
                           } else {
                             navigator.clipboard.writeText(pdfDocument.url!).then(() => {
                               toast({
-                                title: "Đã sao chép!",
-                                description: "Đường dẫn PDF đã được sao chép vào clipboard.",
+                                title: language === 'en' ? "Copied!" : "Đã sao chép!",
+                                description: language === 'en' 
+                                  ? "PDF link has been copied to clipboard."
+                                  : "Đường dẫn PDF đã được sao chép vào clipboard.",
                               });
                             });
                           }
@@ -1560,7 +1622,7 @@ const ArticleDetailPage: React.FC = () => {
                         className="flex items-center gap-2"
                       >
                         <Share2 className="h-4 w-4" />
-                        Chia sẻ
+                        {language === 'en' ? 'Share' : 'Chia sẻ'}
                       </Button>
                       <Button 
                         variant="outline" 
@@ -1569,7 +1631,7 @@ const ArticleDetailPage: React.FC = () => {
                         className="flex items-center gap-2"
                       >
                         <Printer className="h-4 w-4" />
-                        In
+                        {language === 'en' ? 'Print' : 'In'}
                       </Button>
                     </div>
                     
@@ -1593,7 +1655,7 @@ const ArticleDetailPage: React.FC = () => {
                         className="flex items-center gap-2"
                       >
                         <Monitor className="h-4 w-4" />
-                        Xem kích thước thật
+                        {language === 'en' ? 'View actual size' : 'Xem kích thước thật'}
                       </Button>
                       <Button 
                         size="sm" 
@@ -1612,7 +1674,7 @@ const ArticleDetailPage: React.FC = () => {
                         }`}
                       >
                         <Download className="h-4 w-4" />
-                        Tải xuống PDF
+                        {language === 'en' ? 'Download PDF' : 'Tải xuống PDF'}
                       </Button>
                     </div>
                   </div>
@@ -1677,7 +1739,7 @@ const ArticleDetailPage: React.FC = () => {
             <div className={`mt-12 pt-8 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
               <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 <Share2 className="h-5 w-5" />
-                Chia sẻ bài viết:
+                {language === 'en' ? 'Share article:' : 'Chia sẻ bài viết:'}
               </h3>
               <div className="flex flex-wrap gap-3">
                 <a
@@ -1743,7 +1805,7 @@ const ArticleDetailPage: React.FC = () => {
                   className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-dseza-dark-hover hover:border-dseza-dark-secondary-accent' : 'border-dseza-light-border text-dseza-light-main-text hover:bg-dseza-light-hover hover:border-dseza-light-secondary-accent'}`}
                 >
                   <Copy className={`h-4 w-4 ${theme === 'dark' ? 'text-dseza-dark-secondary-accent' : 'text-dseza-light-secondary-accent'}`} />
-                  Sao chép link
+                  {language === 'en' ? 'Copy link' : 'Sao chép link'}
                 </Button>
               </div>
             </div>

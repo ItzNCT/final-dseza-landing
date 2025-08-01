@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { extractImageUrl } from '@/utils/drupal';
+import { createPlainTextSummary } from '@/utils/richTextProcessor';
 
 // Use relative path for proxy in development, full URL in production
 const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
@@ -19,11 +20,14 @@ interface NewsItem {
 interface Event {
   id: string;
   title: string;
+  titleEn?: string;
   description: string;
+  descriptionEn?: string;
   start_date: string;
   end_date?: string;
   location: string;
   featured_image?: string;
+  path_alias?: string; // SEO-friendly URL alias from Drupal
 }
 
 interface InvestmentInfo {
@@ -233,10 +237,12 @@ async function fetchNewsList(baseUrl: string): Promise<NewsItem[]> {
         }
       }
 
+      const rawSummary = item.attributes.body?.summary || item.attributes.body?.value || '';
+
       return {
         id: item.id,                 // JSON:API id is UUID
         title: item.attributes.title,
-        summary: item.attributes.body?.summary || item.attributes.body?.value?.substring(0, 200) + '...' || '',
+        summary: createPlainTextSummary(rawSummary),
         published_date: item.attributes.created,
         featured_image: extractImageUrl(item.relationships.field_anh_dai_dien, data.included),
         category: categoryName,
@@ -246,10 +252,32 @@ async function fetchNewsList(baseUrl: string): Promise<NewsItem[]> {
 }
 
 /**
- * Fetch featured events from JSON:API
+ * Fetch featured events from JSON:API with language support
  */
-async function fetchFeaturedEvents(baseUrl: string): Promise<Event[]> {
-  const url = `${baseUrl}/jsonapi/node/bai-viet`
+async function fetchFeaturedEvents(baseUrl: string, language: 'vi' | 'en' = 'vi'): Promise<Event[]> {
+  const languagePrefix = language === 'en' ? '/en' : '/vi';
+  
+  // Fetch both Vietnamese and English versions for better language support
+  const [viData, enData] = await Promise.allSettled([
+    fetch(`${baseUrl}/vi/jsonapi/node/bai-viet?filter[status][value]=1&filter[field_su_kien_tieu_bieu][value]=1&sort=-created&page[limit]=4&include=field_anh_dai_dien.field_media_image,field_chuyen_muc`, {
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
+        'Accept-Language': 'vi',
+        'Content-Language': 'vi',
+      },
+    }),
+    fetch(`${baseUrl}/en/jsonapi/node/bai-viet?filter[status][value]=1&filter[field_su_kien_tieu_bieu][value]=1&sort=-created&page[limit]=4&include=field_anh_dai_dien.field_media_image,field_chuyen_muc`, {
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
+        'Accept-Language': 'en',
+        'Content-Language': 'en',
+      },
+    })
+  ]);
+
+  const url = `${baseUrl}${languagePrefix}/jsonapi/node/bai-viet`
     + '?filter[status][value]=1'
     + '&filter[field_su_kien_tieu_bieu][value]=1'       // Chỉ bài viết được đánh dấu sự kiện tiêu điểm
     + '&sort=-created'                                   // Sắp xếp theo ngày tạo mới nhất
@@ -260,6 +288,8 @@ async function fetchFeaturedEvents(baseUrl: string): Promise<Event[]> {
     headers: {
       'Accept': 'application/vnd.api+json',
       'Content-Type': 'application/vnd.api+json',
+      'Accept-Language': language,
+      'Content-Language': language,
     },
   });
 
@@ -269,38 +299,89 @@ async function fetchFeaturedEvents(baseUrl: string): Promise<Event[]> {
 
   const data = await response.json();
   
-  return data.data?.map((item: any) => ({
-    id: item.id,
-    title: item.attributes.title,
-    description: item.attributes.body?.processed || item.attributes.body?.value || '',
-    start_date: item.attributes.created,                 // Sử dụng ngày tạo làm ngày sự kiện
-    end_date: undefined,
-    location: '',                                        // Bài viết không có địa điểm
-    featured_image: extractImageUrl(item.relationships?.field_anh_dai_dien, data.included), // Restore featured images for homepage
-  })) || [];
+  // Process alternative language data for dual language support
+  let viDataResult: any = null;
+  let enDataResult: any = null;
+  
+  if (viData.status === 'fulfilled' && viData.value.ok) {
+    viDataResult = await viData.value.json();
+  }
+  
+  if (enData.status === 'fulfilled' && enData.value.ok) {
+    enDataResult = await enData.value.json();
+  }
+  
+  return data.data?.map((item: any) => {
+    // Find corresponding article in other language for dual language support
+    let titleEn: string | undefined;
+    let descriptionEn: string | undefined;
+    
+    // Look for English version if current is Vietnamese
+    if (language === 'vi' && enDataResult?.data) {
+      const enArticle = enDataResult.data.find((enItem: any) => 
+        enItem.attributes?.drupal_internal__nid === item.attributes?.drupal_internal__nid
+      );
+      if (enArticle) {
+        titleEn = enArticle.attributes.title;
+        const rawDescription = enArticle.attributes.body?.processed || enArticle.attributes.body?.value || '';
+        descriptionEn = createPlainTextSummary(rawDescription);
+      }
+    }
+    
+    // Look for Vietnamese version if current is English  
+    if (language === 'en' && viDataResult?.data) {
+      const viArticle = viDataResult.data.find((viItem: any) => 
+        viItem.attributes?.drupal_internal__nid === item.attributes?.drupal_internal__nid
+      );
+      if (viArticle) {
+        // For English articles, we store Vietnamese as the alternative
+        titleEn = viArticle.attributes.title;
+        const rawDescription = viArticle.attributes.body?.processed || viArticle.attributes.body?.value || '';
+        descriptionEn = createPlainTextSummary(rawDescription);
+      }
+    }
+
+    const rawMainDescription = item.attributes.body?.processed || item.attributes.body?.value || '';
+
+    return {
+      id: item.id,
+      title: item.attributes.title,
+      titleEn,
+      description: createPlainTextSummary(rawMainDescription),
+      descriptionEn,
+      start_date: item.attributes.created,                 // Sử dụng ngày tạo làm ngày sự kiện
+      end_date: undefined,
+      location: '',                                        // Bài viết không có địa điểm
+      featured_image: extractImageUrl(item.relationships?.field_anh_dai_dien, data.included), // Restore featured images for homepage
+      path_alias: item.attributes.path?.alias || null, // Extract path alias for SEO URLs
+    };
+  }) || [];
 }
 
 /**
- * Fetch data from Drupal JSON:API endpoints and combine into homepage data
+ * Fetch data from Drupal JSON:API endpoints and combine into homepage data with language support
  * Uses pure JSON:API for better reliability
  */
-async function fetchHomepageData(): Promise<HomepageData> {
+async function fetchHomepageData(language: 'vi' | 'en' = 'vi'): Promise<HomepageData> {
   try {
     // Use relative URLs when in development (proxy will handle routing)
     // Use full URL when VITE_API is set (production or specific config)
     const baseUrl = DRUPAL_BASE_URL ? DRUPAL_BASE_URL : '';
+    const languagePrefix = language === 'en' ? '/en' : '/vi';
     
     // Fetch different content types from JSON:API
     const [newsResponse, eventsResponse, quickLinksResponse] = await Promise.allSettled([
       // Fetch recent news/articles via JSON:API
       fetchNewsList(baseUrl),
-      // Fetch featured events via JSON:API
-      fetchFeaturedEvents(baseUrl),
+      // Fetch featured events via JSON:API with language support
+      fetchFeaturedEvents(baseUrl, language),
       // Fetch quick access links
-      fetch(`${baseUrl}/jsonapi/block_content/quick_link`, {
+      fetch(`${baseUrl}${languagePrefix}/jsonapi/block_content/quick_link`, {
         headers: {
           'Accept': 'application/vnd.api+json',
           'Content-Type': 'application/vnd.api+json',
+          'Accept-Language': language,
+          'Content-Language': language,
         },
       }),
     ]);
@@ -384,10 +465,11 @@ export const useMainMenu = () => {
 };
 
 /**
- * Custom hook to fetch and manage homepage data using React Query
+ * Custom hook to fetch and manage homepage data using React Query with language support
+ * @param language - Language code ('vi' or 'en'), defaults to 'vi'
  * @returns Object containing data, loading state, and error state
  */
-export const useHomepageData = () => {
+export const useHomepageData = (language: 'vi' | 'en' = 'vi') => {
   const {
     data,
     isLoading,
@@ -396,8 +478,8 @@ export const useHomepageData = () => {
     isSuccess,
     refetch,
   } = useQuery({
-    queryKey: ['homepageData'],
-    queryFn: fetchHomepageData,
+    queryKey: ['homepageData', language],
+    queryFn: () => fetchHomepageData(language),
     staleTime: 60_000, // 1 minute – homepage should be quite fresh
     gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
     retry: 1, // news is not critical

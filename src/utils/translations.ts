@@ -702,7 +702,7 @@ const translations = {
  * @param path - The path to the value (e.g., "nav.intro")
  * @returns The value at the path or undefined if not found
  */
-const getNestedValue = (obj: any, path: string): string | undefined => {
+const getNestedValue = (obj: any, path: string): any => {
   const keys = path.split('.');
   let value = obj;
 
@@ -713,7 +713,7 @@ const getNestedValue = (obj: any, path: string): string | undefined => {
     value = value[key];
   }
 
-  return typeof value === 'string' ? value : undefined;
+  return value;
 };
 
 /**
@@ -728,13 +728,13 @@ export const useTranslation = () => {
   /**
    * Get a translation by key
    * @param key - The translation key (can be a dot notation for nested keys)
-   * @returns The translated string or the key itself if not found
+   * @returns The translated string, array, or the key itself if not found
    */
-  const t = (key: string): string => {
+  const t = (key: string): any => {
     try {
-      // Use react-i18next first
-      const translation = i18nT(key);
-      if (translation !== key && translation) {
+      // Use react-i18next first with returnObjects: true to get arrays/objects
+      const translation = i18nT(key, { returnObjects: true });
+      if (translation && typeof translation !== 'string' || (typeof translation === 'string' && translation !== key)) {
         return translation;
       }
     } catch (error) {
@@ -745,10 +745,12 @@ export const useTranslation = () => {
     const translationSet = translations[language];
     const translation = getNestedValue(translationSet, key);
     
-    if (translation === undefined || typeof translation !== 'string') {
-        // console.warn(`Translation key not found or not a string: ${key}`); // Optional: for debugging
+    if (translation === undefined) {
+        // console.warn(`Translation key not found: ${key}`); // Optional: for debugging
         return key;
     }
+    
+    // Return the translation as-is (string, array, or object)
     return translation;
   };
 

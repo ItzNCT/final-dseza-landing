@@ -8,7 +8,7 @@ import { CalendarDays } from "lucide-react";
 import { useTranslation } from "@/utils/translations";
 import { useLanguage } from "@/context/LanguageContext";
 import { useHomepageData } from "@/hooks/useHomepageData";
-import { getImageWithFallback } from "@/utils/drupal";
+import { getImageWithFallback, generateArticleUrl } from "@/utils/drupal";
 
 type EventCardProps = {
   id: string;
@@ -18,19 +18,21 @@ type EventCardProps = {
   titleEn?: string;
   excerpt?: string;
   excerptEn?: string;
+  path_alias?: string;
   featured?: boolean;
   isLarge?: boolean;
 };
 
-// Format date function
-const formatDate = (dateString: string): string => {
+// Format date function with language support
+const formatDate = (dateString: string, language: 'vi' | 'en' = 'vi'): string => {
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const locale = language === 'en' ? 'en-US' : 'vi-VN';
+    const options: Intl.DateTimeFormatOptions = language === 'en' 
+      ? { month: 'long', day: 'numeric', year: 'numeric' }
+      : { day: '2-digit', month: '2-digit', year: 'numeric' };
+    
+    return date.toLocaleDateString(locale, options);
   } catch (error) {
     return dateString; // Fallback to original string if parsing fails
   }
@@ -66,16 +68,17 @@ const EventCardSkeleton = ({ isLarge = false }: { isLarge?: boolean }) => {
   );
 };
 
-const EventCard = ({ id, image, date, title, titleEn, excerpt, excerptEn, featured = false, isLarge = false }: EventCardProps) => {
+const EventCard = ({ id, image, date, title, titleEn, excerpt, excerptEn, path_alias, featured = false, isLarge = false }: EventCardProps) => {
   const isFeature = featured || isLarge;
   const { language } = useLanguage();
   
-  const displayTitle = language === 'en' && titleEn ? titleEn : title;
-  const displayExcerpt = language === 'en' && excerptEn ? excerptEn : excerpt;
+  // Use title and excerpt directly since they're already from the correct language API endpoint  
+  const displayTitle = title; // title is already in the correct language from API endpoint
+  const displayExcerpt = excerpt; // excerpt is already in the correct language from API endpoint
   
   return (
     <Link 
-      to={`/bai-viet/${id}`}
+      to={generateArticleUrl({ id, path_alias }, language)}
       className={cn(
         "relative overflow-hidden rounded-xl group block", // Added 'block' for proper link display
         isFeature ? 'col-span-2 row-span-2' : ''
@@ -115,8 +118,9 @@ const EventCard = ({ id, image, date, title, titleEn, excerpt, excerptEn, featur
  */
 const FeaturedEvents: React.FC = () => {
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const { t } = useTranslation();
-  const { data, isLoading, isError } = useHomepageData();
+  const { data, isLoading, isError } = useHomepageData(language);
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
 
   return (
@@ -159,11 +163,12 @@ const FeaturedEvents: React.FC = () => {
               <EventCard 
                 key={event.id || index}
                 id={event.id}
-                date={formatDate(event.start_date)}
+                date={formatDate(event.start_date, language)}
                 title={event.title}
-                titleEn={event.title} // API doesn't have separate English titles yet
+                titleEn={event.titleEn}
                 excerpt={event.description}
-                excerptEn={event.description} // API doesn't have separate English descriptions yet
+                excerptEn={event.descriptionEn}
+                path_alias={event.path_alias}
                 image={getImageWithFallback(event.featured_image)}
                 isLarge={index === 0}
               />

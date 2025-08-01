@@ -425,6 +425,197 @@ const viTranslation = {
     "downloadingTitle": "Đang tải xuống tài liệu...",
     "shareSuccess": "Đã sao chép link vào clipboard!"
   },
+  "functions": {
+    "title": "Chức năng, nhiệm vụ",
+    "pageTitle": "Chức năng, nhiệm vụ, quyền hạn Ban Quản lý",
+    "breadcrumbGeneral": "Tổng quan về Ban Quản lý",
+    "generalIntroduction": "Giới thiệu chung",
+    "section1Title": "1. Chức năng",
+    "section2Title": "2. Nhiệm vụ và Quyền hạn",
+    "section3Title": "3. Sơ đồ tổ chức",
+    "introduction1": "Ban Quản lý Khu công nghệ cao và các khu công nghiệp Đà Nẵng được thành lập theo Quyết định số 1296/QĐ-TTg ngày 03/10/2018 của Thủ tướng Chính phủ.",
+    "introduction2": "Đây là đầu mối thống nhất quản lý các KCN trên địa bàn thành phố và xúc tiến đầu tư.",
+    "functionMain": "Chức năng chính: Cơ quan trực thuộc UBND thành phố, thực hiện chức năng quản lý nhà nước trực tiếp đối với Khu công nghệ cao và các khu công nghiệp.",
+    "functionPoint1": "Quản lý và cung ứng dịch vụ hành chính công",
+    "functionPoint2": "Hỗ trợ hoạt động đầu tư và sản xuất kinh doanh",
+    "functionPoint3": "Có tư cách pháp nhân và tài khoản riêng",
+    "legalBasis": "Căn cứ pháp lý:",
+    "legalPoint1": "Điều 35 Nghị định số 99/2003/NĐ-CP (Quy chế Khu công nghệ cao)",
+    "legalPoint2": "Điều 63 Nghị định số 82/2018/NĐ-CP (Quản lý KCN và khu kinh tế)",
+    "legalPoint3": "Các văn bản pháp luật khác có liên quan",
+    "organizationChart": "SƠ ĐỒ TỔ CHỨC BAN QUẢN LÝ",
+    "organizationSubtitle": "KHU CÔNG NGHỆ CAO VÀ CÁC KHU CÔNG NGHIỆP ĐÀ NẴNG",
+    "organizationUpdating": "Sơ đồ tổ chức chi tiết đang được cập nhật...",
+    "detailedIntro1": "Ban quản lý Khu công nghệ cao và các Khu công nghiệp Đà Nẵng (sau đây viết tắt là Ban Quản lý) là cơ quan trực thuộc UBND thành phố, thực hiện chức năng quản lý nhà nước trực tiếp đối với Khu công nghệ cao và các khu công nghiệp trên địa bàn Đà Nẵng; quản lý và tổ chức thực hiện chức năng cung ứng dịch vụ hành chính công và dịch vụ hỗ trợ khác có liên quan đến hoạt động đầu tư và sản xuất, kinh doanh cho nhà đầu tư trong khu công nghệ cao và các khu công nghiệp.",
+    "detailedIntro2": "Ban Quản lý chịu sự chỉ đạo và quản lý về tổ chức, biên chế, chương trình kế hoạch công tác và kinh phí hoạt động của Ủy ban nhân dân thành phố; chịu sự chỉ đạo, hướng dẫn và kiểm tra về chuyên môn nghiệp vụ của các Bộ, ngành quản lý về lĩnh vực có liên quan.",
+    "detailedIntro3": "Ban Quản lý có tư cách pháp nhân; có con dấu mang hình quốc huy và tài khoản riêng; kinh phí quản lý hành chính nhà nước, kinh phí hoạt động sự nghiệp và vốn đầu tư phát triển do ngân sách nhà nước cấp theo kế hoạch hàng năm.",
+    "dutiesIntro": "Ban Quản lý thực hiện nhiệm vụ, quyền hạn theo quy định tại:",
+    "dutiesPoint1": "Điều 35 Nghị định số 99/2003/NĐ-CP ngày 28 tháng 8 năm 2003 của Chính phủ về việc ban hành Quy chế Khu công nghệ cao.",
+    "dutiesPoint2": "Điều 63 Nghị định số 82/2018/NĐ-CP ngày 22 tháng 5 năm 2018 của Chính phủ quy định về quản lý khu công nghiệp và khu kinh tế.",
+    "dutiesPoint3": "Các văn bản pháp luật khác có liên quan.",
+    "organizationFullTitle": "SƠ ĐỒ TỔ CHỨC BAN QUẢN LÝ KHU CÔNG NGHỆ CAO VÀ CÁC KHU CÔNG NGHIỆP ĐÀ NẴNG",
+    "organizationNote": "Sơ đồ tổ chức chi tiết đang được cập nhật...",
+    "download": "Tải xuống",
+    "share": "Chia sẻ",
+    "print": "In",
+    "shareTitle": "Chia sẻ trang:",
+    "downloadingTitle": "Đang tải xuống tài liệu...",
+    "shareSuccess": "Đã sao chép link vào clipboard!"
+  },
+  "departments": {
+    "title": "Cơ cấu tổ chức",
+    "pageTitle": "Cơ cấu tổ chức - Các phòng ban",
+    "breadcrumbGeneral": "Tổng quan về Ban Quản lý",
+    "office": {
+      "title": "I. VĂN PHÒNG",
+      "mainFunction": "Chức năng chính: Tham mưu quản lý công tác tổ chức, cán bộ; quản lý tài chính; thực hiện công tác văn thư, lưu trữ; điều hành các hoạt động của Ban Quản lý.",
+      "documentReceiving": "Tiếp nhận hồ sơ",
+      "detailedDuties": [
+        "Tham mưu, quản lý về công tác tổ chức, cán bộ.",
+        "Tham mưu xây dựng các quy chế, quy định nội bộ của Ban Quản lý.",
+        "Tham mưu công tác bảo vệ bí mật nhà nước.",
+        "Tham mưu, dự toán ngân sách, kinh phí hoạt động hàng năm của Ban Quản lý; hướng dẫn, giám sát kế toán tài chính các đơn vị trực thuộc Ban Quản lý.",
+        "Tham mưu, tổ chức, theo dõi phong trào thi đua – khen thưởng Ban Quản lý, doanh nghiệp KCN.",
+        "Tham mưu, tổ chức thực hiện nhiệm vụ công tác cải cách hành chính nhà nước về lĩnh vực thuộc thẩm quyền của Ban Quản lý.",
+        "Điều hành Bộ phận tiếp nhận và trả kết quả.",
+        "Tổ chức thực hiện công tác văn thư, lưu trữ; quản lý và sử dụng con dấu của cơ quan.",
+        "Rà soát văn bản đi trước khi trình Lãnh đạo Ban ký.",
+        "Tham mưu quản lý, điều hành hệ thống mạng LAN, hệ thống quản lý văn bản và điều hành, trang thông tin điện tử của Ban Quản lý, các công tác liên quan đến ứng dụng công nghệ thông tin.",
+        "Theo dõi công tác xây dựng, áp dụng và cải tiến hệ thống quản lý chất lượng theo tiêu chuẩn TCVN ISO 9001: 2008 Ban Quản lý.",
+        "Triển khai, theo dõi công tác dân chủ cơ sở, cơ quan văn hóa và các công tác về nề nếp làm việc, tinh thần trách nhiệm của cán bộ công chức.",
+        "Chủ trì tham mưu tổ chức các cuộc họp giao ban với các doanh nghiệp trong KCN; giao ban định kỳ của Ban Quản lý.",
+        "Tổng hợp báo cáo tuần, báo cáo giao ban và thông báo kết luận giao ban hàng tháng của Lãnh đạo Ban.",
+        "Thực hiện công tác công tác lễ tân, tổ chức hội nghị, hội thảo và các hoạt động lễ hội của Ban Quản lý, các cấp phát động.",
+        "Quản lý điều hành các phương tiện, đầu mối quản lý tài sản trang thiết bị của cơ quan.",
+        "Thực hiện các công việc khác do Lãnh đạo Ban giao."
+      ]
+    },
+    "investmentDept": {
+      "title": "II. PHÒNG QUẢN LÝ, XÚC TIẾN VÀ HỖ TRỢ ĐẦU TƯ",
+      "function": "Chức năng:",
+      "functionDesc": "Tham mưu về xúc tiến đầu tư, quản lý dự án, hỗ trợ nhà đầu tư, đối ngoại và hợp tác quốc tế.",
+      "duties": "Nhiệm vụ chính:",
+      "dutiesDesc": "Xúc tiến đầu tư và quảng bá, Cấp Giấy chứng nhận đầu tư, Quản lý các dự án đầu tư, Hỗ trợ nhà đầu tư, Hợp tác quốc tế",
+      "fullFunctionDesc": "Tham mưu cho Lãnh đạo Ban Quản lý Khu CNC và các KCN về các lĩnh vực: Xúc tiến đầu tư; quản lý dự án đầu tư; hỗ trợ nhà đầu tư; đối ngoại, hợp tác quốc tế.",
+      "detailedSections": {
+        "investmentPromotion": {
+          "title": "a) Công tác xúc tiến đầu tư",
+          "duties": [
+            "- Tham mưu xây dựng và tổ chức thực hiện kế hoạch, chương trình xúc tiến đầu tư hàng năm, 05 năm và dài hạn của Khu CNC và các KCN.",
+            "- Tổ chức đón tiếp các nhà đầu tư và các đoàn khách trong và ngoài nước đến thăm và tìm hiểu cơ hội đầu tư tại Khu CNC và các KCN.",
+            "- Chủ trì tổ chức hoặc tham gia các hội nghị, hội thảo, sự kiện về xúc tiến đầu tư; đề xuất tổ chức các đoàn công tác xúc tiến đầu tư trong nước và nước ngoài; tổ chức tuyên truyền, quảng bá thông tin, hình ảnh Khu CNC và các KCN.",
+            "- Thiết kế các công cụ, biên soạn và quản lý các tài liệu xúc tiến đầu tư phục vụ công tác xúc tiến đầu tư.",
+            "- Chủ trì, phối hợp với Văn phòng nghiên cứu triển khai các công cụ, phần mềm trên máy tính và môi trường Internet để nâng cao hiệu quả hoạt động hỗ trợ và xúc tiến đầu tư.",
+            "- Quản trị và thực hiện các báo cáo tình hình hoạt động đối với Website Khu CNC phiên bản tiếng Anh, tiếng Nhật và tiếng Hàn; thực hiện nhiệm vụ Thư ký Ban biên tập Website."
+          ]
+        },
+        "investmentCertificate": {
+          "title": "b) Cấp Giấy chứng nhận đăng ký đầu tư",
+          "description": "- Chủ trì tham mưu giải quyết các thủ tục hành chính; cấp Giấy chứng nhận đăng ký đầu tư hoặc quyết định chủ trương đầu tư."
+        },
+        "projectManagement": {
+          "title": "c) Công tác quản lý các dự án đầu tư",
+          "duties": [
+            "- Tham mưu xây dựng, giải quyết các thủ tục thuộc thẩm quyền của Ban Quản lý Khu CNC và các KCN trong lĩnh vực đầu tư.",
+            "- Chủ trì tham mưu giải quyết các vấn đề phát sinh đối với dự án đầu tư sau cấp phép đầu tư.",
+            "- Tham mưu, đề xuất trong việc xây dựng các văn bản quy phạm pháp luật, chính sách có liên quan đến hoạt động đầu tư.",
+            "- Định kỳ kiểm tra, đôn đốc, nhắc nhở việc thực hiện dự án đầu tư."
+          ]
+        },
+        "investorSupport": {
+          "title": "d) Công tác hỗ trợ nhà đầu tư",
+          "duties": [
+            "- Hỗ trợ nhà đầu tư tìm hiểu thông tin, khảo sát môi trường đầu tư của thành phố Đà Nẵng và Khu CNC và các KCN.",
+            "- Hỗ trợ cung cấp thông tin, hướng dẫn, tư vấn cho nhà đầu tư các quy định về pháp luật liên quan đến hoạt động đầu tư vào Khu CNC và các KCN.",
+            "- Đầu mối liên lạc với các sở, ban, ngành liên quan trong việc hỗ trợ nhà đầu tư thực hiện các thủ tục đầu tư vào Khu CNC và các KCN."
+          ]
+        },
+        "internationalCooperation": {
+          "title": "e) Đối ngoại, hợp tác quốc tế",
+          "duties": [
+            "- Tham mưu thiết lập, duy trì triển khai các hoạt động hợp tác với các cá nhân, tổ chức trong và ngoài nước trong lĩnh vực đầu tư.",
+            "- Tham mưu cho Lãnh đạo Ban ký kết các thỏa thuận hợp tác, biên bản ghi nhớ giữa Ban Quản lý Khu CNC và các KCN với các đối tác, nhà đầu tư trong và ngoài nước về các lĩnh vực đầu tư.",
+            "- Tham mưu thực hiện công tác đối ngoại nhân dân theo Chương trình, Kế hoạch của thành phố.",
+            "- Định kỳ kiểm tra, đánh giá, báo cáo việc thực hiện."
+          ]
+        }
+      }
+    },
+    "businessDept": {
+      "title": "III. PHÒNG QUẢN LÝ DOANH NGHIỆP VÀ LAO ĐỘNG",
+      "duties": "Nhiệm vụ chính:",
+      "dutiesDesc": "Cấp giấy chứng nhận xuất xứ hàng hóa, Tiếp nhận báo cáo thống kê của doanh nghiệp, Theo dõi hoạt động sản xuất kinh doanh, Quản lý các hoạt động dịch vụ trong KCN, Báo cáo tình hình an ninh trật tự",
+      "detailedDuties": [
+        "Tham mưu và trình cấp các loại giấy chứng nhận xuất xứ hàng hóa sản xuất trong KCN.",
+        "Tiếp nhận báo cáo thống kê, tài chính của doanh nghiệp hoạt động trong KCN, theo dõi hoạt động sản xuất kinh doanh của các dự án trong KCN.",
+        "Hướng dẫn, giải quyết các vấn đề phát sinh, khó khăn, vướng mắc của nhà đầu tư trong hoạt động sản xuất kinh doanh, hoạt động chuyển nhượng dự án, tài sản; tạm ngừng hoạt động, phá sản, giải thể doanh nghiệp trong KCN; các thủ tục thanh lý tài sản, máy móc thiết bị.",
+        "Hướng dẫn, theo dõi và tiếp nhận đăng ký khung giá đất, cho thuê lại đất và phí hạ tầng KCN của nhà đầu tư xây dựng kinh doanh kết cấu hạ tầng KCN.",
+        "Theo dõi, đôn đốc Công ty Phát triển và Khai thác hạ tầng KCN Đà Nẵng và xử lý các kiến nghị liên quan đến thu nộp tiền sử dụng đất và phí sử dụng hạ tầng tại KCN do thành phố đầu tư.",
+        "Quản lý các hoạt động dịch vụ trong các KCN.",
+        "Tham mưu và trình cấp, cấp lại, sửa đổi, bổ sung các loại giấy chứng nhận đủ điều kiện kinh doanh, giấy phép kinh doanh một số mặt hàng thuộc phạm vi quản lý chuyên ngành cho thương nhân đặt trụ sở và có cơ sở kinh doanh tại KCN.",
+        "Chủ trì, phối hợp với các phòng, đơn vị có liên quan xây dựng báo cáo tổng hợp định kỳ, báo cáo đột xuất về tình hình sản xuất kinh doanh của các doanh nghiệp trong Khu công nghệ cao và các Khu công nghiệp.",
+        "Báo cáo tổng hợp định kỳ, đột xuất tình hình hoạt động, công tác an ninh trật tự, an toàn giao thông, an toàn vệ sinh thực phẩm, an sinh xã hội tại khu công nghệ cao và các KCN.",
+        "Báo cáo định kỳ và đột xuất theo yêu cầu của Ban Chỉ huy thống nhất thành phố.",
+        "Thực hiện các công việc khác do Lãnh đạo Ban giao."
+      ]
+    },
+    "planningDept": {
+      "title": "IV. PHÒNG QUẢN LÝ QUY HOẠCH VÀ XÂY DỰNG",
+      "function": "Chức năng:",
+      "functionDesc": "Tham mưu về quy hoạch, kiến trúc, xây dựng công trình, đấu nối hạ tầng và đất đai.",
+      "duties": "Nhiệm vụ chính:",
+      "dutiesDesc": "Quản lý quy hoạch và kiến trúc, Quản lý xây dựng công trình, Quản lý đất đai, Phòng cháy chữa cháy",
+      "fullFunctionDesc": "Tham mưu cho Lãnh đạo Ban Quản lý Khu CNC và các KCN về các lĩnh vực: Quy hoạch, Kiến trúc, Xây dựng công trình, Đấu nối hạ tầng kỹ thuật và Đất đai, phòng cháy chữa cháy, cứu nạn cứu hộ.",
+      "detailedSections": {
+        "planningArchitecture": {
+          "title": "a) Công tác quản lý Quy hoạch, Kiến trúc, Đấu nối hạ tầng kỹ thuật",
+          "description": "Tham mưu, đề xuất về việc tổ chức lập, thẩm định các loại quy hoạch; có ý kiến chấp thuận quy hoạch tổng mặt bằng, phương án kiến trúc và đấu nối hạ tầng kỹ thuật..."
+        },
+        "constructionManagement": {
+          "title": "b) Công tác quản lý Xây dựng công trình",
+          "description": "Có ý kiến chấp thuận đối với thiết kế cơ sở; cấp Thỏa thuận thiết kế tổng mặt bằng; tổ chức kiểm tra xác nhận hoàn thành công trình..."
+        },
+        "landManagement": {
+          "title": "c) Công tác quản lý Đất đai",
+          "description": "Tham mưu lập Quy hoạch, kế hoạch sử dụng đất chi tiết; thẩm định nhu cầu sử dụng đất; tham mưu quyết định giao đất, cho thuê đất..."
+        },
+        "decentralizedTasks": {
+          "title": "d) Thực hiện các nhiệm vụ theo phân cấp, ủy quyền",
+          "description": "Điều chỉnh quy hoạch chi tiết xây dựng; phê duyệt nhiệm vụ và đồ án quy hoạch; cấp, điều chỉnh, gia hạn Giấy phép quy hoạch xây dựng..."
+        },
+        "firePreventionRescue": {
+          "title": "f) Theo dõi công tác phòng cháy chữa cháy, cứu nạn cứu hộ trong Khu CNC và các KCN."
+        },
+        "otherTasks": {
+          "title": "g) Thực hiện các công việc khác do Lãnh đạo Ban giao."
+        }
+      }
+    },
+    "environmentDept": {
+      "title": "V. PHÒNG QUẢN LÝ MÔI TRƯỜNG, KHOA HỌC - CÔNG NGHỆ",
+      "duties": "Nhiệm vụ chính:",
+      "dutiesDesc": "Hướng dẫn thực hiện bảo vệ môi trường, Thẩm định báo cáo đánh giá tác động môi trường, Kiểm tra và xử lý vi phạm môi trường, Báo cáo công tác bảo vệ môi trường",
+      "fullTitle": "V. PHÒNG QUẢN LÝ MÔI TRƯỜNG, KHOA HỌC - CÔNG NGHỆ VÀ ƯƠM TẠO",
+      "detailedDuties": [
+        "Hướng dẫn, kiểm tra chủ đầu tư xây dựng và kinh doanh hạ tầng KCN, các cơ sở sản xuất, kinh doanh, dịch vụ trong KCN thực hiện các quy định bảo vệ môi trường; Phát hiện và kịp thời báo cáo với cơ quan quản lý nhà nước có thẩm quyền để giải quyết, xử lý các hành vi vi phạm pháp luật về bảo vệ môi trường.",
+        "Định kỳ báo cáo công tác bảo vệ môi trường của khu kinh tế, KCN gửi Ủy ban nhân dân thành phố và Bộ Tài nguyên và Môi trường.",
+        "Công khai thông tin về bảo vệ môi trường KCN; tuyên truyền, phổ biến các văn bản quy phạm pháp luật về bảo vệ môi trường cho chủ đầu tư xây dựng và kinh doanh hạ tầng KCN.",
+        "Phối hợp với cơ quan chức năng giải quyết các tranh chấp về môi trường giữa các cơ sở sản xuất, kinh doanh dịch vụ trong KCN hoặc với các tổ chức, cá nhân ngoài phạm vi KCN.",
+        "Phối hợp kiểm tra, thanh tra và xử lý vi phạm về bảo vệ môi trường đối với các hoạt động của chủ đầu tư xây dựng và kinh doanh hạ tầng KCN và các cơ sở sản xuất, kinh doanh, dịch vụ trong KCN.",
+        "Tổ chức thẩm định và trình phê duyệt Báo cáo đánh giá tác động môi trường đối với dự án trong KCN theo ủy quyền của UBND thành phố.",
+        "Tổ chức đăng ký và xác nhận kế hoạch bảo vệ môi trường cho các đối tượng thuộc diện đăng ký trong KCN theo ủy quyền của Sở Tài nguyên và Môi trường hoặc của UBND nhân dân cấp quận.",
+        "Tổ chức thẩm định và trình phê duyệt đề án bảo vệ môi trường chi tiết, đề án bảo vệ môi trường đơn giản của các dự án trong KCN theo ủy quyền của cơ quan có thẩm quyền.",
+        "Tổ chức kiểm tra và trình Lãnh đạo Ban xác nhận hoàn thành công trình bảo vệ môi trường phục vụ giai đoạn vận hành dự án đối với dự án đầu tư trong KCN theo pháp luật về bảo vệ môi trường.",
+        "Thực hiện các công việc khác do Lãnh đạo Ban giao."
+      ]
+    },
+    "download": "Tải xuống",
+    "share": "Chia sẻ",
+    "print": "In",
+    "shareTitle": "Chia sẻ trang:",
+    "downloadingTitle": "Đang tải xuống tài liệu...",
+    "shareSuccess": "Đã sao chép link vào clipboard!"
+  },
   "errors": {
     "loadNavFailed": "Failed to load navigation menu",
     "loadDataFailed": "Đã xảy ra lỗi khi tải thông tin đầu tư. Vui lòng thử lại sau.",
@@ -855,6 +1046,197 @@ const enTranslation = {
     "affiliatedUnits": {
       "title": "Affiliated Units",
       "description": "Information about affiliated units and infrastructure investment business units"
+    },
+    "download": "Download",
+    "share": "Share",
+    "print": "Print",
+    "shareTitle": "Share page:",
+    "downloadingTitle": "Downloading document...",
+    "shareSuccess": "Link copied to clipboard!"
+  },
+  "functions": {
+    "title": "Functions and Duties",
+    "pageTitle": "Functions, Duties, and Powers of the Management Board",
+    "breadcrumbGeneral": "Overview of the Management Board",
+    "generalIntroduction": "General Introduction",
+    "section1Title": "1. Functions",
+    "section2Title": "2. Duties and Powers",
+    "section3Title": "3. Organizational Chart",
+    "introduction1": "The Da Nang High-Tech Park and Industrial Zones Management Board was established according to Decision No. 1296/QD-TTg dated October 3, 2018 by the Prime Minister.",
+    "introduction2": "This is the unified focal point for managing industrial zones in the city and promoting investment.",
+    "functionMain": "Main function: An agency under the City People's Committee, performing direct state management functions for the High-Tech Park and industrial zones.",
+    "functionPoint1": "Management and provision of public administrative services",
+    "functionPoint2": "Support investment and production business activities",
+    "functionPoint3": "Has legal personality and separate accounts",
+    "legalBasis": "Legal basis:",
+    "legalPoint1": "Article 35 of Decree No. 99/2003/ND-CP (High-Tech Park Regulations)",
+    "legalPoint2": "Article 63 of Decree No. 82/2018/ND-CP (Industrial Zone and Economic Zone Management)",
+    "legalPoint3": "Other relevant legal documents",
+    "organizationChart": "ORGANIZATIONAL CHART OF THE MANAGEMENT BOARD",
+    "organizationSubtitle": "HIGH-TECH PARK AND INDUSTRIAL ZONES DA NANG",
+    "organizationUpdating": "Detailed organizational chart is being updated...",
+    "detailedIntro1": "The Da Nang High-Tech Park and Industrial Zones Management Board (hereinafter referred to as the Management Board) is an agency under the City People's Committee, performing direct state management functions for the High-Tech Park and industrial zones in Da Nang; managing and organizing the implementation of public administrative services and other support services related to investment and production activities for investors in the high-tech park and industrial zones.",
+    "detailedIntro2": "The Management Board is subject to direction and management regarding organization, staffing, work programs and operating budgets by the City People's Committee; subject to direction, guidance and inspection on professional activities by ministries and sectors managing related fields.",
+    "detailedIntro3": "The Management Board has legal personality; has a seal bearing the national emblem and separate accounts; state administrative management funds, operational funds and development investment capital are provided by the state budget according to annual plans.",
+    "dutiesIntro": "The Management Board performs duties and powers as prescribed in:",
+    "dutiesPoint1": "Article 35 of Decree No. 99/2003/ND-CP dated August 28, 2003 of the Government on promulgating the High-Tech Park Regulations.",
+    "dutiesPoint2": "Article 63 of Decree No. 82/2018/ND-CP dated May 22, 2018 of the Government regulating the management of industrial zones and economic zones.",
+    "dutiesPoint3": "Other relevant legal documents.",
+    "organizationFullTitle": "ORGANIZATIONAL CHART OF DA NANG HIGH-TECH PARK AND INDUSTRIAL ZONES MANAGEMENT BOARD",
+    "organizationNote": "Detailed organizational chart is being updated...",
+    "download": "Download",
+    "share": "Share",
+    "print": "Print",
+    "shareTitle": "Share page:",
+    "downloadingTitle": "Downloading document...",
+    "shareSuccess": "Link copied to clipboard!"
+  },
+  "departments": {
+    "title": "Organizational Structure",
+    "pageTitle": "Organizational Structure - Departments",
+    "breadcrumbGeneral": "Overview of the Management Board",
+    "office": {
+      "title": "I. OFFICE",
+      "mainFunction": "Main function: Advising on organizational and personnel management; financial management; document and archival work; coordinating the Management Board's activities.",
+      "documentReceiving": "Document Reception",
+      "detailedDuties": [
+        "Advising and managing organizational and personnel work.",
+        "Advising on developing internal regulations and rules of the Management Board.",
+        "Advising on state secret protection work.",
+        "Advising and estimating budget and annual operating funds of the Management Board; guiding and supervising financial accounting of units under the Management Board.",
+        "Advising, organizing, and monitoring emulation movements - rewarding the Management Board and enterprises in industrial zones.",
+        "Advising and organizing implementation of state administrative reform tasks in areas under the Management Board's jurisdiction.",
+        "Operating the receiving and returning results department.",
+        "Organizing document and archival work; managing and using the agency's seal.",
+        "Reviewing outgoing documents before submitting to Management Board leaders for signature.",
+        "Advising on managing and operating LAN systems, document management and administration systems, the Management Board's electronic information portal, and work related to information technology applications.",
+        "Monitoring the construction, application and improvement of quality management systems according to TCVN ISO 9001: 2008 standards of the Management Board.",
+        "Implementing and monitoring grassroots democracy work, cultural agencies and work on working order, responsibility spirit of officials and civil servants.",
+        "Leading and advising on organizing regular meetings with enterprises in industrial zones; regular meetings of the Management Board.",
+        "Compiling weekly reports, meeting reports and monthly meeting conclusion announcements from Management Board leaders.",
+        "Implementing reception work, organizing conferences, seminars and festival activities of the Management Board at all levels.",
+        "Managing and operating vehicles, focal point for managing assets and equipment of the agency.",
+        "Performing other tasks assigned by Management Board leaders."
+      ]
+    },
+    "investmentDept": {
+      "title": "II. INVESTMENT MANAGEMENT, PROMOTION AND SUPPORT DEPARTMENT",
+      "function": "Functions:",
+      "functionDesc": "Advising on investment promotion, project management, investor support, foreign affairs and international cooperation.",
+      "duties": "Main duties:",
+      "dutiesDesc": "Investment promotion and marketing, Investment license issuance, Investment project management, Investor support, International cooperation",
+      "fullFunctionDesc": "Advising the Management Board leadership on: Investment promotion; investment project management; investor support; foreign affairs and international cooperation.",
+      "detailedSections": {
+        "investmentPromotion": {
+          "title": "a) Investment promotion work",
+          "duties": [
+            "- Advising on developing and organizing implementation of annual, 5-year and long-term investment promotion plans and programs for high-tech parks and industrial zones.",
+            "- Organizing reception of investors and domestic and foreign delegations visiting and learning about investment opportunities in high-tech parks and industrial zones.",
+            "- Leading organization or participating in conferences, seminars, investment promotion events; proposing organization of domestic and foreign investment promotion working groups; organizing promotion and advertising of information and images of high-tech parks and industrial zones.",
+            "- Designing tools, compiling and managing investment promotion materials for investment promotion work.",
+            "- Leading and coordinating with the Office to research and deploy computer tools and software and Internet environment to improve the effectiveness of support and investment promotion activities.",
+            "- Managing and implementing activity reports for the high-tech park website in English, Japanese and Korean versions; performing the duties of Secretary of the Website Editorial Board."
+          ]
+        },
+        "investmentCertificate": {
+          "title": "b) Investment registration certificate issuance",
+          "description": "- Leading advisory work to resolve administrative procedures; issuing investment registration certificates or investment policy decisions."
+        },
+        "projectManagement": {
+          "title": "c) Investment project management work",
+          "duties": [
+            "- Advising on developing and resolving procedures under the jurisdiction of the High-Tech Park and Industrial Zones Management Board in the investment field.",
+            "- Leading advisory work to resolve issues arising with investment projects after investment licensing.",
+            "- Advising and proposing the development of legal documents and policies related to investment activities.",
+            "- Periodically inspecting, urging and reminding the implementation of investment projects."
+          ]
+        },
+        "investorSupport": {
+          "title": "d) Investor support work",
+          "duties": [
+            "- Supporting investors to learn information and survey the investment environment of Da Nang city and high-tech parks and industrial zones.",
+            "- Supporting provision of information, guidance and consultation to investors on legal regulations related to investment activities in high-tech parks and industrial zones.",
+            "- Liaison with relevant departments, branches and sectors in supporting investors to carry out investment procedures in high-tech parks and industrial zones."
+          ]
+        },
+        "internationalCooperation": {
+          "title": "e) Foreign affairs and international cooperation",
+          "duties": [
+            "- Advising on establishing, maintaining and deploying cooperation activities with individuals and organizations domestically and internationally in the investment field.",
+            "- Advising Management Board leaders on signing cooperation agreements and memorandums of understanding between the High-Tech Park and Industrial Zones Management Board and domestic and foreign partners and investors in investment fields.",
+            "- Advising on implementing people-to-people diplomacy work according to the city's programs and plans.",
+            "- Periodically inspecting, evaluating and reporting on implementation."
+          ]
+        }
+      }
+    },
+    "businessDept": {
+      "title": "III. ENTERPRISE AND LABOR MANAGEMENT DEPARTMENT",
+      "duties": "Main duties:",
+      "dutiesDesc": "Certificate of origin issuance, Enterprise statistical reports reception, Production and business monitoring, Industrial zone service management, Security and order reporting",
+      "detailedDuties": [
+        "Advising and submitting applications for various types of certificates of origin for goods produced in industrial zones.",
+        "Receiving statistical and financial reports from enterprises operating in industrial zones, monitoring production and business activities of projects in industrial zones.",
+        "Guiding and resolving arising issues, difficulties and obstacles of investors in production and business activities, project and asset transfer activities; temporary suspension of operations, bankruptcy, dissolution of enterprises in industrial zones; procedures for liquidation of assets, machinery and equipment.",
+        "Guiding, monitoring and receiving registration of land price frameworks, sub-leasing land and industrial zone infrastructure fees from investors building and operating industrial zone infrastructure.",
+        "Monitoring and urging Da Nang Industrial Zone Infrastructure Development and Exploitation Company and handling proposals related to collection of land use fees and infrastructure usage fees at industrial zones invested by the city.",
+        "Managing service activities in industrial zones.",
+        "Advising and submitting applications for, re-issuing, modifying and supplementing various types of business eligibility certificates and business licenses for certain goods under specialized management for merchants headquartered and having business establishments in industrial zones.",
+        "Leading and coordinating with relevant departments and units to build periodic comprehensive reports and emergency reports on production and business situation of enterprises in high-tech parks and industrial zones.",
+        "Comprehensive periodic and emergency reporting on activities, security and order work, traffic safety, food hygiene and safety, social security at high-tech parks and industrial zones.",
+        "Periodic and emergency reporting as required by the City's Unified Command Board.",
+        "Performing other tasks assigned by Management Board leaders."
+      ]
+    },
+    "planningDept": {
+      "title": "IV. PLANNING AND CONSTRUCTION MANAGEMENT DEPARTMENT",
+      "function": "Functions:",
+      "functionDesc": "Advising on planning, architecture, construction, infrastructure connection and land management.",
+      "duties": "Main duties:",
+      "dutiesDesc": "Planning and architecture management, Construction management, Land management, Fire prevention and fighting",
+      "fullFunctionDesc": "Advising the Management Board leadership on: Planning, Architecture, Construction, Technical infrastructure connection and Land, fire prevention and rescue.",
+      "detailedSections": {
+        "planningArchitecture": {
+          "title": "a) Planning, Architecture, and Technical Infrastructure Connection Management",
+          "description": "Advising and proposing on organizing development and appraisal of various types of planning; providing approval opinions on master plans, architectural schemes and technical infrastructure connections..."
+        },
+        "constructionManagement": {
+          "title": "b) Construction Management",
+          "description": "Providing approval opinions on basic designs; issuing master plan design agreements; organizing inspection and confirmation of construction completion..."
+        },
+        "landManagement": {
+          "title": "c) Land Management",
+          "description": "Advising on developing detailed land use planning and plans; appraising land use needs; advising on decisions for land allocation and leasing..."
+        },
+        "decentralizedTasks": {
+          "title": "d) Implementing tasks according to decentralization and authorization",
+          "description": "Adjusting detailed construction planning; approving planning tasks and schemes; issuing, adjusting, extending construction planning permits..."
+        },
+        "firePreventionRescue": {
+          "title": "f) Monitoring fire prevention and fighting, rescue work in high-tech parks and industrial zones."
+        },
+        "otherTasks": {
+          "title": "g) Performing other tasks assigned by Management Board leaders."
+        }
+      }
+    },
+    "environmentDept": {
+      "title": "V. ENVIRONMENT AND SCIENCE-TECHNOLOGY MANAGEMENT DEPARTMENT",
+      "duties": "Main duties:",
+      "dutiesDesc": "Environmental protection guidance, Environmental impact assessment review, Environmental violation inspection and handling, Environmental protection reporting",
+      "fullTitle": "V. ENVIRONMENT, SCIENCE-TECHNOLOGY AND INCUBATION MANAGEMENT DEPARTMENT",
+      "detailedDuties": [
+        "Guiding and inspecting investors in infrastructure construction and business, production, business and service establishments in industrial zones to implement environmental protection regulations; detecting and promptly reporting to competent state management agencies to resolve and handle violations of environmental protection laws.",
+        "Periodically reporting on environmental protection work of economic zones and industrial zones to the City People's Committee and the Ministry of Natural Resources and Environment.",
+        "Publishing information on industrial zone environmental protection; promoting and disseminating legal documents on environmental protection to investors in infrastructure construction and business in industrial zones.",
+        "Coordinating with functional agencies to resolve environmental disputes between production and service business establishments in industrial zones or with organizations and individuals outside the scope of industrial zones.",
+        "Coordinating in inspection, supervision and handling of environmental protection violations regarding activities of investors in infrastructure construction and business and production, business and service establishments in industrial zones.",
+        "Organizing appraisal and submitting for approval environmental impact assessment reports for projects in industrial zones under authorization of the City People's Committee.",
+        "Organizing registration and confirmation of environmental protection plans for subjects subject to registration in industrial zones under authorization of the Department of Natural Resources and Environment or district-level People's Committees.",
+        "Organizing appraisal and submitting for approval detailed environmental protection schemes and simple environmental protection schemes for projects in industrial zones under authorization of competent agencies.",
+        "Organizing inspection and submitting to Management Board leaders for confirmation of completion of environmental protection works serving the project operation phase for investment projects in industrial zones according to environmental protection laws.",
+        "Performing other tasks assigned by Management Board leaders."
+      ]
     },
     "download": "Download",
     "share": "Share",

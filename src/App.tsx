@@ -12,6 +12,7 @@ import { AccessibilityProvider } from "@/context/AccessibilityContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ArticleDetailPage from "@/pages/Article/ArticleDetailPage";
+import DynamicArticleHandler from "@/pages/Article/DynamicArticleHandler";
 import ArticleListPage from "@/pages/News/ArticleListPage";
 import DocumentSearchPage from "@/pages/Document/DocumentSearchPage";
 import DocumentTabLayout from "@/pages/Document/Layout/DocumentTabLayout";
@@ -147,7 +148,7 @@ const App: React.FC = () => (
                         <Route path="introduction/general-introduction/overview-of-da-nang" element={<DanangOverviewPage />} />
                         <Route path="introduction/general-introduction/overview-of-management-board" element={<ManagementBoardOverviewPage />} />
                         <Route path="introduction/general-introduction/functions-and-tasks" element={<FunctionsDutiesPage />} />
-                        <Route path="introduction/general-introduction/departments" element={<DepartmentsPage />} />
+                        <Route path="introduction/general-introduction/organizational-structure" element={<DepartmentsPage />} />
                         <Route path="introduction/general-introduction/subordinate-units" element={<AffiliatedUnitsPage />} />
                         
                         {/* Functional zones routes */}
@@ -189,9 +190,11 @@ const App: React.FC = () => (
                         
                         {/* Language Test Component - Development only */}
     
+                        {/* SEO-friendly URLs (Drupal path aliases) - This should be before 404 */}
+                        <Route path="*" element={<DynamicArticleHandler />} />
                         
                         {/* 404 - This should be the last route */}
-                        <Route path="*" element={<NotFound />} />
+                        {/* <Route path="*" element={<NotFound />} /> */}
                       </Route>
                       
                       {/* Catch-all for invalid URLs without language prefix */}

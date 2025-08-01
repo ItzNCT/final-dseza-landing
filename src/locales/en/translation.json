@@ -435,19 +435,153 @@
     "downloadingTitle": "Downloading document...",
     "shareSuccess": "Link copied to clipboard!"
   },
-  "danangOverview": {
-    "title": "Overview of Da Nang",
-    "pageTitle": "Overview of Da Nang",
-    "download": "Download",
-    "share": "Share",
-    "print": "Print",
-    "shareTitle": "Share page:",
-    "downloadingTitle": "Downloading document...",
-    "shareSuccess": "Link copied to clipboard!"
-  },
   "departments": {
     "title": "Organizational Structure",
     "pageTitle": "Organizational Structure - Departments",
+    "breadcrumbGeneral": "Overview of the Management Board",
+    "office": {
+      "title": "I. OFFICE",
+      "mainFunction": "Main function: Advising on organizational and personnel management; financial management; document and archival work; coordinating the Management Board's activities.",
+      "documentReceiving": "Document Reception",
+      "detailedDuties": [
+        "Advising and managing organizational and personnel work.",
+        "Advising on developing internal regulations and rules of the Management Board.",
+        "Advising on state secret protection work.",
+        "Advising and estimating budget and annual operating funds of the Management Board; guiding and supervising financial accounting of units under the Management Board.",
+        "Advising, organizing, and monitoring emulation movements - rewarding the Management Board and enterprises in industrial zones.",
+        "Advising and organizing implementation of state administrative reform tasks in areas under the Management Board's jurisdiction.",
+        "Operating the receiving and returning results department.",
+        "Organizing document and archival work; managing and using the agency's seal.",
+        "Reviewing outgoing documents before submitting to Management Board leaders for signature.",
+        "Advising on managing and operating LAN systems, document management and administration systems, the Management Board's electronic information portal, and work related to information technology applications.",
+        "Monitoring the construction, application and improvement of quality management systems according to TCVN ISO 9001: 2008 standards of the Management Board.",
+        "Implementing and monitoring grassroots democracy work, cultural agencies and work on working order, responsibility spirit of officials and civil servants.",
+        "Leading and advising on organizing regular meetings with enterprises in industrial zones; regular meetings of the Management Board.",
+        "Compiling weekly reports, meeting reports and monthly meeting conclusion announcements from Management Board leaders.",
+        "Implementing reception work, organizing conferences, seminars and festival activities of the Management Board at all levels.",
+        "Managing and operating vehicles, focal point for managing assets and equipment of the agency.",
+        "Performing other tasks assigned by Management Board leaders."
+      ]
+    },
+    "investmentDept": {
+      "title": "II. INVESTMENT MANAGEMENT, PROMOTION AND SUPPORT DEPARTMENT",
+      "function": "Functions:",
+      "functionDesc": "Advising on investment promotion, project management, investor support, foreign affairs and international cooperation.",
+      "duties": "Main duties:",
+      "dutiesDesc": "Investment promotion and marketing, Investment license issuance, Investment project management, Investor support, International cooperation",
+      "fullFunctionDesc": "Advising the Management Board leadership on: Investment promotion; investment project management; investor support; foreign affairs and international cooperation.",
+      "detailedSections": {
+        "investmentPromotion": {
+          "title": "a) Investment promotion work",
+          "duties": [
+            "- Advising on developing and organizing implementation of annual, 5-year and long-term investment promotion plans and programs for high-tech parks and industrial zones.",
+            "- Organizing reception of investors and domestic and foreign delegations visiting and learning about investment opportunities in high-tech parks and industrial zones.",
+            "- Leading organization or participating in conferences, seminars, investment promotion events; proposing organization of domestic and foreign investment promotion working groups; organizing promotion and advertising of information and images of high-tech parks and industrial zones.",
+            "- Designing tools, compiling and managing investment promotion materials for investment promotion work.",
+            "- Leading and coordinating with the Office to research and deploy computer tools and software and Internet environment to improve the effectiveness of support and investment promotion activities.",
+            "- Managing and implementing activity reports for the high-tech park website in English, Japanese and Korean versions; performing the duties of Secretary of the Website Editorial Board."
+          ]
+        },
+        "investmentCertificate": {
+          "title": "b) Investment registration certificate issuance",
+          "description": "- Leading advisory work to resolve administrative procedures; issuing investment registration certificates or investment policy decisions."
+        },
+        "projectManagement": {
+          "title": "c) Investment project management work",
+          "duties": [
+            "- Advising on developing and resolving procedures under the jurisdiction of the High-Tech Park and Industrial Zones Management Board in the investment field.",
+            "- Leading advisory work to resolve issues arising with investment projects after investment licensing.",
+            "- Advising and proposing the development of legal documents and policies related to investment activities.",
+            "- Periodically inspecting, urging and reminding the implementation of investment projects."
+          ]
+        },
+        "investorSupport": {
+          "title": "d) Investor support work",
+          "duties": [
+            "- Supporting investors to learn information and survey the investment environment of Da Nang city and high-tech parks and industrial zones.",
+            "- Supporting provision of information, guidance and consultation to investors on legal regulations related to investment activities in high-tech parks and industrial zones.",
+            "- Liaison with relevant departments, branches and sectors in supporting investors to carry out investment procedures in high-tech parks and industrial zones."
+          ]
+        },
+        "internationalCooperation": {
+          "title": "e) Foreign affairs and international cooperation",
+          "duties": [
+            "- Advising on establishing, maintaining and deploying cooperation activities with individuals and organizations domestically and internationally in the investment field.",
+            "- Advising Management Board leaders on signing cooperation agreements and memorandums of understanding between the High-Tech Park and Industrial Zones Management Board and domestic and foreign partners and investors in investment fields.",
+            "- Advising on implementing people-to-people diplomacy work according to the city's programs and plans.",
+            "- Periodically inspecting, evaluating and reporting on implementation."
+          ]
+        }
+      }
+    },
+    "businessDept": {
+      "title": "III. ENTERPRISE AND LABOR MANAGEMENT DEPARTMENT",
+      "duties": "Main duties:",
+      "dutiesDesc": "Certificate of origin issuance, Enterprise statistical reports reception, Production and business monitoring, Industrial zone service management, Security and order reporting",
+      "detailedDuties": [
+        "Advising and submitting applications for various types of certificates of origin for goods produced in industrial zones.",
+        "Receiving statistical and financial reports from enterprises operating in industrial zones, monitoring production and business activities of projects in industrial zones.",
+        "Guiding and resolving arising issues, difficulties and obstacles of investors in production and business activities, project and asset transfer activities; temporary suspension of operations, bankruptcy, dissolution of enterprises in industrial zones; procedures for liquidation of assets, machinery and equipment.",
+        "Guiding, monitoring and receiving registration of land price frameworks, sub-leasing land and industrial zone infrastructure fees from investors building and operating industrial zone infrastructure.",
+        "Monitoring and urging Da Nang Industrial Zone Infrastructure Development and Exploitation Company and handling proposals related to collection of land use fees and infrastructure usage fees at industrial zones invested by the city.",
+        "Managing service activities in industrial zones.",
+        "Advising and submitting applications for, re-issuing, modifying and supplementing various types of business eligibility certificates and business licenses for certain goods under specialized management for merchants headquartered and having business establishments in industrial zones.",
+        "Leading and coordinating with relevant departments and units to build periodic comprehensive reports and emergency reports on production and business situation of enterprises in high-tech parks and industrial zones.",
+        "Comprehensive periodic and emergency reporting on activities, security and order work, traffic safety, food hygiene and safety, social security at high-tech parks and industrial zones.",
+        "Periodic and emergency reporting as required by the City's Unified Command Board.",
+        "Performing other tasks assigned by Management Board leaders."
+      ]
+    },
+    "planningDept": {
+      "title": "IV. PLANNING AND CONSTRUCTION MANAGEMENT DEPARTMENT",
+      "function": "Functions:",
+      "functionDesc": "Advising on planning, architecture, construction, infrastructure connection and land management.",
+      "duties": "Main duties:",
+      "dutiesDesc": "Planning and architecture management, Construction management, Land management, Fire prevention and fighting",
+      "fullFunctionDesc": "Advising the Management Board leadership on: Planning, Architecture, Construction, Technical infrastructure connection and Land, fire prevention and rescue.",
+      "detailedSections": {
+        "planningArchitecture": {
+          "title": "a) Planning, Architecture, and Technical Infrastructure Connection Management",
+          "description": "Advising and proposing on organizing development and appraisal of various types of planning; providing approval opinions on master plans, architectural schemes and technical infrastructure connections..."
+        },
+        "constructionManagement": {
+          "title": "b) Construction Management",
+          "description": "Providing approval opinions on basic designs; issuing master plan design agreements; organizing inspection and confirmation of construction completion..."
+        },
+        "landManagement": {
+          "title": "c) Land Management",
+          "description": "Advising on developing detailed land use planning and plans; appraising land use needs; advising on decisions for land allocation and leasing..."
+        },
+        "decentralizedTasks": {
+          "title": "d) Implementing tasks according to decentralization and authorization",
+          "description": "Adjusting detailed construction planning; approving planning tasks and schemes; issuing, adjusting, extending construction planning permits..."
+        },
+        "firePreventionRescue": {
+          "title": "e) Monitoring fire prevention and fighting, rescue work in high-tech parks and industrial zones."
+        },
+        "otherTasks": {
+          "title": "f) Performing other tasks assigned by Management Board leaders."
+        }
+      }
+    },
+    "environmentDept": {
+      "title": "V. ENVIRONMENT AND SCIENCE-TECHNOLOGY MANAGEMENT DEPARTMENT",
+      "duties": "Main duties:",
+      "dutiesDesc": "Environmental protection guidance, Environmental impact assessment review, Environmental violation inspection and handling, Environmental protection reporting",
+      "fullTitle": "V. ENVIRONMENT, SCIENCE-TECHNOLOGY AND INCUBATION MANAGEMENT DEPARTMENT",
+      "detailedDuties": [
+        "Guiding and inspecting investors in infrastructure construction and business, production, business and service establishments in industrial zones to implement environmental protection regulations; detecting and promptly reporting to competent state management agencies to resolve and handle violations of environmental protection laws.",
+        "Periodically reporting on environmental protection work of economic zones and industrial zones to the City People's Committee and the Ministry of Natural Resources and Environment.",
+        "Publishing information on industrial zone environmental protection; promoting and disseminating legal documents on environmental protection to investors in infrastructure construction and business in industrial zones.",
+        "Coordinating with functional agencies to resolve environmental disputes between production and service business establishments in industrial zones or with organizations and individuals outside the scope of industrial zones.",
+        "Coordinating in inspection, supervision and handling of environmental protection violations regarding activities of investors in infrastructure construction and business and production, business and service establishments in industrial zones.",
+        "Organizing appraisal and submitting for approval environmental impact assessment reports for projects in industrial zones under authorization of the City People's Committee.",
+        "Organizing registration and confirmation of environmental protection plans for subjects subject to registration in industrial zones under authorization of the Department of Natural Resources and Environment or district-level People's Committees.",
+        "Organizing appraisal and submitting for approval detailed environmental protection schemes and simple environmental protection schemes for projects in industrial zones under authorization of competent agencies.",
+        "Organizing inspection and submitting to Management Board leaders for confirmation of completion of environmental protection works serving the project operation phase for investment projects in industrial zones according to environmental protection laws.",
+        "Performing other tasks assigned by Management Board leaders."
+      ]
+    },
     "download": "Download",
     "share": "Share",
     "print": "Print",
@@ -458,25 +592,33 @@
   "functions": {
     "title": "Functions and Duties",
     "pageTitle": "Functions, Duties, and Powers of the Management Board",
-    "download": "Download",
-    "share": "Share",
-    "print": "Print",
-    "shareTitle": "Share page:",
-    "downloadingTitle": "Downloading document...",
-    "shareSuccess": "Link copied to clipboard!"
-  },
-  "welcome": {
-    "title": "Welcome Letter",
-    "pageTitle": "Welcome Letter",
-    "greeting": "Welcome to DSEZA,",
-    "introduction": "First of all, the Danang Hi-Tech Park and Industrial Zones Authority (DSEZA) would like to send our sincere greetings and best wishes for health, prosperity, and success to all organizations, enterprises, investors, and individuals.",
-    "paragraph1": "The Danang Hi-Tech Park and Industrial Zones Authority was established in October 2018 based on the merger of the Danang Industrial and Export Processing Zones Authority and the Danang Hi-Tech Park Authority, in response to the Government and State's policies and in line with the requirements for socio-economic development of Danang City.",
-    "paragraph2": "On April 29, 2025, the Danang City People's Committee issued Decision No. 34/2025/QD-UBND regulating the functions, duties, powers, and organizational structure of the management board, notably including important new functions in defining the functions, duties, powers, and organizational structure of the Danang Hi-Tech Park and Industrial Zones Authority - a unit directly under the City People's Committee.",
-    "paragraph3": "The Management Board is an agency directly under the Danang City People's Committee, performing the function of direct state management over the Danang Hi-Tech Park; managing and organizing the implementation of public administrative services and other support services related to investment and production activities, business operations for investors in the hi-tech park, Danang Information Technology Park, and industrial zones in Danang City according to legal regulations.",
-    "paragraph4": "With the modern spirit at the hi-tech park, Danang Information Technology Park, and industrial zones in Danang City, DSEZA commits to always accompany organizations, enterprises, investors, and individuals who have placed their trust and chosen the hi-tech park, Danang Information Technology Park, and industrial zones in Danang City as their destination in the past, present, and future.",
-    "paragraph5": "With the spirit of goodwill at the hi-tech park, Danang Information Technology Park, and industrial zones in Danang City, DSEZA commits to always accompany organizations, enterprises, investors, and individuals who have placed their trust and chosen the hi-tech park, Danang Information Technology Park, and industrial zones in Danang City as their destination in the past, present, and future.",
-    "closing": "Sincerely grateful!",
-    "signature": "Management Board Leadership",
+    "breadcrumbGeneral": "Overview of the Management Board",
+    "generalIntroduction": "General Introduction",
+    "section1Title": "1. Functions",
+    "section2Title": "2. Duties and Powers",
+    "section3Title": "3. Organizational Chart",
+    "introduction1": "The Da Nang High-Tech Park and Industrial Zones Management Board was established according to Decision No. 1296/QD-TTg dated October 3, 2018 by the Prime Minister.",
+    "introduction2": "This is the unified focal point for managing industrial zones in the city and promoting investment.",
+    "functionMain": "Main function: An agency under the City People's Committee, performing direct state management functions for the High-Tech Park and industrial zones.",
+    "functionPoint1": "Management and provision of public administrative services",
+    "functionPoint2": "Support investment and production business activities",
+    "functionPoint3": "Has legal personality and separate accounts",
+    "legalBasis": "Legal basis:",
+    "legalPoint1": "Article 35 of Decree No. 99/2003/ND-CP (High-Tech Park Regulations)",
+    "legalPoint2": "Article 63 of Decree No. 82/2018/ND-CP (Industrial Zone and Economic Zone Management)",
+    "legalPoint3": "Other relevant legal documents",
+    "organizationChart": "ORGANIZATIONAL CHART OF THE MANAGEMENT BOARD",
+    "organizationSubtitle": "HIGH-TECH PARK AND INDUSTRIAL ZONES DA NANG",
+    "organizationUpdating": "Detailed organizational chart is being updated...",
+    "detailedIntro1": "The Da Nang High-Tech Park and Industrial Zones Management Board (hereinafter referred to as the Management Board) is an agency under the City People's Committee, performing direct state management functions for the High-Tech Park and industrial zones in Da Nang; managing and organizing the implementation of public administrative services and other support services related to investment and production activities for investors in the high-tech park and industrial zones.",
+    "detailedIntro2": "The Management Board is subject to direction and management regarding organization, staffing, work programs and operating budgets by the City People's Committee; subject to direction, guidance and inspection on professional activities by ministries and sectors managing related fields.",
+    "detailedIntro3": "The Management Board has legal personality; has a seal bearing the national emblem and separate accounts; state administrative management funds, operational funds and development investment capital are provided by the state budget according to annual plans.",
+    "dutiesIntro": "The Management Board performs duties and powers as prescribed in:",
+    "dutiesPoint1": "Article 35 of Decree No. 99/2003/ND-CP dated August 28, 2003 of the Government on promulgating the High-Tech Park Regulations.",
+    "dutiesPoint2": "Article 63 of Decree No. 82/2018/ND-CP dated May 22, 2018 of the Government regulating the management of industrial zones and economic zones.",
+    "dutiesPoint3": "Other relevant legal documents.",
+    "organizationFullTitle": "ORGANIZATIONAL CHART OF DA NANG HIGH-TECH PARK AND INDUSTRIAL ZONES MANAGEMENT BOARD",
+    "organizationNote": "Detailed organizational chart is being updated...",
     "download": "Download",
     "share": "Share",
     "print": "Print",

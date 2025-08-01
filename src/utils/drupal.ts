@@ -298,4 +298,32 @@ export function useDrupalApi() {
     language,
     // Add other API methods here if needed (POST, PATCH, DELETE, etc.)
   };
+}
+
+/**
+ * Generate article URL with language prefix and SEO-friendly alias
+ * @param article - News article with id and optional path_alias
+ * @param language - Current language ('vi' or 'en')
+ * @returns SEO-friendly URL or fallback to /bai-viet/{id}
+ * 
+ * @example
+ * ```typescript
+ * // With alias
+ * generateArticleUrl({ id: '123', path_alias: '/tin-tuc/article-slug' }, 'en')
+ * // Returns: '/en/tin-tuc/article-slug'
+ * 
+ * // Without alias (fallback)
+ * generateArticleUrl({ id: '123', path_alias: null }, 'vi')
+ * // Returns: '/bai-viet/123'
+ * ```
+ */
+export function generateArticleUrl(article: { id: string; path_alias?: string | null }, language: 'vi' | 'en' = 'vi'): string {
+  const languagePrefix = language === 'en' ? '/en' : '';
+  
+  // Use path alias if available, otherwise fallback to /bai-viet/{id}
+  if (article.path_alias) {
+    return `${languagePrefix}${article.path_alias}`;
+  }
+  
+  return `${languagePrefix}/bai-viet/${article.id}`;
 } 
