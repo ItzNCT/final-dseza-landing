@@ -12,7 +12,7 @@ const URL_MAPPING = {
     'about': 'gioi-thieu',
     'news': 'tin-tuc',
     'events': 'su-kien',
-    'documents': 'tai-lieu',
+    'documents': 'van-ban',
     'business': 'doanh-nghiep', 
     'utilities': 'tien-ich',
     'introduction': 'gioi-thieu',

@@ -102,10 +102,10 @@ const App: React.FC = () => (
                         
                         {/* Enterprise routes */}
                         <Route path="doanh-nghiep/thong-tin-doanh-nghiep/thong-ke-doanh-nghiep" element={<EnterpriseListPage />} />
-                        <Route path="doanh-nghiep/tai-lieu/chi-tiet/:docId" element={<DocumentViewerPage />} />
+                        <Route path="doanh-nghiep/van-ban/chi-tiet/:docId" element={<DocumentViewerPage />} />
                         <Route path="doanh-nghiep/tuyen-dung" element={<RecruitmentPage />} />
                         <Route path="doanh-nghiep/thong-tin-doanh-nghiep/:docCategorySlug" element={<DocumentListPage />} />
-                        <Route path="doanh-nghiep/tai-lieu/:docCategorySlug" element={<DocumentListPage />} />
+                        <Route path="doanh-nghiep/van-ban/:docCategorySlug" element={<DocumentListPage />} />
                         <Route path="doanh-nghiep/bao-cao-du-lieu/:docCategory" element={<DocumentListPage />} />
                         
                         {/* News routes */}
