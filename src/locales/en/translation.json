@@ -662,5 +662,19 @@
     "shareTitle": "Share page:",
     "downloadingTitle": "Downloading document...",
     "shareSuccess": "Link copied to clipboard!"
+  },
+  "urlSegments": {
+    "news": "news",
+    "article": "article",
+    "event": "event",
+    "utilities": "utilities",
+    "documents": "documents",
+    "introduction": "introduction",
+    "contact": "contact",
+    "investmentGuide": "investment-guide",
+    "qna": "qna",
+    "create": "create",
+    "faq": "faq",
+    "functionalZones": "functional-zones"
   }
 } 

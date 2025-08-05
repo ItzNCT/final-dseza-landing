@@ -649,5 +649,19 @@
     "shareTitle": "Chia sẻ trang:",
     "downloadingTitle": "Đang tải xuống tài liệu...",
     "shareSuccess": "Đã sao chép link vào clipboard!"
+  },
+  "urlSegments": {
+    "news": "tin-tuc",
+    "article": "bai-viet",
+    "event": "su-kien",
+    "utilities": "tien-ich",
+    "documents": "van-ban",
+    "introduction": "gioi-thieu",
+    "contact": "lien-he",
+    "investmentHandbook": "cam-nang-dau-tu",
+    "qna": "hoi-dap",
+    "create": "tao-moi",
+    "faq": "cau-hoi-thuong-gap",
+    "functionalZones": "cac-khu-chuc-nang"
   }
 } 

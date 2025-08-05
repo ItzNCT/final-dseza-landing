@@ -872,6 +872,28 @@ export const useArticleByPath = (pathAlias: string, language: 'vi' | 'en' = 'vi'
 };
 
 /**
+ * Smart hook that detects identifier type and calls appropriate fetch method
+ * @param identifier - Either a UUID (36 chars with hyphens or numeric) or a path slug
+ * @param language - Language code ('vi' or 'en'), defaults to 'vi'
+ * @returns Same shape as useArticleDetail hook
+ */
+export const useArticle = (identifier: string, language: 'vi' | 'en' = 'vi') => {
+  // Detect if identifier is a UUID (36 chars with hyphens) or numeric
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier) || /^\d+$/.test(identifier);
+  
+  // Use conditional hook calls based on identifier type
+  const uuidResult = useArticleDetail(isUuid ? identifier : '', language);
+  const pathResult = useArticleByPath(isUuid ? '' : '/' + identifier, language);
+  
+  // Return the appropriate result based on identifier type
+  if (isUuid) {
+    return uuidResult;
+  } else {
+    return pathResult;
+  }
+};
+
+/**
  * Fetch event details by UUID from Drupal JSON:API
  * @param uuid - The UUID of the event to fetch
  * @returns Promise containing the event data

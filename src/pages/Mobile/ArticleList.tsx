@@ -5,6 +5,8 @@ import { useAllNewsCategories } from "../../hooks/useNewsCategories";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
 import { ChevronRight, ChevronLeft, Star, Filter } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { translatePath } from "@/utils/seo";
 import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
 import MobileArticleCard from "@/components/mobile/MobileArticleCard";
@@ -70,6 +72,7 @@ const MobileArticleListPage: React.FC = () => {
   const { data: articles, isLoading, isError } = useArticles();
   const { data: categoriesData } = useAllNewsCategories();
   const { theme } = useTheme();
+  const { language } = useLanguage();
 
   // Create dynamic title with real categories
   const pageTitle = category && subcategory 
@@ -149,7 +152,7 @@ const MobileArticleListPage: React.FC = () => {
             {isSubcategoryOfSuKien ? (
               <>
                 <Link 
-                  to="/tin-tuc/su-kien" 
+                  to={`/${translatePath('news', language)}/${translatePath('event', language)}`}
                   className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                 >
                   Tin tức & Sự kiện
@@ -162,7 +165,7 @@ const MobileArticleListPage: React.FC = () => {
             ) : (
               <>
                 <Link 
-                  to="/tin-tuc" 
+                  to={`/${translatePath('news', language)}`}
                   className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                 >
                   Tin tức
@@ -252,7 +255,7 @@ const MobileArticleListPage: React.FC = () => {
                 Hiện tại chưa có bài viết nào trong "{pageTitle}".
               </p>
               <Link 
-                to="/tin-tuc" 
+                                  to={`/${translatePath('news', language)}`} 
                 className={`inline-flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                   theme === 'dark' 
                     ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary/80' 

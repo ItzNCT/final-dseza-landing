@@ -14,6 +14,7 @@ import { useArticleDetail, useArticleViewCount } from "@/api/hooks";
 import { ArticleDetailPageContext } from "./DynamicArticleHandler";
 import { extractImageUrl } from "@/utils/drupal";
 import { processRichTextContent, extractFirstImageFromRichText } from "@/utils/richTextProcessor";
+import { getArticleUrl } from "@/utils/seo";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
@@ -585,9 +586,11 @@ const ArticleDetailPage: React.FC = () => {
             // Sanitize image URL and caption to prevent XSS
             const safeImageUrl = DOMPurify.sanitize(imageUrl, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
             const safeImageCaption = DOMPurify.sanitize(rawImageCaption, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+            // Use article title or generic translation as fallback for alt text
+            const altText = safeImageCaption || article.attributes.title || (language === 'en' ? 'Article image' : 'Hình ảnh bài viết');
             content += `
               <figure class="my-6 text-center">
-                <img src="${safeImageUrl}" alt="${safeImageCaption}" class="max-w-full h-auto rounded-lg shadow-md mx-auto" loading="lazy" />
+                <img src="${safeImageUrl}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md mx-auto" loading="lazy" />
                 ${safeImageCaption ? `<figcaption class="text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} mt-2 italic">${safeImageCaption}</figcaption>` : ''}
               </figure>
             `;
@@ -1212,24 +1215,19 @@ const ArticleDetailPage: React.FC = () => {
   const articleContent = getArticleContent();
   const pdfDocument = getPdfDocument();
 
-  // Generate SEO meta data
+  // Generate SEO meta data with canonical URL using getArticleUrl
   const articleTitle = article.attributes.title;
   const siteTitle = language === 'en' ? 'DSEZA - Da Nang Software and Digital Economy Zone' : 'DSEZA - Khu Kinh tế Phần mềm và Số Đà Nẵng';
   const fullTitle = `${articleTitle} | ${siteTitle}`;
   const description = metaDescription || (language === 'en' 
     ? `Read the latest article: ${articleTitle}`
     : `Đọc bài viết mới nhất: ${articleTitle}`);
-  const canonicalUrl = window.location.href;
   const baseUrl = window.location.origin;
+  const canonicalUrl = `${baseUrl}${getArticleUrl(language, article)}`;
   
-  // Generate alternate URLs for hreflang
-  const currentPath = window.location.pathname;
-  const isEnglishPath = currentPath.startsWith('/en/');
-  const pathWithoutLang = isEnglishPath 
-    ? currentPath.replace('/en/', '/') 
-    : currentPath;
-  const alternateViUrl = `${baseUrl}${pathWithoutLang}`;
-  const alternateEnUrl = `${baseUrl}/en${pathWithoutLang.startsWith('/') ? pathWithoutLang.slice(1) : pathWithoutLang}`;
+  // Generate alternate URLs for hreflang using getArticleUrl
+  const alternateViUrl = `${baseUrl}${getArticleUrl('vi', article)}`;
+  const alternateEnUrl = `${baseUrl}${getArticleUrl('en', article)}`;
 
   // SEO Helmet component
   const seoHelmet = (
@@ -1238,6 +1236,11 @@ const ArticleDetailPage: React.FC = () => {
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={canonicalUrl} />
+      
+      {/* Hreflang alternate links */}
+      <link rel="alternate" hrefLang="vi" href={alternateViUrl} />
+      <link rel="alternate" hrefLang="en" href={alternateEnUrl} />
+      <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
       
       {/* Open Graph meta tags */}
       <meta property="og:title" content={articleTitle} />
@@ -1259,11 +1262,6 @@ const ArticleDetailPage: React.FC = () => {
       {categories.map((category) => (
         <meta key={category.id} property="article:tag" content={category.name} />
       ))}
-      
-      {/* Hreflang alternate links */}
-      <link rel="alternate" href={alternateViUrl} hrefLang="vi" />
-      <link rel="alternate" href={alternateEnUrl} hrefLang="en" />
-      <link rel="alternate" href={canonicalUrl} hrefLang="x-default" />
       
       {/* Additional SEO meta tags */}
       <meta name="robots" content="index, follow" />

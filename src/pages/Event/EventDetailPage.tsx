@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useEventDetail } from "@/api/hooks";
+import { useLanguage } from "@/context/LanguageContext";
+import { translatePath } from "@/utils/seo";
 
 /**
  * EventDetailPage component for displaying detailed event content
@@ -19,6 +21,7 @@ import { useEventDetail } from "@/api/hooks";
 const EventDetailPage: React.FC = () => {
   const { toast } = useToast();
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const { uuid } = useParams<{ uuid: string }>();
   const { data, isLoading, isError, error } = useEventDetail(uuid!);
 
@@ -234,7 +237,7 @@ const EventDetailPage: React.FC = () => {
               </a>
               <ChevronRight className="h-4 w-4" />
               <a 
-                href="/su-kien" 
+                href={`/${translatePath('event', language)}`}
                 className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 Sự kiện

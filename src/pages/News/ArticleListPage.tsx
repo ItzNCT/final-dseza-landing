@@ -13,6 +13,7 @@ import NavigationBar from "@/components/hero/NavigationBar";
 import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
 import { generateArticleLink } from "@/utils/generateArticleLink";
+import { translatePath } from "@/utils/seo";
 
 // Hàm để định dạng tiêu đề với real categories
 const formatTitle = (slug: string, categoriesData?: any[]) => {
@@ -216,7 +217,7 @@ const ArticleListPage = () => {
                 {isSubcategoryOfSuKien ? (
                   <>
                     <Link 
-                      to="/tin-tuc/su-kien" 
+                      to={`/${translatePath('news', language)}/${translatePath('event', language)}`}
                       className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                     >
                       Tin tức & Sự kiện
@@ -229,7 +230,7 @@ const ArticleListPage = () => {
                 ) : (
                   <>
                     <Link 
-                      to="/tin-tuc" 
+                      to={`/${translatePath('news', language)}`}
                       className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                     >
                       Tin tức
@@ -393,7 +394,7 @@ const ArticleListPage = () => {
                     Hiện tại chưa có bài viết nào trong "{pageTitle}".
                   </p>
                   <Link 
-                    to="/tin-tuc" 
+                    to={`/${translatePath('news', language)}`}
                     className={`inline-flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                       theme === 'dark' 
                         ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary/80' 
@@ -410,7 +411,7 @@ const ArticleListPage = () => {
             {!isSuKienMainPage && (
                              <div className="pt-6">
                 <Link 
-                  to={isSubcategoryOfSuKien ? "/tin-tuc/su-kien" : "/tin-tuc"}
+                  to={isSubcategoryOfSuKien ? `/${translatePath('news', language)}/${translatePath('event', language)}` : `/${translatePath('news', language)}`}
                   className={`inline-flex items-center px-4 py-3 rounded-lg border font-medium transition-all duration-200 active:scale-[0.95] ${
                     theme === 'dark' 
                       ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-dseza-dark-secondary-bg' 
@@ -459,7 +460,7 @@ const ArticleListPage = () => {
                 <>
                   {/* For subcategories of su-kien: Trang chủ -> Tin tức & Sự kiện -> Subcategory */}
                   <Link 
-                    to="/tin-tuc/su-kien" 
+                    to={`/${translatePath('news', language)}/${translatePath('event', language)}`}
                     className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                   >
                     Tin tức & Sự kiện
@@ -473,7 +474,7 @@ const ArticleListPage = () => {
                 <>
                   {/* Normal breadcrumb for other routes */}
                   <Link 
-                    to="/tin-tuc" 
+                    to={`/${translatePath('news', language)}`}
                     className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                   >
                     Tin tức
@@ -482,7 +483,7 @@ const ArticleListPage = () => {
                     <>
                       <ChevronRight className="h-4 w-4" />
                       <Link 
-                        to={`/tin-tuc/${category}`} 
+                        to={`/${translatePath('news', language)}/${category}`} 
                         className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                       >
                         {formatTitle(category, categoriesData)}
@@ -699,7 +700,7 @@ const ArticleListPage = () => {
                   Hiện tại chưa có bài viết nào trong chuyên mục "{pageTitle}".
                 </p>
                 <Link 
-                  to="/tin-tuc" 
+                  to={`/${translatePath('news', language)}`}
                   className={`inline-flex items-center px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
                     theme === 'dark' 
                       ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary-hover' 
@@ -717,7 +718,7 @@ const ArticleListPage = () => {
           {!isSuKienMainPage && (
             <div className="mt-16 text-center">
               <Link 
-                to={isSubcategoryOfSuKien ? "/tin-tuc/su-kien" : "/tin-tuc"}
+                to={isSubcategoryOfSuKien ? `/${translatePath('news', language)}/${translatePath('event', language)}` : `/${translatePath('news', language)}`}
                 className={`inline-flex items-center px-6 py-3 rounded-lg border-2 font-medium transition-all duration-300 hover:-translate-y-1 ${
                   theme === 'dark' 
                     ? 'border-dseza-dark-primary text-dseza-dark-primary hover:bg-dseza-dark-primary hover:text-dseza-dark-main-text' 

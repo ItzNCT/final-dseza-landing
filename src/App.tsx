@@ -13,6 +13,7 @@ import { AccessibilityProvider } from "@/context/AccessibilityContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ArticleDetailPage from "@/pages/Article/ArticleDetailPage";
+import ArticleRouter from "@/pages/Article/ArticleRouter";
 import DynamicArticleHandler from "@/pages/Article/DynamicArticleHandler";
 import ArticleListPage from "@/pages/News/ArticleListPage";
 import DocumentSearchPage from "@/pages/Document/DocumentSearchPage";
@@ -63,6 +64,8 @@ import AccessibilityPanel from "./components/AccessibilityPanel";
 import LanguageLayout from "./components/LanguageLayout";
 import RootRedirect from "./components/RootRedirect";
 
+// Article route translations
+const articleRoutes = { vi: 'bai-viet', en: 'article' };
 
 // Create a client
 const queryClient = new QueryClient();
@@ -88,8 +91,8 @@ const App: React.FC = () => (
                       <Route path="/:lang" element={<LanguageLayout />}>
                         {/* Main routes */}
                         <Route index element={<Index />} />
-                        <Route path="bai-viet/:uuid" element={<ArticleDetailPage />} />
-                        <Route path="article/:uuid" element={<ArticleDetailPage />} />
+                        <Route path={`${articleRoutes.vi}/:identifier`} element={<ArticleRouter />} />
+                        <Route path={`${articleRoutes.en}/:identifier`} element={<ArticleRouter />} />
                         
                         {/* SEO-friendly article routes */}
                         <Route path="bai-viet/*" element={<DynamicArticleHandler />} />
