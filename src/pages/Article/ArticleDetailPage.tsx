@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
+import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -1211,10 +1212,73 @@ const ArticleDetailPage: React.FC = () => {
   const articleContent = getArticleContent();
   const pdfDocument = getPdfDocument();
 
+  // Generate SEO meta data
+  const articleTitle = article.attributes.title;
+  const siteTitle = language === 'en' ? 'DSEZA - Da Nang Software and Digital Economy Zone' : 'DSEZA - Khu Kinh tế Phần mềm và Số Đà Nẵng';
+  const fullTitle = `${articleTitle} | ${siteTitle}`;
+  const description = metaDescription || (language === 'en' 
+    ? `Read the latest article: ${articleTitle}`
+    : `Đọc bài viết mới nhất: ${articleTitle}`);
+  const canonicalUrl = window.location.href;
+  const baseUrl = window.location.origin;
+  
+  // Generate alternate URLs for hreflang
+  const currentPath = window.location.pathname;
+  const isEnglishPath = currentPath.startsWith('/en/');
+  const pathWithoutLang = isEnglishPath 
+    ? currentPath.replace('/en/', '/') 
+    : currentPath;
+  const alternateViUrl = `${baseUrl}${pathWithoutLang}`;
+  const alternateEnUrl = `${baseUrl}/en${pathWithoutLang.startsWith('/') ? pathWithoutLang.slice(1) : pathWithoutLang}`;
+
+  // SEO Helmet component
+  const seoHelmet = (
+    <Helmet>
+      <html lang={language} />
+      <title>{fullTitle}</title>
+      <meta name="description" content={description} />
+      <link rel="canonical" href={canonicalUrl} />
+      
+      {/* Open Graph meta tags */}
+      <meta property="og:title" content={articleTitle} />
+      <meta property="og:description" content={description} />
+      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:type" content="article" />
+      <meta property="og:site_name" content={siteTitle} />
+      {featuredImageUrl && <meta property="og:image" content={featuredImageUrl} />}
+      
+      {/* Twitter Card meta tags */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={articleTitle} />
+      <meta name="twitter:description" content={description} />
+      {featuredImageUrl && <meta name="twitter:image" content={featuredImageUrl} />}
+      
+      {/* Article specific meta tags */}
+      <meta property="article:published_time" content={article.attributes.created} />
+      {categories.length > 0 && <meta property="article:section" content={categories[0].name} />}
+      {categories.map((category) => (
+        <meta key={category.id} property="article:tag" content={category.name} />
+      ))}
+      
+      {/* Hreflang alternate links */}
+      <link rel="alternate" href={alternateViUrl} hrefLang="vi" />
+      <link rel="alternate" href={alternateEnUrl} hrefLang="en" />
+      <link rel="alternate" href={canonicalUrl} hrefLang="x-default" />
+      
+      {/* Additional SEO meta tags */}
+      <meta name="robots" content="index, follow" />
+      <meta name="author" content={siteTitle} />
+      {isFeatured && <meta name="keywords" content={language === 'en' 
+        ? "featured event, DSEZA, Da Nang Software Zone" 
+        : "sự kiện tiêu điểm, DSEZA, Khu phần mềm Đà Nẵng"} />}
+    </Helmet>
+  );
+
   // Mobile Layout
   if (isMobile) {
     return (
       <MobileLayout>
+        {seoHelmet}
         <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
           {/* Main Content - Mobile optimized */}
           <main className="flex-1 px-4 py-2 space-y-3">
@@ -1427,7 +1491,9 @@ const ArticleDetailPage: React.FC = () => {
 
   // Desktop Layout (original)
   return (
-    <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+    <>
+      {seoHelmet}
+      <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}
       <TopBar />
       <LogoSearchBar />
@@ -1818,7 +1884,8 @@ const ArticleDetailPage: React.FC = () => {
 
       {/* Footer */}
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

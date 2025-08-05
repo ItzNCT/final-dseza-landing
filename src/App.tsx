@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -69,7 +70,8 @@ const queryClient = new QueryClient();
 const App: React.FC = () => (
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+      <HelmetProvider>
+        <AuthProvider>
         <ThemeProvider>
           <LanguageProvider>
             <AccessibilityProvider>
@@ -87,7 +89,11 @@ const App: React.FC = () => (
                         {/* Main routes */}
                         <Route index element={<Index />} />
                         <Route path="bai-viet/:uuid" element={<ArticleDetailPage />} />
-                        <Route path="su-kien/:uuid" element={<ArticleDetailPage />} />
+                        <Route path="article/:uuid" element={<ArticleDetailPage />} />
+                        
+                        {/* SEO-friendly article routes */}
+                        <Route path="bai-viet/*" element={<DynamicArticleHandler />} />
+                        <Route path="article/*" element={<DynamicArticleHandler />} />
                         
                         {/* Document pages with nested routes */}
                         <Route path="van-ban" element={<DocumentTabLayout />}>
@@ -163,7 +169,7 @@ const App: React.FC = () => (
                         
                         {/* Vietnamese Functional Zone Specific Routes */}
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghe-cao-da-nang" element={<KhuCongNgheCaoDaNang />} />
-                        <Route path="gioi-thieu/cac-khu-chuc-nang/khu-mau-dich-tu-do-da-nang" element={<KhuThuongMaiTuDoDaNang />} />
+                        <Route path="gioi-thieu/cac-khu-chuc-nang/khu-thuong-mai-tu-do-da-nang" element={<KhuThuongMaiTuDoDaNang />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-tap-trung-cong-nghe-thong-tin" element={<KhuCNTTTapTrung />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-khanh" element={<KhuCongNghiepHoaKhanh />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-khanh-mo-rong" element={<KhuCongNghiepHoaKhanhMoRong />} />
@@ -208,7 +214,8 @@ const App: React.FC = () => (
             </AccessibilityProvider>
           </LanguageProvider>
         </ThemeProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </HelmetProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );

@@ -35,6 +35,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     i18n.changeLanguage(language);
   }, [language, i18n]);
 
+  // Update document language attribute for SEO
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   // Listen for URL changes to automatically update language
   useEffect(() => {
     const handleLocationChange = () => {

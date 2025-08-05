@@ -4,6 +4,7 @@ import { useAllNewsCategories } from "../../hooks/useNewsCategories";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
 import { ChevronRight, ChevronLeft, Calendar, ArrowRight, Star, Filter } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileLayout from "@/components/mobile/MobileLayout";
 import TopBar from "@/components/hero/TopBar";
@@ -11,6 +12,7 @@ import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
 import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
+import { generateArticleLink } from "@/utils/generateArticleLink";
 
 // Hàm để định dạng tiêu đề với real categories
 const formatTitle = (slug: string, categoriesData?: any[]) => {
@@ -81,6 +83,7 @@ const ArticleListPage = () => {
   const { data: articles, isLoading, isError } = useArticles();
   const { data: categoriesData } = useAllNewsCategories(); // Use ALL categories instead of just event categories
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const isMobile = useIsMobile();
 
   // Tạo tiêu đề động với real categories
@@ -289,15 +292,17 @@ const ArticleListPage = () => {
               </div>
             )}
             
-            {/* Articles List - Mobile optimized single column */}
+                        {/* Articles List - Mobile optimized single column */}
             {articles && articles.length > 0 ? (
-                             <div className="space-y-4">
-                {articles.map((article) => (
-                  <Link 
-                    to={article.path} 
-                    key={article.id} 
-                    className="block group"
-                  >
+              <div className="space-y-4">
+                {articles.map((article) => {
+                  const url = generateArticleLink(article, language);
+                  return (
+                    <Link 
+                      to={url} 
+                      key={article.id} 
+                      className="block group"
+                    >
                     <article className={`overflow-hidden rounded-lg shadow-md transition-all duration-200 group-hover:shadow-lg active:scale-[0.98] ${
                       theme === 'dark' 
                         ? 'bg-dseza-dark-secondary border border-dseza-dark-border' 
@@ -369,7 +374,8 @@ const ArticleListPage = () => {
                       </div>
                     </article>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               /* Empty State - Mobile optimized */
@@ -545,12 +551,14 @@ const ArticleListPage = () => {
           {/* Articles Grid */}
           {articles && articles.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {articles.map((article) => (
-                <Link 
-                  to={article.path} 
-                  key={article.id} 
-                  className="block group"
-                >
+              {articles.map((article) => {
+                const url = generateArticleLink(article, language);
+                return (
+                  <Link 
+                    to={url} 
+                    key={article.id} 
+                    className="block group"
+                  >
                   <article className={`h-full overflow-hidden rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-2 ${
                     theme === 'dark' 
                       ? 'bg-dseza-dark-secondary border border-dseza-dark-border' 
@@ -672,7 +680,8 @@ const ArticleListPage = () => {
                     </div>
                   </article>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           ) : (
             /* Empty State */

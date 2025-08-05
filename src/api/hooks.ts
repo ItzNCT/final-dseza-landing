@@ -1834,8 +1834,110 @@ export const useChangePassword = () => {
   };
 };
 
+/**
+ * Fetch content by path alias with support for multiple content types
+ * @param pathAlias - The path alias from URL (e.g., "/some-content-path")
+ * @param language - Language for localized content ('vi' or 'en')
+ * @param contentTypes - Array of content types to search ['bai-viet', 'su-kien', etc.]
+ * @returns Promise with content data
+ */
+async function fetchContentByPath(
+  pathAlias: string, 
+  language: 'vi' | 'en' = 'vi',
+  contentTypes: string[] = ['bai-viet']
+): Promise<any> {
+  console.log('🚀 Fetching content with path alias:', pathAlias, 'Language:', language, 'Content types:', contentTypes);
+  
+  const languagePrefix = language === 'en' ? '/en' : '/vi';
+  const normalizedPath = pathAlias.startsWith('/') ? pathAlias : `/${pathAlias}`;
+  
+  // Try each content type until we find a match
+  for (const contentType of contentTypes) {
+    try {
+      console.log(`🔍 Trying content type: ${contentType}`);
+      
+      const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document';
+      
+      // Approach 1: Try filter[path][alias]
+      let url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/${contentType}?filter[path][alias]=${encodeURIComponent(normalizedPath)}&include=${basicInclude}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          ...jsonApiHeaders,
+          'Accept-Language': language,
+          'Content-Language': language,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.data && data.data.length > 0) {
+          console.log(`✅ Found content in ${contentType}:`, data);
+          
+          // Return the first match with content type info
+          const articleData = { data: data.data[0], included: data.included, contentType };
+          
+          // Enrich with media if needed (only for article type)
+          if (contentType === 'bai-viet' && articleData?.data?.relationships?.field_noi_dung_bai_viet?.data?.length > 0) {
+            await enrichParagraphsWithMedia(articleData, language);
+          }
+          
+          return articleData;
+        }
+      }
+    } catch (error) {
+      console.warn(`⚠️ Error searching in ${contentType}:`, error);
+      // Continue to next content type
+    }
+  }
+  
+  // If no content found in any type, throw error
+  throw new Error(`No content found with path alias: ${pathAlias} in content types: ${contentTypes.join(', ')}`);
+}
+
+/**
+ * React Query hook to fetch content by path alias with support for multiple content types
+ * @param pathAlias - The path alias from URL
+ * @param language - Language for localized content
+ * @param contentTypes - Array of content types to search
+ * @returns Object containing content data and loading states
+ */
+export const useContentByPath = (
+  pathAlias: string, 
+  language: 'vi' | 'en' = 'vi',
+  contentTypes: string[] = ['bai-viet']
+) => {
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+  } = useQuery({
+    queryKey: ['contentByPath', pathAlias, language, contentTypes],
+    queryFn: () => fetchContentByPath(pathAlias, language, contentTypes),
+    enabled: !!pathAlias,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes cache time
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+
+  return {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+    contentType: data?.contentType, // Expose which content type was found
+  };
+};
+
 // Export types for external use
 export type { ContactFormData, ContactFormResponse, RegistrationFormData, RegistrationResponse, ChangePasswordFormData, ChangePasswordResponse };
 
 // Export the fetch function for potential standalone use
-export { submitContactForm, submitRegistrationForm, submitChangePasswordForm }; 
+export { submitContactForm, submitRegistrationForm, submitChangePasswordForm, fetchContentByPath }; 

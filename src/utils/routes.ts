@@ -8,14 +8,14 @@ const URL_MAPPING = {
   // English to Vietnamese mapping
   'en-to-vi': {
     // Core sections
-    'contact': 'lien-he',
-    'about': 'gioi-thieu',
-    'news': 'tin-tuc',
-    'events': 'su-kien',
-    'documents': 'van-ban',
-    'business': 'doanh-nghiep', 
-    'utilities': 'tien-ich',
     'introduction': 'gioi-thieu',
+    'news': 'tin-tuc',
+    'business': 'doanh-nghiep',
+    'documents': 'van-ban',
+    'administrative-reform': 'cai-cach-hanh-chinh',
+    'utilities': 'tien-ich',
+    'contact': 'lien-he', // URL tiếng Anh nên là /en/contact, không phải /vi/contact
+    'investment-handbook': 'cam-nang-dau-tu',
     
     // Introduction section paths
     'general-introduction': 'gioi-thieu-chung',
@@ -31,7 +31,7 @@ const URL_MAPPING = {
     // Functional zones
     'da-nang-hi-tech-park': 'khu-cong-nghe-cao-da-nang',
     'da-nang-free-trade-zone': 'khu-thuong-mai-tu-do-da-nang',
-    'it-concentration-zone': 'khu-tap-trung-cong-nghe-thong-tin',
+    'it-concentration-zone': 'khu-cntt-tap-trung',
     'hoa-khanh-industrial-park': 'khu-cong-nghiep-hoa-khanh',
     'hoa-khanh-expanded-industrial-park': 'khu-cong-nghiep-hoa-khanh-mo-rong',
     'da-nang-industrial-park': 'khu-cong-nghiep-da-nang',
@@ -41,32 +41,36 @@ const URL_MAPPING = {
     'hoa-ninh-industrial-park': 'khu-cong-nghiep-hoa-ninh',
     
     // News & Events section
-    'outstanding-achievements': 'thanh-tuu-noi-bat',
-    'announcements': 'thong-bao',
-    'press-information': 'thong-tin-bao-chi',
+    'events': 'su-kien',
     'investment-international-cooperation': 'dau-tu-hop-tac-quoc-te',
-    'enterprises': 'doanh-nghiep',
+    'enterprises': 'doanh-nghiep', // Lưu ý: 'enterprises' và 'business' cùng trỏ đến 'doanh-nghiep'
     'digital-transformation': 'chuyen-doi-so',
     'training-startup-incubation': 'dao-tao-uom-tao-khoi-nghiep',
     'management-board-activities': 'hoat-dong-ban-quan-ly',
     'other-news': 'tin-tuc-khac',
+    'see-more': 'xem-them', // LƯU Ý: Đã sửa `xem_them` thành `xem-them`
     'work-schedule': 'lich-cong-tac',
-    'see-more': 'xem-them',
+    'announcements': 'thong-bao',
+    'press-information': 'thong-tin-bao-chi',
     
     // Investment Environment
     'for-investors': 'danh-cho-nha-dau-tu',
     'investment-environment': 'moi-truong-dau-tu',
     'investment-sector-procedures': 'thu-tuc-linh-vuc-dau-tu',
-    'investment-incentive-sectors': 'linh-vuc-khuyong-dau-tu',
+    'investment-incentive-sectors': 'linh-vuc-khuyen-khich-dau-tu',
+    // 'investment-attraction-sectors': 'linh-vuc-thu-hut-dau-tu', // Nhãn EN/VI khác nhau
     'transportation-infrastructure': 'ha-tang-giao-thong',
     'science-technology-environment': 'khoa-hoc-cong-nghe-moi-truong',
     'logistics': 'logistics',
     'social-infrastructure': 'ha-tang-xa-hoi',
     'human-resources': 'nguon-nhan-luc',
+    'industrial-park-infrastructure': 'ha-tang-khu-cong-nghiep',
+
     
     // Business section
     'reports-data': 'bao-cao-du-lieu',
-    'investment-monitoring-evaluation-reports': 'bao-cao-theo-doi-danh-gia-dau-tu',
+    'investment-monitoring-evaluation-reports': 'bao-cao-giam-sat-va-danh-gia-dau-tu',
+    // LƯU Ý: Sửa lại slug cho nhất quán
     'report-forms-templates': 'mau-bieu-bao-cao',
     'enterprise-information': 'thong-tin-doanh-nghiep',
     'procedures-records-environmental-data': 'thu-tuc-ho-so-du-lieu-moi-truong',
@@ -77,7 +81,8 @@ const URL_MAPPING = {
     'investment-handbook': 'cam-nang-dau-tu',
     
     // Documents section
-    'legal-documents': 'van-ban-phap-ly',
+    'legal-documents': 'van-ban-phap-luat',
+    // LƯU Ý: Đã chuẩn hóa các slug dưới đây để nhất quán
     'central-legal-regulations': 'van-ban-phap-ly-trung-uong',
     'local-legal-regulations': 'van-ban-phap-ly-dia-phuong',
     'directive-management-documents': 'van-ban-chi-dao-dieu-hanh',
@@ -85,6 +90,7 @@ const URL_MAPPING = {
     'guidelines-feedback': 'huong-dan-gop-y',
     'guideline-documents': 'van-ban-huong-dan',
     'draft-document-feedback': 'gop-y-du-thao-van-ban',
+    'search': 'tim-kiem',
     
     // Administrative reform
     'administrative-reform': 'cai-cach-hanh-chinh',
@@ -92,7 +98,7 @@ const URL_MAPPING = {
     // Utilities section
     'qa': 'hoi-dap',
     'frequently-asked-questions': 'cau-hoi-thuong-gap',
-    'faq': 'hoi-dap',
+    'enterprise-connection': 'ket-noi-doanh-nghiep',
     
     // Additional common paths
     'home': 'trang-chu',

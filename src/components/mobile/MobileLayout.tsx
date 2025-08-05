@@ -1,4 +1,3 @@
-
 import React from "react";
 import MobileHeader from "./MobileHeader";
 import MobileHero from "./MobileHero";
@@ -12,43 +11,55 @@ interface MobileLayoutProps {
 const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
   const location = useLocation();
-  
-  // Pages where hero should be hidden
-  const shouldHideHero = location.pathname.includes('lien-he') || 
-                        location.pathname.includes('contact') ||
-                        location.pathname.includes('bai-viet') ||
-                        location.pathname.includes('article') ||
-                        location.pathname.includes('tin-tuc') ||
-                        location.pathname.includes('news') ||
-                        location.pathname.includes('cac-khu-chuc-nang') ||
-                        location.pathname.includes('functional') ||
-                        location.pathname.includes('thu-ngo') ||
-                        location.pathname.includes('welcome') ||
-                        location.pathname.includes('open-letter') ||
-                        location.pathname.includes('introduction') ||
-                        location.pathname.includes('gioi-thieu') ||
-                        location.pathname.includes('don-vi-truc-thuoc') ||
-                        location.pathname.includes('affiliated-units') ||
-                        location.pathname.includes('subsidiary-units') ||
-                        location.pathname.includes('co-cau-to-chuc') ||
-                        location.pathname.includes('departments') ||
-                        location.pathname.includes('chuc-nang-nhiem-vu') ||
-                        location.pathname.includes('functions-duties') ||
-                        location.pathname.includes('tong-quan-ve-ban-quan-ly') ||
-                        location.pathname.includes('management-overview') ||
-                        location.pathname.includes('tong-quan-ve-da-nang') ||
-                        location.pathname.includes('danang-overview');
-  
-  // Only render mobile components if on mobile device
+
+  // Chuẩn hoá path và gom tất cả "từ khoá ẩn hero" vào một mảng
+  const path = location.pathname.toLowerCase();
+
+  const HIDE_KEYS = [
+    // Liên hệ
+    "lien-he", "contact",
+
+    // Bài viết / Tin tức
+    "bai-viet", "tin-tuc", "news", "article",
+
+    // Dynamic Article Handler (thêm đủ biến thể)
+    "dynamic-article", "dynamic-article-handler", "dynamicarticlehandler",
+
+    // Giới thiệu / Introduction
+    "gioi-thieu", "introduction", "open-letter", "welcome", "thu-ngo",
+
+    // Cơ cấu / đơn vị
+    "co-cau-to-chuc", "departments",
+    "don-vi-truc-thuoc", "affiliated-units", "subsidiary-units",
+
+    // Chức năng nhiệm vụ
+    "chuc-nang-nhiem-vu", "functions-duties",
+
+    // Tổng quan
+    "tong-quan-ve-ban-quan-ly", "management-overview",
+    "tong-quan-ve-da-nang", "danang-overview",
+
+    // Khu chức năng
+    "cac-khu-chuc-nang", "functional",
+  ];
+
+  // Ẩn hero nếu path chứa 1 trong các khoá trên
+  const shouldHideHero = HIDE_KEYS.some((key) => path.includes(key));
+
+  // Chỉ render MobileHeader/MobileHero trên thiết bị mobile
   if (!isMobile) {
     return <>{children}</>;
   }
-  
+
   return (
     <div className="min-h-screen">
       <MobileHeader />
-      {!shouldHideHero && <MobileHero />}
-      {children}
+      {!shouldHideHero && (
+        <header className="mobile-hero">
+          <MobileHero />
+        </header>
+      )}
+      <main>{children}</main>
     </div>
   );
 };

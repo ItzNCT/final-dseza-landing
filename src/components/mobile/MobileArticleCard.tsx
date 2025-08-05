@@ -2,7 +2,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Calendar, Star, ArrowRight } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { Badge } from "@/components/ui/badge";
+import { generateArticleLink } from "@/utils/generateArticleLink";
 
 interface MobileArticleCardProps {
   article: {
@@ -29,6 +31,7 @@ const MobileArticleCard: React.FC<MobileArticleCardProps> = ({
   categoryDisplay 
 }) => {
   const { theme } = useTheme();
+  const { language } = useLanguage();
 
   // Format date for mobile display
   const formatDate = (dateString: string) => {
@@ -41,9 +44,10 @@ const MobileArticleCard: React.FC<MobileArticleCardProps> = ({
     });
   };
 
+  const url = generateArticleLink(article, language);
   return (
     <Link 
-      to={article.path} 
+      to={url} 
       className="block group"
     >
       <article className={`relative overflow-hidden rounded-lg shadow-sm border transition-all duration-200 group-hover:shadow-md group-active:scale-[0.98] ${
