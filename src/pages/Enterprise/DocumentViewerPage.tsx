@@ -248,6 +248,60 @@ const DocumentViewerPage: React.FC = () => {
         document.head.appendChild(canonicalLink);
       }
 
+      // --- Alternate hreflang links (SEO improvement) ---
+      const currentPath = window.location.pathname; // full path with language prefix
+      const isEnglishPath = currentPath.startsWith('/en/');
+      const subPath = currentPath.replace(/^\/(en|vi)/, ''); // remove the leading language segment
+
+      // Mapping rules between Vietnamese and English detail paths
+      const viDetailPrefixes = [
+        '/doanh-nghiep/bao-cao-du-lieu/chi-tiet/',
+        '/doanh-nghiep/tai-lieu/chi-tiet/',
+        '/doanh-nghiep/van-ban/chi-tiet/',
+      ];
+      const enDetailPrefix = '/enterprises/documents/detail/';
+
+      let alternateViUrl = `${window.location.origin}${subPath}`; // default fallback (vi current)
+      let alternateEnUrl = `${window.location.origin}/en${subPath.startsWith('/') ? subPath.slice(1) : subPath}`; // default fallback (en current)
+
+      if (!isEnglishPath) {
+        // Current page is Vietnamese → build English equivalent
+        for (const viPrefix of viDetailPrefixes) {
+          if (subPath.startsWith(viPrefix)) {
+            const idPart = subPath.slice(viPrefix.length);
+            alternateEnUrl = `${window.location.origin}${enDetailPrefix}${idPart}`;
+            break;
+          }
+        }
+        alternateViUrl = `${window.location.origin}${subPath}`;
+      } else {
+        // Current page is English → build Vietnamese equivalent (default to báo‐cáo‐dữ‐liệu path)
+        if (subPath.startsWith('/enterprises/documents/detail/')) {
+          const idPart = subPath.slice('/enterprises/documents/detail/'.length);
+          alternateViUrl = `${window.location.origin}/doanh-nghiep/bao-cao-du-lieu/chi-tiet/${idPart}`;
+        }
+        alternateEnUrl = `${window.location.origin}${subPath}`;
+      }
+
+      const hreflangLinks = [
+        { href: alternateViUrl, hreflang: 'vi' },
+        { href: alternateEnUrl, hreflang: 'en' },
+        { href: window.location.href, hreflang: 'x-default' },
+      ];
+
+      hreflangLinks.forEach(linkInfo => {
+        let linkTag = document.querySelector(`link[rel="alternate"][hreflang="${linkInfo.hreflang}"]`) as HTMLLinkElement;
+        if (linkTag) {
+          linkTag.href = linkInfo.href;
+        } else {
+          linkTag = document.createElement('link');
+          linkTag.rel = 'alternate';
+          linkTag.hreflang = linkInfo.hreflang;
+          linkTag.href = linkInfo.href;
+          document.head.appendChild(linkTag);
+        }
+      });
+
       // Set Schema.org structured data
       const existingSchema = document.querySelector('script[type="application/ld+json"]');
       if (existingSchema) {
