@@ -1,15 +1,16 @@
 // src/components/BusinessesAndPartners.tsx
-import React from "react";
+import React, { useMemo } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import { cn } from "@/lib/utils";
 import { usePartners } from "@/hooks/usePartners";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "@/utils/translations";
 
 // PartnerLogoSkeleton component for loading state
 const PartnerLogoSkeleton = () => {
   return (
     <div className="flex-shrink-0 mx-8">
-      <Skeleton className="h-8 md:h-12 w-20 md:w-32" />
+      <Skeleton className="h-12 md:h-16 w-24 md:w-40" />
     </div>
   );
 };
@@ -19,7 +20,25 @@ const PartnerLogoSkeleton = () => {
  */
 const BusinessesAndPartners: React.FC = () => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const { partners, isLoading, isError, error, hasPartners } = usePartners();
+
+  // Create a duplicated list of partners based on the number of available logos
+  // to ensure the carousel is always filled and scrolls seamlessly.
+  const displayedPartners = useMemo(() => {
+    if (!partners || partners.length === 0) return [];
+    // The minimum number of logos we want to display to make the marquee feel full.
+    const MIN_LOGO_COUNT = 10;
+    const repeatCount = Math.ceil(MIN_LOGO_COUNT / partners.length) + 1; // +1 ensures overlap for seamless loop
+
+    // Duplicate the partners array "repeatCount" times.
+    const duplicated: typeof partners = [] as any;
+    for (let i = 0; i < repeatCount; i += 1) {
+      duplicated.push(...partners);
+    }
+
+    return duplicated;
+  }, [partners]);
 
   // Theme-specific styles
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
@@ -35,7 +54,7 @@ const BusinessesAndPartners: React.FC = () => {
           textColor,
           "text-center lg:text-left"
         )}>
-          DOANH NGHIỆP VÀ ĐỐI TÁC
+          {t('homepage.businessesAndPartners')}
         </h2>
 
         {/* Loading State */}
@@ -53,7 +72,7 @@ const BusinessesAndPartners: React.FC = () => {
         {isError && (
           <div className="text-center py-12">
             <p className={cn("text-lg", textColor)}>
-              Có lỗi xảy ra khi tải thông tin đối tác.
+              {t('partners.error') || 'Có lỗi xảy ra khi tải thông tin đối tác.'}
             </p>
             {error && (
               <p className={cn("text-sm mt-2 opacity-70", textColor)}>
@@ -66,11 +85,13 @@ const BusinessesAndPartners: React.FC = () => {
         {/* Data State - Continuous scrolling logo carousel */}
         {hasPartners && !isLoading && !isError && (
           <div className="relative w-full overflow-hidden">
-            <div className="flex animate-[scroll_60s_linear_infinite] hover:pause">
-              {/* First set of logos */}
-              {partners.map((partner, index) => (
+            <div
+              className="flex animate-[scroll_60s_linear_infinite] hover:pause"
+              style={{ animationDirection: 'reverse' }}
+            >
+              {displayedPartners.map((partner, index) => (
                 <a
-                  key={`partner-1-${partner.id}`}
+                  key={`partner-${index}-${partner.id}`}
                   href={partner.partnerUrl || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -80,7 +101,7 @@ const BusinessesAndPartners: React.FC = () => {
                   <img
                     src={partner.logoUrl || '/media/placeholder.svg'}
                     alt={partner.name}
-                    className="h-8 md:h-12 w-auto object-contain"
+                    className="h-24 md:h-32 w-auto object-contain"
                     onError={(e) => {
                       // Fallback to placeholder if image fails to load
                       const target = e.target as HTMLImageElement;
@@ -90,8 +111,8 @@ const BusinessesAndPartners: React.FC = () => {
                 </a>
               ))}
 
-              {/* Duplicate set of logos for seamless scrolling */}
-              {partners.map((partner, index) => (
+              {/* Duplicate set of logos for seamless scrolling - disabled */}
+              {false && partners.map((partner, index) => (
                 <a
                   key={`partner-2-${partner.id}`}
                   href={partner.partnerUrl || "#"}
@@ -103,7 +124,7 @@ const BusinessesAndPartners: React.FC = () => {
                   <img
                     src={partner.logoUrl || '/media/placeholder.svg'}
                     alt={partner.name}
-                    className="h-8 md:h-12 w-auto object-contain"
+                    className="h-12 md:h-16 w-auto object-contain"
                     onError={(e) => {
                       // Fallback to placeholder if image fails to load
                       const target = e.target as HTMLImageElement;
@@ -113,8 +134,8 @@ const BusinessesAndPartners: React.FC = () => {
                 </a>
               ))}
 
-              {/* Third set of logos for seamless scrolling */}
-              {partners.map((partner, index) => (
+              {/* Third set of logos for seamless scrolling - disabled */}
+              {false && partners.map((partner, index) => (
                 <a
                   key={`partner-3-${partner.id}`}
                   href={partner.partnerUrl || "#"}
@@ -126,7 +147,7 @@ const BusinessesAndPartners: React.FC = () => {
                   <img
                     src={partner.logoUrl || '/media/placeholder.svg'}
                     alt={partner.name}
-                    className="h-8 md:h-12 w-auto object-contain"
+                    className="h-12 md:h-16 w-auto object-contain"
                     onError={(e) => {
                       // Fallback to placeholder if image fails to load
                       const target = e.target as HTMLImageElement;
@@ -143,7 +164,7 @@ const BusinessesAndPartners: React.FC = () => {
         {!hasPartners && !isLoading && !isError && (
           <div className="text-center py-12">
             <p className={cn("text-lg", textColor)}>
-              Chưa có thông tin đối tác nào được đăng tải.
+              {t('partners.noData') || 'Chưa có thông tin đối tác nào được đăng tải.'}
             </p>
           </div>
         )}

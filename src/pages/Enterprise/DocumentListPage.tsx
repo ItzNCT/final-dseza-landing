@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Download, FileText, AlertCircle, ExternalLink, ChevronRight } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useEnterpriseDocs, EnterpriseDocument } from "../../hooks/useEnterpriseDocs";
@@ -6,6 +6,8 @@ import { LoadingSpinner } from "../../components/ui/loading-spinner";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { Alert, AlertDescription } from "../../components/ui/alert";
+import { useLanguage } from "../../context/LanguageContext";
+import { useTranslation } from "react-i18next";
 import {
   Table,
   TableBody,
@@ -21,22 +23,76 @@ import LogoSearchBar from "../../components/hero/LogoSearchBar";
 import NavigationBar from "../../components/hero/NavigationBar";
 import Footer from "../../components/Footer";
 
-// Hàm hỗ trợ định dạng tiêu đề với mapping cho các danh mục cụ thể
-const formatTitle = (slug: string = "") => {
-  // Mapping cho các category cụ thể với tiếng Việt có dấu
-  const categoryTitleMap: { [key: string]: string } = {
-    'bao-cao-giam-sat-va-danh-gia-dau-tu': 'Báo cáo giám sát và đánh giá đầu tư',
-    'mau-bang-bieu-bao-cao': 'Mẫu bảng biểu báo cáo',
-    'van-ban-phap-ly': 'Văn bản pháp lý',
-    'tai-lieu-huong-dan': 'Tài liệu hướng dẫn',
-    'bieu-mau-ho-so': 'Biểu mẫu hồ sơ',
-    'quy-dinh-thuc-hien': 'Quy định thực hiện',
-    'thu-tuc-ho-so-du-lieu-moi-truong': 'Thủ tục - Hồ sơ - Dữ liệu môi trường',
+// Hàm hỗ trợ định dạng tiêu đề với mapping cho các danh mục cụ thể (đa ngôn ngữ)
+const formatTitle = (slug: string = "", language: 'vi' | 'en' = 'vi') => {
+  // Mapping cho các category cụ thể với hỗ trợ đa ngôn ngữ
+  const categoryTitleMap: { [key: string]: { vi: string; en: string } } = {
+    'bao-cao-giam-sat-va-danh-gia-dau-tu': {
+      vi: 'Báo cáo giám sát và đánh giá đầu tư',
+      en: 'Investment Monitoring and Evaluation Reports'
+    },
+    'mau-bang-bieu-bao-cao': {
+      vi: 'Mẫu bảng biểu báo cáo',
+      en: 'Report Form Templates'
+    },
+    'van-ban-phap-ly': {
+      vi: 'Văn bản pháp lý',
+      en: 'Legal Documents'
+    },
+    'tai-lieu-huong-dan': {
+      vi: 'Tài liệu hướng dẫn',
+      en: 'Guidance Documents'
+    },
+    'bieu-mau-ho-so': {
+      vi: 'Biểu mẫu hồ sơ',
+      en: 'Application Forms'
+    },
+    'quy-dinh-thuc-hien': {
+      vi: 'Quy định thực hiện',
+      en: 'Implementation Regulations'
+    },
+    'thu-tuc-ho-so-du-lieu-moi-truong': {
+      vi: 'Thủ tục - Hồ sơ - Dữ liệu môi trường',
+      en: 'Environmental Procedures - Documents - Data'
+    },
+    // English specific mappings
+    'investment-monitoring-evaluation-reports': {
+      vi: 'Báo cáo giám sát và đánh giá đầu tư',
+      en: 'Investment Monitoring and Evaluation Reports'
+    },
+    'report-forms-templates': {
+      vi: 'Mẫu bảng biểu báo cáo',
+      en: 'Report Form Templates'
+    },
+    'legal-documents': {
+      vi: 'Văn bản pháp lý',
+      en: 'Legal Documents'
+    },
+    'guidance-documents': {
+      vi: 'Tài liệu hướng dẫn',
+      en: 'Guidance Documents'
+    },
+    'application-forms': {
+      vi: 'Biểu mẫu hồ sơ',
+      en: 'Application Forms'
+    },
+    'implementation-regulations': {
+      vi: 'Quy định thực hiện',
+      en: 'Implementation Regulations'
+    },
+    'procedures-records-environmental-data': {
+      vi: 'Thủ tục - Hồ sơ - Dữ liệu môi trường',
+      en: 'Environmental Procedures - Documents - Data'
+    },
+    'environmental-procedures-documents-data': {
+      vi: 'Thủ tục - Hồ sơ - Dữ liệu môi trường',
+      en: 'Environmental Procedures - Documents - Data'
+    },
   };
 
   // Kiểm tra xem có mapping cụ thể không
   if (categoryTitleMap[slug]) {
-    return categoryTitleMap[slug];
+    return categoryTitleMap[slug][language];
   }
 
   // Fallback: capitalize từng từ
@@ -59,6 +115,8 @@ const handleDownload = (fileUrl: string, title: string) => {
 
 const DocumentListPage: React.FC = () => {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const { t } = useTranslation();
   const { docCategory, docCategorySlug } = useParams<{ 
     docCategory?: string; 
     docCategorySlug?: string; 
@@ -69,8 +127,37 @@ const DocumentListPage: React.FC = () => {
   // Sử dụng docCategorySlug nếu có, nếu không thì fallback về docCategory (để tương thích với route cũ)
   const categoryParam = docCategorySlug || docCategory;
 
-  // KIỂM TRA ĐỂ CHỌN GIAO DIỆN
-  const isEnvironmentalPage = categoryParam === "thu-tuc-ho-so-du-lieu-moi-truong";
+  // KIỂM TRA ĐỂ CHỌN GIAO DIỆN (hỗ trợ cả tiếng Anh và tiếng Việt)
+  const isEnvironmentalPage = categoryParam === "thu-tuc-ho-so-du-lieu-moi-truong" || 
+                             categoryParam === "procedures-records-environmental-data" ||
+                             categoryParam === "environmental-procedures-documents-data";
+
+  // Dynamic breadcrumb links based on language and current path
+  const getBreadcrumbLinks = () => {
+    const isEnterpriseRoute = window.location.pathname.includes('/enterprises/');
+    const isDocumentRoute = window.location.pathname.includes('/tai-lieu/');
+    const isVanBanRoute = window.location.pathname.includes('/van-ban/');
+    
+    if (language === 'en') {
+      return {
+        home: '/',
+        business: isEnterpriseRoute ? '/enterprises' : '/business',
+        documents: isEnterpriseRoute ? '/enterprises/reports-data' : '/business/reports-data',
+        businessLabel: isEnterpriseRoute ? 'Enterprises' : 'Business',
+        documentsLabel: 'Reports & Data'
+      };
+    } else {
+      return {
+        home: '/',
+        business: '/doanh-nghiep',
+        documents: isDocumentRoute ? '/doanh-nghiep/tai-lieu' : (isVanBanRoute ? '/doanh-nghiep/van-ban' : '/doanh-nghiep/bao-cao-du-lieu'),
+        businessLabel: 'Doanh nghiệp',
+        documentsLabel: isDocumentRoute ? 'Tài liệu' : (isVanBanRoute ? 'Văn bản' : 'Báo cáo dữ liệu')
+      };
+    }
+  };
+
+  const breadcrumbLinks = getBreadcrumbLinks();
 
   // Filter documents by search term only (category filtering is now handled by the API)
   const filteredDocuments = (documents || []).filter(doc => {
@@ -87,6 +174,92 @@ const DocumentListPage: React.FC = () => {
   const cardClass = isDark ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary';
   const borderClass = isDark ? 'border-dseza-dark-border' : 'border-dseza-light-border';
 
+  // Get page title and description based on language
+  const pageTitle = formatTitle(categoryParam, language);
+  const getPageDescription = () => {
+    if (language === 'en') {
+      switch(categoryParam) {
+        case 'bao-cao-giam-sat-va-danh-gia-dau-tu':
+        case 'investment-monitoring-evaluation-reports':
+          return 'Periodic reports on investment implementation and project effectiveness evaluation in the high-tech park.';
+        case 'mau-bang-bieu-bao-cao':
+        case 'report-forms-templates':
+          return 'Standard report forms and templates for enterprises to comply with reporting regulations.';
+        case 'thu-tuc-ho-so-du-lieu-moi-truong':
+        case 'procedures-records-environmental-data':
+        case 'environmental-procedures-documents-data':
+          return 'Environmental procedures, documents and data necessary for enterprises to implement environmental protection processes.';
+        default:
+          return 'Collection of documents, guidance materials and forms necessary for enterprises.';
+      }
+    } else {
+      switch(categoryParam) {
+        case 'bao-cao-giam-sat-va-danh-gia-dau-tu':
+        case 'investment-monitoring-evaluation-reports':
+          return 'Các báo cáo định kỳ về tình hình thực hiện đầu tư và đánh giá hiệu quả dự án trong khu công nghệ cao.';
+        case 'mau-bang-bieu-bao-cao':
+        case 'report-forms-templates':
+          return 'Các mẫu biểu, bảng biểu chuẩn để doanh nghiệp thực hiện báo cáo theo quy định.';
+        case 'thu-tuc-ho-so-du-lieu-moi-truong':
+        case 'procedures-records-environmental-data':
+        case 'environmental-procedures-documents-data':
+          return 'Thủ tục, hồ sơ và dữ liệu môi trường cần thiết cho doanh nghiệp thực hiện các quy trình bảo vệ môi trường.';
+        default:
+          return 'Tập hợp các tài liệu, văn bản hướng dẫn và biểu mẫu cần thiết cho doanh nghiệp.';
+      }
+    }
+  };
+
+  // Enhanced SEO: update document title & meta tags
+  useEffect(() => {
+    // Set page title
+    document.title = `${pageTitle} | DSEZA`;
+    
+    // Set meta description
+    const metaDesc = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (metaDesc) {
+      metaDesc.setAttribute('content', getPageDescription());
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = getPageDescription();
+      document.head.appendChild(meta);
+    }
+    
+    // Set language meta tag
+    document.documentElement.lang = language;
+    
+    // Add/update Open Graph meta tags
+    const updateOrCreateMetaTag = (property: string, content: string) => {
+      let metaTag = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null;
+      if (metaTag) {
+        metaTag.setAttribute('content', content);
+      } else {
+        metaTag = document.createElement('meta');
+        metaTag.setAttribute('property', property);
+        metaTag.setAttribute('content', content);
+        document.head.appendChild(metaTag);
+      }
+    };
+    
+    updateOrCreateMetaTag('og:title', `${pageTitle} | DSEZA`);
+    updateOrCreateMetaTag('og:description', getPageDescription());
+    updateOrCreateMetaTag('og:type', 'website');
+    updateOrCreateMetaTag('og:url', window.location.href);
+    
+    // Canonical URL
+    let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (canonicalLink) {
+      canonicalLink.href = window.location.href;
+    } else {
+      canonicalLink = document.createElement('link');
+      canonicalLink.rel = 'canonical';
+      canonicalLink.href = window.location.href;
+      document.head.appendChild(canonicalLink);
+    }
+    
+  }, [pageTitle, language, getPageDescription]);
+
   // Giao diện dạng thẻ (Card)
   const renderCardView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -97,7 +270,15 @@ const DocumentListPage: React.FC = () => {
           title={doc.title}
           docNumber={doc.docNumber}
           releaseDate={doc.releaseDate}
-          path={`/doanh-nghiep/tai-lieu/chi-tiet/${doc.id}`} // Đường dẫn tới trang xem chi tiết
+          path={language === 'en' 
+            ? (window.location.pathname.includes('/enterprises/') 
+                ? `/enterprises/documents/detail/${doc.id}` 
+                : `/business/documents/detail/${doc.id}`)
+            : (window.location.pathname.includes('/tai-lieu/') 
+                ? `/doanh-nghiep/tai-lieu/chi-tiet/${doc.id}`
+                : (window.location.pathname.includes('/van-ban/') 
+                    ? `/doanh-nghiep/van-ban/chi-tiet/${doc.id}`
+                    : `/doanh-nghiep/bao-cao-du-lieu/chi-tiet/${doc.id}`))}
         />
       ))}
     </div>
@@ -109,10 +290,10 @@ const DocumentListPage: React.FC = () => {
       <Table>
         <TableHeader>
           <TableRow className={isDark ? 'border-dseza-dark-border' : 'border-dseza-light-border'}>
-            <TableHead className="w-[200px]">Số/Ký hiệu</TableHead>
-            <TableHead>Tên tài liệu</TableHead>
-            <TableHead className="w-[150px]">Ngày ban hành</TableHead>
-            <TableHead className="w-[120px] text-center">Tải về</TableHead>
+            <TableHead className="w-[200px]">{language === 'en' ? 'Number/Symbol' : 'Số/Ký hiệu'}</TableHead>
+            <TableHead>{language === 'en' ? 'Document Name' : 'Tên tài liệu'}</TableHead>
+            <TableHead className="w-[150px]">{language === 'en' ? 'Issue Date' : 'Ngày ban hành'}</TableHead>
+            <TableHead className="w-[120px] text-center">{language === 'en' ? 'Download' : 'Tải về'}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -133,7 +314,7 @@ const DocumentListPage: React.FC = () => {
                 <TableCell>
                   <div className="max-w-md">
                     <p className="font-medium leading-relaxed">
-                      {doc.title || 'Không có tiêu đề'}
+                      {doc.title || (language === 'en' ? 'No title' : 'Không có tiêu đề')}
                     </p>
                   </div>
                 </TableCell>
@@ -156,11 +337,11 @@ const DocumentListPage: React.FC = () => {
                       onClick={() => handleDownload(doc.fileUrl, doc.title)}
                     >
                       <Download className="w-4 h-4" />
-                      <span>Tải file</span>
+                      <span>{language === 'en' ? 'Download' : 'Tải file'}</span>
                     </Button>
                   ) : (
                     <span className={`text-sm ${secondaryTextClass} italic`}>
-                      Không có file
+                      {language === 'en' ? 'No file available' : 'Không có file'}
                     </span>
                   )}
                 </TableCell>
@@ -173,31 +354,41 @@ const DocumentListPage: React.FC = () => {
                   <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
                   <p className="text-lg font-medium mb-2">
                     {!isError && documents && documents.length === 0 
-                      ? `Danh mục "${formatTitle(categoryParam)}" hiện tại chưa có tài liệu`
+                      ? (language === 'en' 
+                          ? `The "${formatTitle(categoryParam, language)}" category currently has no documents`
+                          : `Danh mục "${formatTitle(categoryParam, language)}" hiện tại chưa có tài liệu`)
                       : searchTerm
-                        ? `Không có tài liệu nào phù hợp với từ khóa "${searchTerm}"`
-                        : "Không tìm thấy tài liệu nào"
+                        ? (language === 'en' 
+                            ? `No documents match the keyword "${searchTerm}"`
+                            : `Không có tài liệu nào phù hợp với từ khóa "${searchTerm}"`)
+                        : (language === 'en' ? "No documents found" : "Không tìm thấy tài liệu nào")
                     }
                   </p>
                   <p className="text-sm">
                     {!isError && documents && documents.length === 0 
-                      ? "Hệ thống đang cập nhật tài liệu cho danh mục này. Vui lòng quay lại sau hoặc kiểm tra danh mục khác."
+                      ? (language === 'en' 
+                          ? "The system is updating documents for this category. Please check back later or browse other categories."
+                          : "Hệ thống đang cập nhật tài liệu cho danh mục này. Vui lòng quay lại sau hoặc kiểm tra danh mục khác.")
                       : searchTerm
-                        ? "Hãy thử từ khóa khác hoặc xóa bộ lọc tìm kiếm."
-                        : "Hãy thử tải lại trang hoặc liên hệ với quản trị viên."
+                        ? (language === 'en' 
+                            ? "Try different keywords or clear the search filter."
+                            : "Hãy thử từ khóa khác hoặc xóa bộ lọc tìm kiếm.")
+                        : (language === 'en' 
+                            ? "Please try refreshing the page or contact the administrator."
+                            : "Hãy thử tải lại trang hoặc liên hệ với quản trị viên.")
                     }
                   </p>
                   {!isError && documents && documents.length === 0 && (
                     <div className="mt-6">
                       <Link
-                        to="/doanh-nghiep/bao-cao-du-lieu"
+                        to={breadcrumbLinks.documents}
                         className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                           isDark 
                             ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary hover:bg-dseza-dark-primary/30' 
                             : 'bg-dseza-light-primary/20 text-dseza-light-primary hover:bg-dseza-light-primary/30'
                         }`}
                       >
-                        ← Xem các danh mục khác
+                        ← {language === 'en' ? 'View other categories' : 'Xem các danh mục khác'}
                       </Link>
                     </div>
                   )}
@@ -224,28 +415,28 @@ const DocumentListPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${secondaryTextClass}`}>
               <Link 
-                to="/" 
+                to={breadcrumbLinks.home} 
                 className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {language === 'en' ? 'Home' : 'Trang chủ'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/doanh-nghiep" 
+                to={breadcrumbLinks.business} 
                 className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Doanh nghiệp
+                {breadcrumbLinks.businessLabel}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/doanh-nghiep/bao-cao-du-lieu" 
+                to={breadcrumbLinks.documents} 
                 className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Báo cáo dữ liệu
+                {breadcrumbLinks.documentsLabel}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${textClass}`}>
-                {formatTitle(categoryParam)}
+                {formatTitle(categoryParam, language)}
               </span>
             </nav>
           </div>
@@ -256,33 +447,26 @@ const DocumentListPage: React.FC = () => {
           {/* Page Header */}
                       <div className="mb-12 text-center">
             <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${textClass}`}>
-              {formatTitle(categoryParam)}
+              {pageTitle}
             </h1>
             <div className={`w-24 h-1 mx-auto mb-4 rounded-full ${isDark ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></div>
             <div className="flex items-center justify-center space-x-2 text-lg">
               <FileText className="w-5 h-5" />
               <span className={secondaryTextClass}>
-                Tài liệu doanh nghiệp • {formatTitle(categoryParam)}
+                {language === 'en' ? 'Enterprise Documents' : 'Tài liệu doanh nghiệp'} • {pageTitle}
               </span>
             </div>
             <p className={`text-sm mt-4 max-w-2xl mx-auto ${secondaryTextClass}`}>
-              {categoryParam === 'bao-cao-giam-sat-va-danh-gia-dau-tu' 
-                ? 'Các báo cáo định kỳ về tình hình thực hiện đầu tư và đánh giá hiệu quả dự án trong khu công nghệ cao.'
-                : categoryParam === 'mau-bang-bieu-bao-cao'
-                ? 'Các mẫu biểu, bảng biểu chuẩn để doanh nghiệp thực hiện báo cáo theo quy định.'
-                : categoryParam === 'thu-tuc-ho-so-du-lieu-moi-truong'
-                ? 'Thủ tục, hồ sơ và dữ liệu môi trường cần thiết cho doanh nghiệp thực hiện các quy trình bảo vệ môi trường.'
-                : 'Tập hợp các tài liệu, văn bản hướng dẫn và biểu mẫu cần thiết cho doanh nghiệp.'
-              }
+              {getPageDescription()}
             </p>
           </div>
 
-          {/* Results Summary */}
+              {/* Results Summary */}
           {documents && documents.length > 0 && (
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center space-x-4">
                 <div className={`px-3 py-1 text-sm rounded-md ${isDark ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary border border-dseza-dark-primary/30' : 'bg-dseza-light-primary/20 text-dseza-light-primary border border-dseza-light-primary/30'}`}>
-                  {filteredDocuments.length} / {documents.length} tài liệu
+                  {filteredDocuments.length} / {documents.length} {language === 'en' ? (filteredDocuments.length === 1 ? 'document' : 'documents') : 'tài liệu'}
                 </div>
               </div>
             </div>
@@ -296,7 +480,7 @@ const DocumentListPage: React.FC = () => {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type="text"
-                    placeholder="Tìm kiếm theo tên tài liệu hoặc số ký hiệu..."
+                    placeholder={language === 'en' ? "Search by document name or number..." : "Tìm kiếm theo tên tài liệu hoặc số ký hiệu..."}
                     className="pl-10"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -313,10 +497,16 @@ const DocumentListPage: React.FC = () => {
             <Alert className="mb-8">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Có lỗi xảy ra khi tải tài liệu: {error?.message || 'Lỗi không xác định'}
+                {language === 'en' 
+                  ? `Error loading documents: ${error?.message || 'Unknown error'}`
+                  : `Có lỗi xảy ra khi tải tài liệu: ${error?.message || 'Lỗi không xác định'}`
+                }
                 <br />
                 <span className="text-sm opacity-75">
-                  Vui lòng thử lại sau hoặc liên hệ với quản trị viên.
+                  {language === 'en' 
+                    ? 'Please try again later or contact the administrator.'
+                    : 'Vui lòng thử lại sau hoặc liên hệ với quản trị viên.'
+                  }
                 </span>
               </AlertDescription>
             </Alert>
@@ -328,7 +518,7 @@ const DocumentListPage: React.FC = () => {
               <div className="text-center">
                 <LoadingSpinner size="lg" />
                 <p className={`mt-4 text-sm ${secondaryTextClass}`}>
-                  Đang tải danh sách tài liệu...
+                  {language === 'en' ? 'Loading document list...' : 'Đang tải danh sách tài liệu...'}
                 </p>
               </div>
             </div>
@@ -345,31 +535,41 @@ const DocumentListPage: React.FC = () => {
                   <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
                   <p className="text-lg font-medium mb-2">
                     {!isError && documents && documents.length === 0 
-                      ? `Danh mục "${formatTitle(categoryParam)}" hiện tại chưa có tài liệu`
+                      ? (language === 'en' 
+                          ? `The "${pageTitle}" category currently has no documents`
+                          : `Danh mục "${pageTitle}" hiện tại chưa có tài liệu`)
                       : searchTerm
-                        ? `Không có tài liệu nào phù hợp với từ khóa "${searchTerm}"`
-                        : "Không tìm thấy tài liệu nào"
+                        ? (language === 'en' 
+                            ? `No documents match the keyword "${searchTerm}"`
+                            : `Không có tài liệu nào phù hợp với từ khóa "${searchTerm}"`)
+                        : (language === 'en' ? "No documents found" : "Không tìm thấy tài liệu nào")
                     }
                   </p>
                   <p className="text-sm">
                     {!isError && documents && documents.length === 0 
-                      ? "Hệ thống đang cập nhật tài liệu cho danh mục này. Vui lòng quay lại sau hoặc kiểm tra danh mục khác."
+                      ? (language === 'en' 
+                          ? "The system is updating documents for this category. Please check back later or browse other categories."
+                          : "Hệ thống đang cập nhật tài liệu cho danh mục này. Vui lòng quay lại sau hoặc kiểm tra danh mục khác.")
                       : searchTerm
-                        ? "Hãy thử từ khóa khác hoặc xóa bộ lọc tìm kiếm."
-                        : "Hãy thử tải lại trang hoặc liên hệ với quản trị viên."
+                        ? (language === 'en' 
+                            ? "Try different keywords or clear the search filter."
+                            : "Hãy thử từ khóa khác hoặc xóa bộ lọc tìm kiếm.")
+                        : (language === 'en' 
+                            ? "Please try refreshing the page or contact the administrator."
+                            : "Hãy thử tải lại trang hoặc liên hệ với quản trị viên.")
                     }
                   </p>
                   {!isError && documents && documents.length === 0 && (
                     <div className="mt-6">
                       <Link
-                        to="/doanh-nghiep/bao-cao-du-lieu"
+                        to={breadcrumbLinks.documents}
                         className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                           isDark 
                             ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary hover:bg-dseza-dark-primary/30' 
                             : 'bg-dseza-light-primary/20 text-dseza-light-primary hover:bg-dseza-light-primary/30'
                         }`}
                       >
-                        ← Xem các danh mục khác
+                        ← {language === 'en' ? 'View other categories' : 'Xem các danh mục khác'}
                       </Link>
                     </div>
                   )}
@@ -381,25 +581,32 @@ const DocumentListPage: React.FC = () => {
           {/* Summary info */}
           {filteredDocuments.length > 0 && (
             <div className={`mt-8 text-sm ${secondaryTextClass} text-center`}>
-              Hiển thị {filteredDocuments.length} tài liệu
-              {searchTerm && ` phù hợp với từ khóa "${searchTerm}"`}
-              {documents && documents.length !== filteredDocuments.length && 
-                ` (từ tổng số ${documents.length} tài liệu)`
+              {language === 'en' 
+                ? `Showing ${filteredDocuments.length} ${filteredDocuments.length === 1 ? 'document' : 'documents'}`
+                : `Hiển thị ${filteredDocuments.length} tài liệu`
               }
+              {searchTerm && (language === 'en' 
+                ? ` matching keyword "${searchTerm}"`
+                : ` phù hợp với từ khóa "${searchTerm}"`
+              )}
+              {documents && documents.length !== filteredDocuments.length && (language === 'en'
+                ? ` (out of ${documents.length} total ${documents.length === 1 ? 'document' : 'documents'})`
+                : ` (từ tổng số ${documents.length} tài liệu)`
+              )}
             </div>
           )}
 
           {/* Back to Enterprise Button */}
           <div className="mt-16 text-center">
             <Link 
-              to="/doanh-nghiep/bao-cao-du-lieu"
+              to={breadcrumbLinks.documents}
               className={`inline-flex items-center px-6 py-3 rounded-lg border-2 font-medium transition-all duration-300 hover:-translate-y-1 ${
                 isDark 
                   ? 'border-dseza-dark-primary text-dseza-dark-primary hover:bg-dseza-dark-primary hover:text-dseza-dark-main-text' 
                   : 'border-dseza-light-primary text-dseza-light-primary hover:bg-dseza-light-primary hover:text-white'
               }`}
             >
-              ← Quay lại Báo cáo dữ liệu
+              ← {language === 'en' ? `Back to ${breadcrumbLinks.documentsLabel}` : `Quay lại ${breadcrumbLinks.documentsLabel}`}
             </Link>
           </div>
         </div>

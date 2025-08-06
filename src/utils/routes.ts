@@ -78,8 +78,6 @@ const URL_MAPPING = {
     'enterprise-statistics': 'thong-ke-doanh-nghiep',
     'recruitment': 'tuyen-dung',
     
-    // Investment handbook
-    'investment-handbook': 'cam-nang-dau-tu',
     
     // Documents section
     'legal-documents': 'van-ban-phap-luat',
@@ -94,7 +92,6 @@ const URL_MAPPING = {
     'search': 'tim-kiem',
     
     // Administrative reform
-    'administrative-reform': 'cai-cach-hanh-chinh',
     
     // Utilities section
     'qa': 'hoi-dap',
@@ -103,7 +100,6 @@ const URL_MAPPING = {
     
     // Additional common paths
     'home': 'trang-chu',
-    'search': 'tim-kiem',
     'sitemap': 'so-do-site',
     'legal': 'phap-ly',
     'privacy': 'rieng-tu',
@@ -152,6 +148,11 @@ const translatePath = (path: string, fromLang: 'vi' | 'en', toLang: 'vi' | 'en')
  * @returns Language-prefixed URL (e.g., "/vi/tin-tuc")
  */
 export const createLanguageUrl = (path: string, lang?: "vi" | "en"): string => {
+  // Preserve external URLs (http://, https://, //) without adding language prefix
+  if (/^(https?:)?\/\//.test(path)) {
+    return path;
+  }
+
   // Remove leading slash if present
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
   

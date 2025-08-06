@@ -408,7 +408,7 @@ async function fetchArticleById(uuid: string, language: 'vi' | 'en' = 'vi'): Pro
     // Try a simpler include first to avoid API errors, then fetch additional data if needed
     console.log('🚀 Fetching article with UUID:', uuid, 'Language:', language);
     
-    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document,translations';
+    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document';
     
     // Use language-specific endpoint
     const languagePrefix = language === 'en' ? '/en' : '/vi';
@@ -487,7 +487,7 @@ async function fetchArticleByPath(pathAlias: string, language: 'vi' | 'en' = 'vi
   try {
     console.log('🚀 Fetching article with path alias:', pathAlias, 'Language:', language);
     
-    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document,translations';
+    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document';
     
     // Use language-specific endpoint with path filter
     const languagePrefix = language === 'en' ? '/en' : '/vi';
@@ -594,7 +594,7 @@ async function fetchArticleByUuid(uuid: string, language: 'vi' | 'en' = 'vi'): P
   try {
     console.log('🚀 Fetching article with UUID:', uuid, 'Language:', language);
     
-    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document,translations';
+    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document';
     
     // Use language-specific endpoint with UUID
     const languagePrefix = language === 'en' ? '/en' : '/vi';
@@ -1935,7 +1935,7 @@ async function fetchContentByPath(
     try {
       console.log(`🔍 Trying content type: ${contentType}`);
       
-      const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document,translations';
+      const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document';
       
       // Approach 1: Try filter[path][alias]
       let url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/${contentType}?filter[path][alias]=${encodeURIComponent(normalizedPath)}&include=${basicInclude}`;

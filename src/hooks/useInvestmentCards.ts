@@ -18,8 +18,9 @@ export interface InvestmentCard {
 /**
  * Fetch investment cards from JSON:API
  */
-async function fetchInvestmentCards(): Promise<InvestmentCard[]> {
-  const url = `${DRUPAL_BASE_URL}/jsonapi/node/investment_card`
+async function fetchInvestmentCards(language: 'vi' | 'en' = 'vi'): Promise<InvestmentCard[]> {
+  const languagePrefix = language === 'en' ? '/en' : '/vi';
+  const url = `${DRUPAL_BASE_URL}${languagePrefix}/jsonapi/node/investment_card`
     + '?include=field_category,field_image.field_media_image'
     + '&sort=field_order_weight';
 
@@ -27,6 +28,8 @@ async function fetchInvestmentCards(): Promise<InvestmentCard[]> {
     headers: {
       'Accept': 'application/vnd.api+json',
       'Content-Type': 'application/vnd.api+json',
+      'Accept-Language': language,
+      'Content-Language': language,
     },
   });
 
@@ -65,10 +68,10 @@ async function fetchInvestmentCards(): Promise<InvestmentCard[]> {
 /**
  * Hook to fetch and cache investment cards
  */
-export const useInvestmentCards = () => {
+export const useInvestmentCards = (language: 'vi' | 'en' = 'vi') => {
   return useQuery({
-    queryKey: ['investmentCards'],
-    queryFn: fetchInvestmentCards,
+    queryKey: ['investmentCards', language],
+    queryFn: () => fetchInvestmentCards(language),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 3,

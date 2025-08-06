@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { extractImageUrl, useDrupalApi } from "@/utils/drupal";
 import { extractFirstImageFromRichText } from "@/utils/richTextProcessor";
 import { useAllNewsCategories } from "./useNewsCategories";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Định nghĩa cấu trúc cho một bài viết
 export interface Article {
@@ -21,6 +22,7 @@ export const useArticles = () => {
   const { category, subcategory } = useParams<{ category: string; subcategory?: string; }>();
   const { data: categoriesData } = useAllNewsCategories(); // Use ALL categories instead of just event categories
   const { apiGet } = useDrupalApi(); // Use language-aware API client
+  const { language } = useLanguage(); // Get current language
 
   const fetchArticles = async (): Promise<Article[]> => {
     // Xác định target category cho filter
@@ -40,8 +42,8 @@ export const useArticles = () => {
       include: 'field_anh_dai_dien.field_media_image,field_chuyen_muc' // Include images và categories
     };
 
-    // Nếu targetCategory là 'su-kien' hoặc 'tin-tuc' thì lấy tất cả tin tức (không filter)
-    const showAllNews = targetCategory === 'su-kien' || targetCategory === 'tin-tuc';
+    // Nếu targetCategory là 'su-kien', 'events', hoặc 'tin-tuc' thì lấy tất cả tin tức (không filter)
+    const showAllNews = targetCategory === 'su-kien' || targetCategory === 'tin-tuc' || targetCategory === 'events';
 
     // URL mapping để convert từ URL slug sang category name thực tế
     const urlToCategoryMap: { [key: string]: string } = {
@@ -54,6 +56,7 @@ export const useArticles = () => {
       'thong-bao': 'Thông báo',
       'hoat-dong': 'Hoạt động',
       'su-kien': 'Tin tức & Sự kiện',
+      'events': 'Tin tức & Sự kiện',
       'tin-tuc': 'Tin tức',
       // Investment-related categories
       'quy-trinh-linh-vuc-dau-tu': 'Quy trình lĩnh vực đầu tư',
@@ -95,10 +98,12 @@ export const useArticles = () => {
     }
 
     try {
-      console.log(`📡 API call with options:`, apiOptions);
+      console.log(`📡 API call for category "${targetCategory}" with options:`, apiOptions);
+      console.log(`🔍 showAllNews: ${showAllNews}, categoryNameToFilter: "${categoryNameToFilter}"`);
       
       const data = await apiGet('/jsonapi/node/bai-viet', apiOptions);
-      console.log(`📊 API returned ${data.data?.length || 0} articles`);
+      console.log(`📊 API returned ${data.data?.length || 0} articles for category "${targetCategory}"`);
+      console.log(`📋 Raw API response:`, data);
       
       // Map dữ liệu trả về thành cấu trúc Article
       let articles = data.data?.map((item: any) => {
@@ -215,7 +220,7 @@ export const useArticles = () => {
   };
 
   return useQuery<Article[], Error>({
-    queryKey: ['articles', category, subcategory],
+    queryKey: ['articles', category, subcategory, language], // Include language in query key
     queryFn: fetchArticles,
     enabled: !!(category), // Chỉ fetch khi có category
     staleTime: 5 * 60 * 1000, // 5 minutes

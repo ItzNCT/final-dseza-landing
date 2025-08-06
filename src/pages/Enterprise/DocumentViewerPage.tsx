@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingSpinner } from '../../components/ui/loading-spinner';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { ChevronRight, FileText, Download, ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import TopBar from '../../components/hero/TopBar';
@@ -23,18 +24,22 @@ interface DocumentDetails {
 const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
   (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
 
-// Function to fetch single document by ID
-const fetchSingleDocument = async (docId: string): Promise<DocumentDetails | null> => {
+// Function to fetch single document by ID with language support
+const fetchSingleDocument = async (docId: string, language: 'vi' | 'en' = 'vi'): Promise<DocumentDetails | null> => {
   try {
-    console.log('🔍 Fetching single document:', docId);
+    console.log('🔍 Fetching single document:', docId, 'Language:', language);
+    
+    // Use language-aware endpoint
+    const languagePrefix = language === 'en' ? '/en' : '/vi';
+    const endpoint = `${DRUPAL_BASE_URL}${languagePrefix}/jsonapi/node/tai_lieu_doanh_nghiep/${docId}?include=field_file_dinh_kem,field_file_dinh_kem.field_media_document`;
     
     // Fetch the specific document with includes
-    const response = await fetch(
-      `${DRUPAL_BASE_URL}/jsonapi/node/tai_lieu_doanh_nghiep/${docId}?include=field_file_dinh_kem,field_file_dinh_kem.field_media_document`, 
-      {
+    const response = await fetch(endpoint, {
         headers: {
           'Accept': 'application/vnd.api+json',
           'Content-Type': 'application/vnd.api+json',
+          'Accept-Language': language,
+          'Content-Language': language,
         },
       }
     );
@@ -127,11 +132,14 @@ const fetchSingleDocument = async (docId: string): Promise<DocumentDetails | nul
       title: item.attributes.title || 'Không có tiêu đề',
       docNumber: item.attributes.field_so_ky_hieu || 'N/A',
       releaseDate: item.attributes.field_ngay_ban_hanh 
-        ? new Date(item.attributes.field_ngay_ban_hanh).toLocaleDateString('vi-VN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-          })
+        ? new Date(item.attributes.field_ngay_ban_hanh).toLocaleDateString(
+            language === 'en' ? 'en-US' : 'vi-VN', 
+            {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            }
+          )
         : 'N/A',
       fileUrl: fileUrl || '',
     };
@@ -143,16 +151,140 @@ const fetchSingleDocument = async (docId: string): Promise<DocumentDetails | nul
 
 const DocumentViewerPage: React.FC = () => {
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const { docId } = useParams<{ docId: string }>();
 
-  // Use React Query to fetch single document
-  const { data: document, isLoading, isError } = useQuery({
-    queryKey: ['singleDocument', docId],
-    queryFn: () => fetchSingleDocument(docId!),
+  // Dynamic breadcrumb links based on language and current path
+  const getBreadcrumbLinks = () => {
+    const isEnterpriseRoute = window.location.pathname.includes('/enterprises/');
+    const isDocumentRoute = window.location.pathname.includes('/tai-lieu/');
+    const isVanBanRoute = window.location.pathname.includes('/van-ban/');
+    
+    if (language === 'en') {
+      return {
+        home: '/',
+        business: isEnterpriseRoute ? '/enterprises' : '/business',
+        documents: isEnterpriseRoute ? '/enterprises/reports-data' : '/business/reports-data',
+        businessLabel: isEnterpriseRoute ? 'Enterprises' : 'Business',
+        documentsLabel: 'Documents'
+      };
+    } else {
+      return {
+        home: '/',
+        business: '/doanh-nghiep',
+        documents: isDocumentRoute ? '/doanh-nghiep/tai-lieu' : (isVanBanRoute ? '/doanh-nghiep/van-ban' : '/doanh-nghiep/bao-cao-du-lieu'),
+        businessLabel: 'Doanh nghiệp',
+        documentsLabel: isDocumentRoute ? 'Tài liệu' : (isVanBanRoute ? 'Văn bản' : 'Báo cáo dữ liệu')
+      };
+    }
+  };
+
+  const breadcrumbLinks = getBreadcrumbLinks();
+
+  // Use React Query to fetch single document with language support
+  const { data: documentData, isLoading, isError } = useQuery({
+    queryKey: ['singleDocument', docId, language], // Include language in query key
+    queryFn: () => fetchSingleDocument(docId!, language),
     enabled: !!docId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
+
+  // SEO and metadata management
+  useEffect(() => {
+    if (documentData) {
+      const pageTitle = language === 'en' 
+        ? `${documentData.title} - Document Viewer - DSEZA`
+        : `${documentData.title} - Xem tài liệu - DSEZA`;
+      
+      const pageDescription = language === 'en'
+        ? `View document: ${documentData.title}. Document number: ${documentData.docNumber}. Release date: ${documentData.releaseDate}.`
+        : `Xem tài liệu: ${documentData.title}. Số/Ký hiệu: ${documentData.docNumber}. Ngày ban hành: ${documentData.releaseDate}.`;
+
+      // Set document title
+      document.title = pageTitle;
+
+      // Set meta description
+      const metaDescription = document.querySelector('meta[name="description"]') as HTMLMetaElement;
+      if (metaDescription) {
+        metaDescription.content = pageDescription;
+      } else {
+        const newMetaDescription = document.createElement('meta');
+        newMetaDescription.name = 'description';
+        newMetaDescription.content = pageDescription;
+        document.head.appendChild(newMetaDescription);
+      }
+
+      // Set Open Graph tags
+      const ogTags = [
+        { property: 'og:title', content: pageTitle },
+        { property: 'og:description', content: pageDescription },
+        { property: 'og:type', content: 'article' },
+        { property: 'og:url', content: window.location.href },
+        { property: 'og:site_name', content: 'DSEZA' },
+        { property: 'og:locale', content: language === 'en' ? 'en_US' : 'vi_VN' },
+      ];
+
+      ogTags.forEach(tag => {
+        let ogTag = document.querySelector(`meta[property="${tag.property}"]`) as HTMLMetaElement;
+        if (ogTag) {
+          ogTag.content = tag.content;
+        } else {
+          ogTag = document.createElement('meta');
+          ogTag.setAttribute('property', tag.property);
+          ogTag.content = tag.content;
+          document.head.appendChild(ogTag);
+        }
+      });
+
+      // Set canonical URL
+      let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      if (canonicalLink) {
+        canonicalLink.href = window.location.href;
+      } else {
+        canonicalLink = document.createElement('link');
+        canonicalLink.rel = 'canonical';
+        canonicalLink.href = window.location.href;
+        document.head.appendChild(canonicalLink);
+      }
+
+      // Set Schema.org structured data
+      const existingSchema = document.querySelector('script[type="application/ld+json"]');
+      if (existingSchema) {
+        existingSchema.remove();
+      }
+
+      const schemaData = {
+        '@context': 'https://schema.org',
+        '@type': 'DigitalDocument',
+        name: documentData.title,
+        description: pageDescription,
+        url: window.location.href,
+        inLanguage: language === 'en' ? 'en-US' : 'vi-VN',
+        datePublished: documentData.releaseDate !== 'N/A' ? documentData.releaseDate : undefined,
+        identifier: documentData.docNumber !== 'N/A' ? documentData.docNumber : undefined,
+        publisher: {
+          '@type': 'Organization',
+          name: 'DSEZA',
+          url: window.location.origin
+        },
+        breadcrumb: {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: language === 'en' ? 'Home' : 'Trang chủ', item: window.location.origin + breadcrumbLinks.home },
+            { '@type': 'ListItem', position: 2, name: breadcrumbLinks.businessLabel, item: window.location.origin + breadcrumbLinks.business },
+            { '@type': 'ListItem', position: 3, name: breadcrumbLinks.documentsLabel, item: window.location.origin + breadcrumbLinks.documents },
+            { '@type': 'ListItem', position: 4, name: documentData.title, item: window.location.href }
+          ]
+        }
+      };
+
+      const schemaScript = document.createElement('script');
+      schemaScript.type = 'application/ld+json';
+      schemaScript.textContent = JSON.stringify(schemaData);
+      document.head.appendChild(schemaScript);
+    }
+  }, [documentData, language]);
 
   const isDark = theme === 'dark';
   const bgClass = isDark ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg';
@@ -172,7 +304,7 @@ const DocumentViewerPage: React.FC = () => {
             <div className="text-center">
               <LoadingSpinner size="lg" />
               <p className={`mt-4 text-sm ${secondaryTextClass}`}>
-                Đang tải tài liệu...
+                {language === 'en' ? 'Loading document...' : 'Đang tải tài liệu...'}
               </p>
             </div>
           </div>
@@ -192,11 +324,17 @@ const DocumentViewerPage: React.FC = () => {
           <div className="container mx-auto px-4 py-8">
             <div className="text-center text-red-500 py-10">
               <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <h2 className="text-xl font-semibold mb-2">Lỗi khi tải dữ liệu</h2>
-              <p>Không thể tải dữ liệu tài liệu. Vui lòng thử lại sau.</p>
+              <h2 className="text-xl font-semibold mb-2">
+                {language === 'en' ? 'Error Loading Data' : 'Lỗi khi tải dữ liệu'}
+              </h2>
+              <p>
+                {language === 'en' 
+                  ? 'Unable to load document data. Please try again later.' 
+                  : 'Không thể tải dữ liệu tài liệu. Vui lòng thử lại sau.'}
+              </p>
               <div className="mt-6">
                 <Link 
-                  to="/doanh-nghiep/bao-cao-du-lieu"
+                  to={breadcrumbLinks.documents}
                   className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isDark 
                       ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary hover:bg-dseza-dark-primary/30' 
@@ -204,7 +342,7 @@ const DocumentViewerPage: React.FC = () => {
                   }`}
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Quay lại
+                  {language === 'en' ? 'Go Back' : 'Quay lại'}
                 </Link>
               </div>
             </div>
@@ -215,7 +353,7 @@ const DocumentViewerPage: React.FC = () => {
     );
   }
 
-  if (!document) {
+  if (!documentData) {
     return (
       <div className={`min-h-screen flex flex-col ${bgClass}`}>
         <TopBar />
@@ -225,11 +363,17 @@ const DocumentViewerPage: React.FC = () => {
           <div className="container mx-auto px-4 py-8">
             <div className="text-center py-10">
               <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <h2 className={`text-xl font-semibold mb-2 ${textClass}`}>Không tìm thấy tài liệu</h2>
-              <p className={secondaryTextClass}>Tài liệu bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+              <h2 className={`text-xl font-semibold mb-2 ${textClass}`}>
+                {language === 'en' ? 'Document Not Found' : 'Không tìm thấy tài liệu'}
+              </h2>
+              <p className={secondaryTextClass}>
+                {language === 'en' 
+                  ? 'The document you are looking for does not exist or has been deleted.' 
+                  : 'Tài liệu bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.'}
+              </p>
               <div className="mt-6">
                 <Link 
-                  to="/doanh-nghiep/bao-cao-du-lieu"
+                  to={breadcrumbLinks.documents}
                   className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isDark 
                       ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary hover:bg-dseza-dark-primary/30' 
@@ -237,7 +381,7 @@ const DocumentViewerPage: React.FC = () => {
                   }`}
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Quay lại danh sách
+                  {language === 'en' ? 'Back to list' : 'Quay lại danh sách'}
                 </Link>
               </div>
             </div>
@@ -262,28 +406,28 @@ const DocumentViewerPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${secondaryTextClass}`}>
               <Link 
-                to="/" 
+                to={breadcrumbLinks.home} 
                 className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {language === 'en' ? 'Home' : 'Trang chủ'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/doanh-nghiep" 
+                to={breadcrumbLinks.business} 
                 className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Doanh nghiệp
+                {breadcrumbLinks.businessLabel}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/doanh-nghiep/bao-cao-du-lieu" 
+                to={breadcrumbLinks.documents} 
                 className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Báo cáo dữ liệu
+                {breadcrumbLinks.documentsLabel}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${textClass}`}>
-                {document.title}
+                {documentData.title}
               </span>
             </nav>
           </div>
@@ -295,16 +439,20 @@ const DocumentViewerPage: React.FC = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex-1">
                 <h1 className={`text-2xl md:text-3xl font-bold mb-4 ${textClass}`}>
-                  {document.title}
+                  {documentData.title}
                 </h1>
                 <div className={`space-y-2 text-sm ${secondaryTextClass}`}>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">Số/Ký hiệu:</span>
-                    <span>{document.docNumber || 'N/A'}</span>
+                    <span className="font-semibold">
+                      {language === 'en' ? 'Document Number:' : 'Số/Ký hiệu:'}
+                    </span>
+                    <span>{documentData.docNumber || 'N/A'}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">Ngày ban hành:</span>
-                    <span>{document.releaseDate || 'N/A'}</span>
+                    <span className="font-semibold">
+                      {language === 'en' ? 'Release Date:' : 'Ngày ban hành:'}
+                    </span>
+                    <span>{documentData.releaseDate || 'N/A'}</span>
                   </div>
                 </div>
               </div>
@@ -319,16 +467,16 @@ const DocumentViewerPage: React.FC = () => {
                     }
                     transition-colors duration-200
                   `}
-                  onClick={() => window.open(document.fileUrl, '_blank', 'noopener,noreferrer')}
-                  disabled={!document.fileUrl}
+                  onClick={() => window.open(documentData.fileUrl, '_blank', 'noopener,noreferrer')}
+                  disabled={!documentData.fileUrl}
                 >
                   <Download className="w-4 h-4" />
-                  <span>Tải về</span>
+                  <span>{language === 'en' ? 'Download' : 'Tải về'}</span>
                 </Button>
-                <Link to="/doanh-nghiep/bao-cao-du-lieu">
+                <Link to={breadcrumbLinks.documents}>
                   <Button variant="ghost" className={`w-full ${secondaryTextClass} hover:${textClass}`}>
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Quay lại
+                    {language === 'en' ? 'Go Back' : 'Quay lại'}
                   </Button>
                 </Link>
               </div>
@@ -336,12 +484,12 @@ const DocumentViewerPage: React.FC = () => {
           </div>
 
           {/* PDF Viewer */}
-          {document.fileUrl ? (
+          {documentData.fileUrl ? (
             <div className={`rounded-lg ${cardClass} ${borderClass} border overflow-hidden`}>
               <div className="w-full h-[80vh] bg-gray-100">
                 <iframe
-                  src={document.fileUrl}
-                  title={document.title}
+                  src={documentData.fileUrl}
+                  title={documentData.title}
                   width="100%"
                   height="100%"
                   className="border-0"
@@ -351,8 +499,14 @@ const DocumentViewerPage: React.FC = () => {
           ) : (
             <div className={`rounded-lg ${cardClass} ${borderClass} border p-8 text-center`}>
               <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <h3 className={`text-lg font-semibold mb-2 ${textClass}`}>Không có file đính kèm</h3>
-              <p className={secondaryTextClass}>Tài liệu này hiện chưa có file đính kèm để xem.</p>
+              <h3 className={`text-lg font-semibold mb-2 ${textClass}`}>
+                {language === 'en' ? 'No Attached File' : 'Không có file đính kèm'}
+              </h3>
+              <p className={secondaryTextClass}>
+                {language === 'en' 
+                  ? 'This document currently has no attached file to view.' 
+                  : 'Tài liệu này hiện chưa có file đính kèm để xem.'}
+              </p>
             </div>
           )}
         </div>

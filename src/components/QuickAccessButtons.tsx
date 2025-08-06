@@ -20,10 +20,10 @@ const iconMap: Record<string, JSX.Element> = {
  */
 const QuickAccessButtons: React.FC = () => {
   const { theme } = useTheme();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   
-  // Fetch dynamic data from API
-  const { data, isLoading, isError } = useHomepageData();
+  // Fetch dynamic data from API with language support
+  const { data, isLoading, isError } = useHomepageData(language);
   
   // Get theme-specific styles
   const cardBg = theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-dseza-light-secondary-bg";
@@ -73,7 +73,9 @@ const QuickAccessButtons: React.FC = () => {
               "text-lg font-medium",
               theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text"
             )}>
-              Không thể tải dữ liệu truy cập nhanh. Vui lòng thử lại sau.
+              {language === 'en'
+                ? 'Unable to load quick access links. Please try again later.'
+                : 'Không thể tải dữ liệu truy cập nhanh. Vui lòng thử lại sau.'}
             </p>
           </div>
         </div>

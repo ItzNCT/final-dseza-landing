@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Search, ChevronRight, Loader2, Building, MapPin, Users, Calendar, Globe, Phone, Mail } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, ChevronRight, Loader2, Building, MapPin, Users, Calendar, Globe, Phone, Mail, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +37,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useEnterprises } from "@/api/hooks";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useTranslation } from "react-i18next";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
@@ -47,6 +49,8 @@ import Footer from "@/components/Footer";
  */
 const EnterpriseListPage: React.FC = () => {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const { t } = useTranslation();
   const [filters, setFilters] = useState({
     keyword: "",
     location: "",
@@ -59,6 +63,19 @@ const EnterpriseListPage: React.FC = () => {
   const [selectedEnterprise, setSelectedEnterprise] = useState<any>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
+  // Page title and description functions
+  const getPageTitle = (language: 'vi' | 'en' = 'vi') => {
+    return language === 'en' 
+      ? 'Enterprise Statistics - DSEZA' 
+      : 'Thống kê doanh nghiệp - DSEZA';
+  };
+
+  const getPageDescription = (language: 'vi' | 'en' = 'vi') => {
+    return language === 'en'
+      ? 'Comprehensive statistics and directory of enterprises in Da Nang Software & Embedded Systems Zone. Filter by location, industry, and country to find business information.'
+      : 'Thống kê và danh mục đầy đủ các doanh nghiệp tại Khu Phần mềm và Hệ thống nhúng Đà Nẵng. Lọc theo vị trí, ngành nghề và quốc gia để tìm thông tin doanh nghiệp.';
+  };
+
   // Fetch enterprises data using the custom hook
   const { 
     data,
@@ -69,6 +86,126 @@ const EnterpriseListPage: React.FC = () => {
     totalResults, 
     hasEnterprises 
   } = useEnterprises(filters);
+
+  // SEO and metadata management
+  useEffect(() => {
+    const pageTitle = getPageTitle(language);
+    const pageDescription = getPageDescription(language);
+    const currentUrl = window.location.href;
+    const canonicalUrl = language === 'en' 
+      ? currentUrl.includes('/enterprises/') 
+        ? window.location.origin + '/en/enterprises/enterprise-information/enterprise-statistics'
+        : window.location.origin + '/en/business/enterprise-information/enterprise-statistics'
+      : window.location.origin + '/vi/doanh-nghiep/thong-tin-doanh-nghiep/thong-ke-doanh-nghiep';
+
+    // Set document title
+    document.title = pageTitle;
+
+    // Set meta description
+    const metaDescription = document.querySelector('meta[name="description"]') as HTMLMetaElement;
+    if (metaDescription) {
+      metaDescription.content = pageDescription;
+    } else {
+      const newMetaDescription = document.createElement('meta');
+      newMetaDescription.name = 'description';
+      newMetaDescription.content = pageDescription;
+      document.head.appendChild(newMetaDescription);
+    }
+
+    // Set Open Graph tags
+    const ogTags = [
+      { property: 'og:title', content: pageTitle },
+      { property: 'og:description', content: pageDescription },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: currentUrl },
+      { property: 'og:site_name', content: 'DSEZA' },
+      { property: 'og:locale', content: language === 'en' ? 'en_US' : 'vi_VN' },
+    ];
+
+    ogTags.forEach(tag => {
+      let ogTag = document.querySelector(`meta[property="${tag.property}"]`) as HTMLMetaElement;
+      if (ogTag) {
+        ogTag.content = tag.content;
+      } else {
+        ogTag = document.createElement('meta');
+        ogTag.setAttribute('property', tag.property);
+        ogTag.content = tag.content;
+        document.head.appendChild(ogTag);
+      }
+    });
+
+    // Set Twitter Card tags
+    const twitterTags = [
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: pageTitle },
+      { name: 'twitter:description', content: pageDescription },
+    ];
+
+    twitterTags.forEach(tag => {
+      let twitterTag = document.querySelector(`meta[name="${tag.name}"]`) as HTMLMetaElement;
+      if (twitterTag) {
+        twitterTag.content = tag.content;
+      } else {
+        twitterTag = document.createElement('meta');
+        twitterTag.name = tag.name;
+        twitterTag.content = tag.content;
+        document.head.appendChild(twitterTag);
+      }
+    });
+
+    // Set canonical URL
+    let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (canonicalLink) {
+      canonicalLink.href = canonicalUrl;
+    } else {
+      canonicalLink = document.createElement('link');
+      canonicalLink.rel = 'canonical';
+      canonicalLink.href = canonicalUrl;
+      document.head.appendChild(canonicalLink);
+    }
+
+    // Set Schema.org structured data
+    const existingSchema = document.querySelector('script[type="application/ld+json"]');
+    if (existingSchema) {
+      existingSchema.remove();
+    }
+
+    const schemaData = {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: pageTitle,
+      description: pageDescription,
+      url: currentUrl,
+      inLanguage: language === 'en' ? 'en-US' : 'vi-VN',
+      publisher: {
+        '@type': 'Organization',
+        name: 'DSEZA',
+        url: window.location.origin
+      },
+      breadcrumb: {
+        '@type': 'BreadcrumbList',
+        itemListElement: language === 'en' 
+          ? [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: window.location.origin + '/en' },
+              { '@type': 'ListItem', position: 2, name: currentUrl.includes('/enterprises/') ? 'Enterprises' : 'Business', item: window.location.origin + (currentUrl.includes('/enterprises/') ? '/en/enterprises' : '/en/business') },
+              { '@type': 'ListItem', position: 3, name: 'Enterprise Information', item: window.location.origin + (currentUrl.includes('/enterprises/') ? '/en/enterprises/enterprise-information' : '/en/business/enterprise-information') },
+              { '@type': 'ListItem', position: 4, name: 'Enterprise Statistics', item: currentUrl }
+            ]
+          : [
+              { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: window.location.origin + '/vi' },
+              { '@type': 'ListItem', position: 2, name: 'Doanh nghiệp', item: window.location.origin + '/vi/doanh-nghiep' },
+              { '@type': 'ListItem', position: 3, name: 'Thông tin doanh nghiệp', item: window.location.origin + '/vi/doanh-nghiep/thong-tin-doanh-nghiep' },
+              { '@type': 'ListItem', position: 4, name: 'Thống kê doanh nghiệp', item: currentUrl }
+            ]
+      }
+    };
+
+    const schemaScript = document.createElement('script');
+    schemaScript.type = 'application/ld+json';
+    schemaScript.textContent = JSON.stringify(schemaData);
+    document.head.appendChild(schemaScript);
+
+  }, [language, totalResults]);
 
   const handleFilterChange = (field: string, value: string) => {
     setFilters(prev => ({
@@ -130,7 +267,9 @@ const EnterpriseListPage: React.FC = () => {
   const ErrorDisplay = () => (
     <div className="text-center py-8">
       <p className={`mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
-        Có lỗi xảy ra khi tải dữ liệu: {error?.message || 'Lỗi không xác định'}
+        {language === 'en' 
+          ? `Error loading data: ${error?.message || 'Unknown error'}` 
+          : `Có lỗi xảy ra khi tải dữ liệu: ${error?.message || 'Lỗi không xác định'}`}
       </p>
       <Button 
         onClick={handleSearch} 
@@ -141,7 +280,7 @@ const EnterpriseListPage: React.FC = () => {
             : 'bg-dseza-light-secondary text-dseza-light-main-text border-dseza-light-border hover:bg-dseza-light-hover'
         }`}
       >
-        Thử lại
+        {language === 'en' ? 'Try again' : 'Thử lại'}
       </Button>
     </div>
   );
@@ -150,7 +289,9 @@ const EnterpriseListPage: React.FC = () => {
   const EmptyState = () => (
     <div className="text-center py-8">
       <p className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-        Không tìm thấy doanh nghiệp nào phù hợp với bộ lọc hiện tại.
+        {language === 'en' 
+          ? 'No enterprises found matching the current filters.' 
+          : 'Không tìm thấy doanh nghiệp nào phù hợp với bộ lọc hiện tại.'}
       </p>
     </div>
   );
@@ -169,7 +310,7 @@ const EnterpriseListPage: React.FC = () => {
           <DialogTitle className={`text-xl font-bold ${
             theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
           }`}>
-            THÔNG TIN CHI TIẾT DOANH NGHIỆP
+            {language === 'en' ? 'ENTERPRISE DETAILED INFORMATION' : 'THÔNG TIN CHI TIẾT DOANH NGHIỆP'}
           </DialogTitle>
           <p className={`text-sm mt-1 ${
             theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
@@ -189,7 +330,7 @@ const EnterpriseListPage: React.FC = () => {
               <Building className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`} />
               <h3 className={`text-lg font-semibold ${
                 theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-              }`}>Thông tin cơ bản</h3>
+              }`}>{language === 'en' ? 'Basic Information' : 'Thông tin cơ bản'}</h3>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -197,7 +338,7 @@ const EnterpriseListPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Tên doanh nghiệp:</span>
+                  }`}>{language === 'en' ? 'Enterprise Name:' : 'Tên doanh nghiệp:'}</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{enterprise.attributes?.title || "N/A"}</span>
@@ -205,7 +346,7 @@ const EnterpriseListPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Khu vực:</span>
+                  }`}>{language === 'en' ? 'Area:' : 'Khu vực:'}</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{getTaxonomyTermName(enterprise.relationships?.field_khu_hanh_chinh?.data, data?.included)}</span>
@@ -213,7 +354,7 @@ const EnterpriseListPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Lĩnh vực:</span>
+                  }`}>{language === 'en' ? 'Industry:' : 'Lĩnh vực:'}</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{getTaxonomyTermName(enterprise.relationships?.field_linh_vuc_hoat_dong?.data, data?.included)}</span>
@@ -221,7 +362,7 @@ const EnterpriseListPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Quốc gia:</span>
+                  }`}>{language === 'en' ? 'Country:' : 'Quốc gia:'}</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{enterprise.attributes?.field_quoc_gia || "N/A"}</span>
@@ -232,7 +373,7 @@ const EnterpriseListPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Tên viết tắt:</span>
+                  }`}>{language === 'en' ? 'Abbreviation:' : 'Tên viết tắt:'}</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{enterprise.attributes?.field_ten_viet_tat || "N/A"}</span>
@@ -240,15 +381,15 @@ const EnterpriseListPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Trạng thái:</span>
+                  }`}>{language === 'en' ? 'Status:' : 'Trạng thái:'}</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
-                  }`}>{enterprise.attributes?.status ? "Hoạt động" : "Không hoạt động"}</span>
+                  }`}>{enterprise.attributes?.status ? (language === 'en' ? 'Active' : 'Hoạt động') : (language === 'en' ? 'Inactive' : 'Không hoạt động')}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Ngày tạo:</span>
+                  }`}>{language === 'en' ? 'Created Date:' : 'Ngày tạo:'}</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{enterprise.attributes?.created ? new Date(enterprise.attributes.created).toLocaleDateString('vi-VN') : "N/A"}</span>
@@ -256,7 +397,7 @@ const EnterpriseListPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Cập nhật:</span>
+                  }`}>{language === 'en' ? 'Updated:' : 'Cập nhật:'}</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{enterprise.attributes?.changed ? new Date(enterprise.attributes.changed).toLocaleDateString('vi-VN') : "N/A"}</span>
@@ -275,7 +416,7 @@ const EnterpriseListPage: React.FC = () => {
               <Phone className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-secondary-accent' : 'text-dseza-light-secondary-accent'}`} />
               <h3 className={`text-lg font-semibold ${
                 theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-              }`}>Thông tin liên hệ</h3>
+              }`}>{language === 'en' ? 'Contact Information' : 'Thông tin liên hệ'}</h3>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -283,7 +424,7 @@ const EnterpriseListPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Địa chỉ:</span>
+                  }`}>{language === 'en' ? 'Address:' : 'Địa chỉ:'}</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{enterprise.attributes?.field_address || "N/A"}</span>
@@ -291,7 +432,7 @@ const EnterpriseListPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Điện thoại:</span>
+                  }`}>{language === 'en' ? 'Phone:' : 'Điện thoại:'}</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{enterprise.attributes?.field_dien_thoai || "N/A"}</span>
@@ -333,7 +474,7 @@ const EnterpriseListPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Người đại diện:</span>
+                  }`}>{language === 'en' ? 'Representative:' : 'Người đại diện:'}</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{enterprise.attributes?.field_nguoi_dai_dien || "N/A"}</span>
@@ -348,7 +489,7 @@ const EnterpriseListPage: React.FC = () => {
               <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-dseza-dark-accent' : 'text-dseza-light-accent'}`} />
               <h3 className={`font-semibold text-lg ${
                 theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-              }`}>Mô tả doanh nghiệp</h3>
+              }`}>{language === 'en' ? 'Enterprise Description' : 'Mô tả doanh nghiệp'}</h3>
             </div>
             <div className={`p-4 rounded-lg border ${
               theme === 'dark' 
@@ -360,7 +501,7 @@ const EnterpriseListPage: React.FC = () => {
               }`}>
                 {enterprise.description || 
                  enterprise.summary || 
-                 "Chưa có thông tin mô tả về doanh nghiệp này."}
+                 (language === 'en' ? 'No description available for this enterprise.' : 'Chưa có thông tin mô tả về doanh nghiệp này.')}
               </p>
             </div>
           </div>
@@ -379,7 +520,7 @@ const EnterpriseListPage: React.FC = () => {
                 : 'bg-dseza-light-main-bg text-dseza-light-main-text border-dseza-light-border hover:bg-dseza-light-hover hover:text-dseza-light-main-text'
             }`}
           >
-            Đóng
+            {language === 'en' ? 'Close' : 'Đóng'}
           </Button>
         </div>
       </DialogContent>
@@ -417,43 +558,51 @@ const EnterpriseListPage: React.FC = () => {
             <nav className={`flex items-center space-x-2 text-sm ${
               theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
             }`}>
-              <a 
-                href="/" 
-                className={`transition-colors ${
+              <Link 
+                to={language === 'en' ? "/en" : "/vi"} 
+                className={`transition-colors hover:underline ${
                   theme === 'dark' 
                     ? 'hover:text-dseza-dark-primary' 
                     : 'hover:text-dseza-light-primary'
                 }`}
               >
-                Trang chủ
-              </a>
+                {language === 'en' ? 'Home' : 'Trang chủ'}
+              </Link>
               <ChevronRight className="h-4 w-4" />
-              <a 
-                href="/doanh-nghiep" 
-                className={`transition-colors ${
+              <Link 
+                to={language === 'en' 
+                  ? (window.location.pathname.includes('/enterprises/') ? "/enterprises" : "/business") 
+                  : "/doanh-nghiep"} 
+                className={`transition-colors hover:underline ${
                   theme === 'dark' 
                     ? 'hover:text-dseza-dark-primary' 
                     : 'hover:text-dseza-light-primary'
                 }`}
               >
-                Doanh nghiệp
-              </a>
+                {language === 'en' 
+                  ? (window.location.pathname.includes('/enterprises/') ? 'Enterprises' : 'Business')
+                  : 'Doanh nghiệp'}
+              </Link>
               <ChevronRight className="h-4 w-4" />
-              <a 
-                href="/doanh-nghiep/thong-tin-doanh-nghiep" 
-                className={`transition-colors ${
+              <Link 
+                to={language === 'en' 
+                  ? (window.location.pathname.includes('/enterprises/') 
+                      ? "/enterprises/enterprise-information" 
+                      : "/business/enterprise-information") 
+                  : "/doanh-nghiep/thong-tin-doanh-nghiep"} 
+                className={`transition-colors hover:underline ${
                   theme === 'dark' 
                     ? 'hover:text-dseza-dark-primary' 
                     : 'hover:text-dseza-light-primary'
                 }`}
               >
-                Thông tin doanh nghiệp
-              </a>
+                {language === 'en' ? 'Enterprise Information' : 'Thông tin doanh nghiệp'}
+              </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${
                 theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
               }`}>
-                Thống kê doanh nghiệp
+                {language === 'en' ? 'Enterprise Statistics' : 'Thống kê doanh nghiệp'}
               </span>
             </nav>
           </div>
@@ -465,7 +614,7 @@ const EnterpriseListPage: React.FC = () => {
           <h1 className={`text-3xl md:text-4xl font-bold mb-8 text-center ${
             theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
           }`}>
-          Danh sách Doanh nghiệp
+          {language === 'en' ? 'Enterprise Directory' : 'Danh sách Doanh nghiệp'}
         </h1>
 
         {/* Filter Section */}
@@ -482,7 +631,7 @@ const EnterpriseListPage: React.FC = () => {
                   htmlFor="location"
                   className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
                 >
-                  Khu hành chính
+                  {language === 'en' ? 'Administrative Zone' : 'Khu hành chính'}
                 </Label>
                 <Select onValueChange={(value) => handleFilterChange("location", value)}>
                   <SelectTrigger className={`${
@@ -490,19 +639,19 @@ const EnterpriseListPage: React.FC = () => {
                       ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' 
                       : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'
                   }`}>
-                  <SelectValue placeholder="Chọn khu hành chính" />
+                  <SelectValue placeholder={language === 'en' ? 'Select administrative zone' : 'Chọn khu hành chính'} />
                 </SelectTrigger>
                   <SelectContent className={`${
                     theme === 'dark' 
                       ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
                       : 'bg-dseza-light-main-bg border-dseza-light-border'
                   }`}>
-                  <SelectItem value="all">Tất cả</SelectItem>
-                  <SelectItem value="khu-cong-nghe-cao">Khu Công nghệ cao</SelectItem>
-                  <SelectItem value="kcn-hoa-khanh">KCN Hòa Khánh</SelectItem>
-                  <SelectItem value="kcn-lien-chieu">KCN Liên Chiểu</SelectItem>
-                  <SelectItem value="kcn-da-nang">KCN Đà Nẵng</SelectItem>
-                  <SelectItem value="kdt-an-don">KĐT An Đồn</SelectItem>
+                  <SelectItem value="all">{language === 'en' ? 'All' : 'Tất cả'}</SelectItem>
+                  <SelectItem value="khu-cong-nghe-cao">{language === 'en' ? 'High-tech Park' : 'Khu Công nghệ cao'}</SelectItem>
+                  <SelectItem value="kcn-hoa-khanh">{language === 'en' ? 'Hoa Khanh IP' : 'KCN Hòa Khánh'}</SelectItem>
+                  <SelectItem value="kcn-lien-chieu">{language === 'en' ? 'Lien Chieu IP' : 'KCN Liên Chiểu'}</SelectItem>
+                  <SelectItem value="kcn-da-nang">{language === 'en' ? 'Da Nang IP' : 'KCN Đà Nẵng'}</SelectItem>
+                  <SelectItem value="kdt-an-don">{language === 'en' ? 'An Don New Urban Area' : 'KĐT An Đồn'}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -513,11 +662,11 @@ const EnterpriseListPage: React.FC = () => {
                   htmlFor="keyword"
                   className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
                 >
-                  Tên doanh nghiệp
+                  {language === 'en' ? 'Enterprise Name' : 'Tên doanh nghiệp'}
                 </Label>
               <Input
                   id="keyword"
-                placeholder="Nhập tên doanh nghiệp"
+                placeholder={language === 'en' ? 'Enter enterprise name' : 'Nhập tên doanh nghiệp'}
                   value={filters.keyword}
                   onChange={(e) => handleFilterChange("keyword", e.target.value)}
                   className={`${
@@ -534,7 +683,7 @@ const EnterpriseListPage: React.FC = () => {
                   htmlFor="country"
                   className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
                 >
-                  Quốc gia
+                  {language === 'en' ? 'Country' : 'Quốc gia'}
                 </Label>
               <Select onValueChange={(value) => handleFilterChange("country", value)}>
                   <SelectTrigger className={`${
@@ -542,22 +691,22 @@ const EnterpriseListPage: React.FC = () => {
                       ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' 
                       : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'
                   }`}>
-                  <SelectValue placeholder="Chọn quốc gia" />
+                  <SelectValue placeholder={language === 'en' ? 'Select country' : 'Chọn quốc gia'} />
                 </SelectTrigger>
                   <SelectContent className={`${
                     theme === 'dark' 
                       ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
                       : 'bg-dseza-light-main-bg border-dseza-light-border'
                   }`}>
-                  <SelectItem value="all">Tất cả</SelectItem>
-                  <SelectItem value="viet-nam">Việt Nam</SelectItem>
-                  <SelectItem value="han-quoc">Hàn Quốc</SelectItem>
-                  <SelectItem value="nhat-ban">Nhật Bản</SelectItem>
-                  <SelectItem value="hoa-ky">Hoa Kỳ</SelectItem>
-                  <SelectItem value="dai-loan">Đài Loan</SelectItem>
-                  <SelectItem value="duc">Đức</SelectItem>
+                  <SelectItem value="all">{language === 'en' ? 'All' : 'Tất cả'}</SelectItem>
+                  <SelectItem value="viet-nam">{language === 'en' ? 'Vietnam' : 'Việt Nam'}</SelectItem>
+                  <SelectItem value="han-quoc">{language === 'en' ? 'South Korea' : 'Hàn Quốc'}</SelectItem>
+                  <SelectItem value="nhat-ban">{language === 'en' ? 'Japan' : 'Nhật Bản'}</SelectItem>
+                  <SelectItem value="hoa-ky">{language === 'en' ? 'United States' : 'Hoa Kỳ'}</SelectItem>
+                  <SelectItem value="dai-loan">{language === 'en' ? 'Taiwan' : 'Đài Loan'}</SelectItem>
+                  <SelectItem value="duc">{language === 'en' ? 'Germany' : 'Đức'}</SelectItem>
                   <SelectItem value="singapore">Singapore</SelectItem>
-                  <SelectItem value="trung-quoc">Trung Quốc</SelectItem>
+                  <SelectItem value="trung-quoc">{language === 'en' ? 'China' : 'Trung Quốc'}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -568,7 +717,7 @@ const EnterpriseListPage: React.FC = () => {
                   htmlFor="industry"
                   className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
                 >
-                  Lĩnh vực hoạt động
+                  {language === 'en' ? 'Industry' : 'Lĩnh vực hoạt động'}
                 </Label>
               <Select onValueChange={(value) => handleFilterChange("industry", value)}>
                   <SelectTrigger className={`${
@@ -576,21 +725,21 @@ const EnterpriseListPage: React.FC = () => {
                       ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' 
                       : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'
                   }`}>
-                  <SelectValue placeholder="Chọn lĩnh vực" />
+                  <SelectValue placeholder={language === 'en' ? 'Select industry' : 'Chọn lĩnh vực'} />
                 </SelectTrigger>
                   <SelectContent className={`${
                     theme === 'dark' 
                       ? 'bg-dseza-dark-secondary border-dseza-dark-border' 
                       : 'bg-dseza-light-main-bg border-dseza-light-border'
                   }`}>
-                  <SelectItem value="all">Tất cả</SelectItem>
-                  <SelectItem value="dien-tu-vien-thong">Điện tử viễn thông</SelectItem>
-                  <SelectItem value="cong-nghe-thong-tin">Công nghệ thông tin</SelectItem>
-                  <SelectItem value="hoa-chat-nhua">Hóa chất - Nhựa</SelectItem>
-                  <SelectItem value="oto-co-khi">Ô tô - Cơ khí</SelectItem>
-                  <SelectItem value="det-may">Dệt may</SelectItem>
-                  <SelectItem value="thuc-pham">Thực phẩm</SelectItem>
-                  <SelectItem value="xay-dung">Xây dựng</SelectItem>
+                  <SelectItem value="all">{language === 'en' ? 'All' : 'Tất cả'}</SelectItem>
+                  <SelectItem value="dien-tu-vien-thong">{language === 'en' ? 'Electronics & Telecommunications' : 'Điện tử viễn thông'}</SelectItem>
+                  <SelectItem value="cong-nghe-thong-tin">{language === 'en' ? 'Information Technology' : 'Công nghệ thông tin'}</SelectItem>
+                  <SelectItem value="hoa-chat-nhua">{language === 'en' ? 'Chemicals & Plastics' : 'Hóa chất - Nhựa'}</SelectItem>
+                  <SelectItem value="oto-co-khi">{language === 'en' ? 'Automotive & Machinery' : 'Ô tô - Cơ khí'}</SelectItem>
+                  <SelectItem value="det-may">{language === 'en' ? 'Textiles & Garments' : 'Dệt may'}</SelectItem>
+                  <SelectItem value="thuc-pham">{language === 'en' ? 'Food & Beverages' : 'Thực phẩm'}</SelectItem>
+                  <SelectItem value="xay-dung">{language === 'en' ? 'Construction' : 'Xây dựng'}</SelectItem>
                   <SelectItem value="logistics">Logistics</SelectItem>
                 </SelectContent>
               </Select>
@@ -611,7 +760,7 @@ const EnterpriseListPage: React.FC = () => {
                 disabled={isLoading}
             >
               <Search className="h-4 w-4 mr-2" />
-                {isLoading ? 'Đang tìm...' : 'Tìm kiếm'}
+                {isLoading ? (language === 'en' ? 'Searching...' : 'Đang tìm...') : (language === 'en' ? 'Search' : 'Tìm kiếm')}
             </Button>
           </div>
         </div>
@@ -627,7 +776,9 @@ const EnterpriseListPage: React.FC = () => {
                   {isLoading ? (
                     <Skeleton className="h-4 w-48" />
                   ) : (
-                    `Hiển thị ${startResult}-${endResult} của ${totalEnterprises} doanh nghiệp`
+                    language === 'en' 
+                      ? `Showing ${startResult}-${endResult} of ${totalEnterprises} enterprises`
+                      : `Hiển thị ${startResult}-${endResult} của ${totalEnterprises} doanh nghiệp`
                   )}
                 </div>
                 
@@ -642,7 +793,7 @@ const EnterpriseListPage: React.FC = () => {
                           : 'bg-dseza-light-secondary-accent/20 text-dseza-light-secondary-accent border-dseza-light-secondary-accent/30'
                       }`}
                     >
-                      {enterprises.filter((e: any) => e.country !== "Việt Nam").length} FDI
+                      {enterprises.filter((e: any) => e.country !== "Việt Nam").length} {language === 'en' ? 'FDI' : 'FDI'}
                     </Badge>
                     <Badge 
                       variant="secondary" 
@@ -652,7 +803,7 @@ const EnterpriseListPage: React.FC = () => {
                           : 'bg-dseza-light-primary/20 text-dseza-light-primary border-dseza-light-primary/30'
                       }`}
                     >
-                      {enterprises.filter((e: any) => e.location && e.location.includes("Công nghệ cao")).length} Khu Công nghệ cao
+                      {enterprises.filter((e: any) => e.location && e.location.includes("Công nghệ cao")).length} {language === 'en' ? 'High-tech Park' : 'Khu Công nghệ cao'}
                     </Badge>
                     <Badge 
                       variant="secondary" 
@@ -662,7 +813,7 @@ const EnterpriseListPage: React.FC = () => {
                           : 'bg-dseza-light-accent/20 text-dseza-light-accent border-dseza-light-accent/30'
                       }`}
                     >
-                      {enterprises.filter((e: any) => e.industry && e.industry.includes("Công nghệ")).length} Công nghệ
+                      {enterprises.filter((e: any) => e.industry && e.industry.includes("Công nghệ")).length} {language === 'en' ? 'Technology' : 'Công nghệ'}
                     </Badge>
                   </div>
                 )}
@@ -672,7 +823,7 @@ const EnterpriseListPage: React.FC = () => {
             <h2 className={`text-2xl font-semibold mb-4 ${
               theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
             }`}>
-            KẾT QUẢ THỐNG KÊ DOANH NGHIỆP
+            {language === 'en' ? 'ENTERPRISE STATISTICS RESULTS' : 'KẾT QUẢ THỐNG KÊ DOANH NGHIỆP'}
           </h2>
 
           {/* Results Table */}
@@ -691,16 +842,16 @@ const EnterpriseListPage: React.FC = () => {
                     }`}>#</TableHead>
                     <TableHead className={`font-semibold ${
                       theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                    }`}>Doanh nghiệp</TableHead>
+                    }`}>{language === 'en' ? 'Enterprise' : 'Doanh nghiệp'}</TableHead>
                     <TableHead className={`font-semibold ${
                       theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                    }`}>Khu hành chính</TableHead>
+                    }`}>{language === 'en' ? 'Administrative Zone' : 'Khu hành chính'}</TableHead>
                     <TableHead className={`font-semibold ${
                       theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                    }`}>Lĩnh vực hoạt động</TableHead>
+                    }`}>{language === 'en' ? 'Industry' : 'Lĩnh vực hoạt động'}</TableHead>
                     <TableHead className={`font-semibold ${
                       theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                    }`}>Quốc gia</TableHead>
+                    }`}>{language === 'en' ? 'Country' : 'Quốc gia'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -742,7 +893,7 @@ const EnterpriseListPage: React.FC = () => {
                                   ? 'text-dseza-dark-primary hover:text-dseza-dark-primary-hover hover:underline' 
                                   : 'text-dseza-light-primary hover:text-dseza-light-primary-hover hover:underline'
                               }`}
-                              title="Xem chi tiết doanh nghiệp"
+                              title={language === 'en' ? 'View enterprise details' : 'Xem chi tiết doanh nghiệp'}
                             >
                               {enterprise.attributes?.title || 'N/A'}
                             </button>
@@ -932,7 +1083,7 @@ const EnterpriseListPage: React.FC = () => {
                 <h3 className={`font-semibold mb-2 ${
                   theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'
                 }`}>
-                Tổng số doanh nghiệp
+                {language === 'en' ? 'Total Enterprises' : 'Tổng số doanh nghiệp'}
               </h3>
                 <div className={`text-2xl font-bold ${
                   theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'
@@ -953,7 +1104,7 @@ const EnterpriseListPage: React.FC = () => {
                 <h3 className={`font-semibold mb-2 ${
                   theme === 'dark' ? 'text-dseza-dark-secondary-accent' : 'text-dseza-light-secondary-accent'
                 }`}>
-                Doanh nghiệp FDI
+                {language === 'en' ? 'FDI Enterprises' : 'Doanh nghiệp FDI'}
               </h3>
                 <div className={`text-2xl font-bold ${
                   theme === 'dark' ? 'text-dseza-dark-secondary-accent' : 'text-dseza-light-secondary-accent'
@@ -974,7 +1125,7 @@ const EnterpriseListPage: React.FC = () => {
                 <h3 className={`font-semibold mb-2 ${
                   theme === 'dark' ? 'text-dseza-dark-accent' : 'text-dseza-light-accent'
                 }`}>
-                Khu Công nghệ cao
+                {language === 'en' ? 'High-tech Park' : 'Khu Công nghệ cao'}
               </h3>
                 <div className={`text-2xl font-bold ${
                   theme === 'dark' ? 'text-dseza-dark-accent' : 'text-dseza-light-accent'

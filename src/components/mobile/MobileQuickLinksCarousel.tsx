@@ -27,10 +27,10 @@ const iconMap: Record<string, JSX.Element> = {
  */
 const MobileQuickLinksCarousel: React.FC = () => {
   const { theme } = useTheme();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   
-  // Fetch dynamic data from API
-  const { data, isLoading, isError } = useHomepageData();
+  // Fetch dynamic data from API with language support
+  const { data, isLoading, isError } = useHomepageData(language);
   
   // Get theme-specific styles
   const sectionBg = theme === "dark" ? "bg-dseza-dark-main-bg" : "bg-dseza-light-main-bg";
@@ -70,7 +70,9 @@ const MobileQuickLinksCarousel: React.FC = () => {
             "text-sm text-center",
             textColor
           )}>
-            Không thể tải dữ liệu truy cập nhanh. Vui lòng thử lại sau.
+            {language === 'en'
+              ? 'Unable to load quick access links. Please try again later.'
+              : 'Không thể tải dữ liệu truy cập nhanh. Vui lòng thử lại sau.'}
           </p>
         </div>
       </section>

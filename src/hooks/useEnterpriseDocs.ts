@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { useDrupalApi } from "@/utils/drupal";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Định nghĩa cấu trúc cho một tài liệu
 export interface EnterpriseDocument {
@@ -247,6 +249,10 @@ export const useEnterpriseDocs = () => {
   
   // Sử dụng docCategorySlug nếu có, nếu không thì fallback về docCategory (để tương thích với route cũ)
   const categoryParam = docCategorySlug || docCategory;
+  
+  // Get language-aware API client
+  const { apiGet } = useDrupalApi();
+  const { language } = useLanguage();
 
   const fetchDocuments = async (): Promise<EnterpriseDocument[]> => {
     if (!categoryParam) {
@@ -254,73 +260,130 @@ export const useEnterpriseDocs = () => {
     }
 
     // Try JSON:API endpoint first with category filtering
-    // Map URL categories to Vietnamese category names for filtering
-    const categoryMapping: { [key: string]: string } = {
-      'bao-cao-giam-sat-va-danh-gia-dau-tu': 'Báo cáo giám sát và đánh giá đầu tư',
-      'mau-bang-bieu-bao-cao': 'Mẫu bảng biểu báo cáo',
-      'van-ban-phap-ly': 'Văn bản pháp lý',
-      'tai-lieu-huong-dan': 'Tài liệu hướng dẫn',
-      'bieu-mau-ho-so': 'Biểu mẫu hồ sơ',
-      'quy-dinh-thuc-hien': 'Quy định thực hiện',
-      'thu-tuc-ho-so-du-lieu-moi-truong': 'Thủ tục - Hồ sơ - Dữ liệu môi trường',
+    // Map URL categories to category names for filtering (bilingual support)
+    const categoryMapping: { [key: string]: { vi: string; en: string } } = {
+      'bao-cao-giam-sat-va-danh-gia-dau-tu': { 
+        vi: 'Báo cáo giám sát và đánh giá đầu tư', 
+        en: 'Investment Monitoring & Evaluation Reports' 
+      },
+      'investment-monitoring-evaluation-reports': { 
+        vi: 'Báo cáo giám sát và đánh giá đầu tư', 
+        en: 'Investment Monitoring & Evaluation Reports' 
+      },
+      'mau-bang-bieu-bao-cao': { 
+        vi: 'Mẫu bảng biểu báo cáo', 
+        en: 'Report Forms & Templates' 
+      },
+      'report-forms-templates': { 
+        vi: 'Mẫu bảng biểu báo cáo', 
+        en: 'Report Forms & Templates' 
+      },
+      'van-ban-phap-ly': { 
+        vi: 'Văn bản pháp lý', 
+        en: 'Legal Documents' 
+      },
+      'legal-documents': { 
+        vi: 'Văn bản pháp lý', 
+        en: 'Legal Documents' 
+      },
+      'tai-lieu-huong-dan': { 
+        vi: 'Tài liệu hướng dẫn', 
+        en: 'Guidance Documents' 
+      },
+      'guidance-documents': { 
+        vi: 'Tài liệu hướng dẫn', 
+        en: 'Guidance Documents' 
+      },
+      'bieu-mau-ho-so': { 
+        vi: 'Biểu mẫu hồ sơ', 
+        en: 'Application Forms' 
+      },
+      'application-forms': { 
+        vi: 'Biểu mẫu hồ sơ', 
+        en: 'Application Forms' 
+      },
+      'quy-dinh-thuc-hien': { 
+        vi: 'Quy định thực hiện', 
+        en: 'Implementation Regulations' 
+      },
+      'implementation-regulations': { 
+        vi: 'Quy định thực hiện', 
+        en: 'Implementation Regulations' 
+      },
+      'thu-tuc-ho-so-du-lieu-moi-truong': { 
+        vi: 'Thủ tục - Hồ sơ - Dữ liệu môi trường', 
+        en: 'Environmental Procedures - Documents - Data' 
+      },
+      'procedures-records-environmental-data': {
+        vi: 'Thủ tục - Hồ sơ - Dữ liệu môi trường', 
+        en: 'Environmental Procedures - Documents - Data' 
+      },
+      'environmental-procedures-documents-data': { 
+        vi: 'Thủ tục - Hồ sơ - Dữ liệu môi trường', 
+        en: 'Environmental Procedures - Documents - Data' 
+      },
     };
 
-    const categoryName = categoryMapping[categoryParam] || categoryParam;
+    const categoryName = categoryMapping[categoryParam]?.[language] || categoryParam;
     
     // Validate category mapping
     if (!categoryMapping[categoryParam]) {
       console.warn('⚠️ No explicit mapping found for category:', categoryParam, 'using as-is:', categoryName);
     }
     
-    // Try JSON:API endpoint with category filtering
-    const queryParams = new URLSearchParams();
-    queryParams.append('filter[field_loai_tai_lieu.name]', categoryName);
-    // Fixed include parameter to properly include file entities
-    queryParams.append('include', 'field_loai_tai_lieu,field_file_dinh_kem,field_file_dinh_kem.field_media_document');
-    queryParams.append('sort', '-created');
+    // Try JSON:API endpoint with category filtering using language-aware API
+    const apiOptions = {
+      filter: {
+        'field_loai_tai_lieu.name': categoryName
+      },
+      include: 'field_loai_tai_lieu,field_file_dinh_kem,field_file_dinh_kem.field_media_document',
+      sort: '-created'
+    };
     
-    const jsonApiEndpoint = `${DRUPAL_BASE_URL}/jsonapi/node/tai_lieu_doanh_nghiep?${queryParams.toString()}`;
-    
-    console.log('🔍 Trying JSON:API endpoint:', jsonApiEndpoint);
+    console.log('🔍 Using language-aware API with language:', language);
     console.log('🎯 URL category parameter:', categoryParam);
     console.log('📂 Mapped category name:', categoryName);
-    console.log('🔧 Include parameter:', 'field_loai_tai_lieu,field_file_dinh_kem,field_file_dinh_kem.field_media_document');
+    console.log('🔧 API options:', apiOptions);
 
     try {
-      // First try JSON:API with proper filtering
-      let response = await fetch(jsonApiEndpoint, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/vnd.api+json',
-          'Content-Type': 'application/vnd.api+json',
-        },
-      });
-
+      // First try JSON:API with proper filtering using language-aware client
       let data;
       let isJsonApi = true;
 
-      if (!response.ok) {
-        console.log('⚠️ JSON:API failed, falling back to custom endpoint');
-        console.log('❌ JSON:API Response:', response.status, response.statusText);
-        // Fallback to original endpoint
-        const fallbackEndpoint = `${DRUPAL_BASE_URL}/vi/api/v1/enterprise-docs`;
-        response = await fetch(fallbackEndpoint, {
+      try {
+        data = await apiGet('/jsonapi/node/tai_lieu_doanh_nghiep', apiOptions);
+        console.log('✅ JSON:API call successful with language-aware client');
+      } catch (apiError) {
+        console.log('⚠️ Language-aware JSON:API failed, falling back to manual fetch');
+        console.log('❌ API Error:', apiError);
+        
+        // Fallback to manual fetch with language prefix
+        const queryParams = new URLSearchParams();
+        queryParams.append('filter[field_loai_tai_lieu.name]', categoryName);
+        queryParams.append('include', 'field_loai_tai_lieu,field_file_dinh_kem,field_file_dinh_kem.field_media_document');
+        queryParams.append('sort', '-created');
+        
+        const languagePrefix = language === 'en' ? '/en' : '/vi';
+        const jsonApiEndpoint = `${DRUPAL_BASE_URL}${languagePrefix}/jsonapi/node/tai_lieu_doanh_nghiep?${queryParams.toString()}`;
+        
+        console.log('🔍 Fallback endpoint:', jsonApiEndpoint);
+        
+        const response = await fetch(jsonApiEndpoint, {
           method: 'GET',
           headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.api+json',
+            'Content-Type': 'application/vnd.api+json',
+            'Accept-Language': language,
+            'Content-Language': language,
           },
         });
-        isJsonApi = false;
-      }
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ API Error Response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-      }
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-      data = await response.json();
+        data = await response.json();
+      }
       console.log('📄 Raw API response:', data);
       console.log('🔧 Using JSON:API:', isJsonApi);
       console.log('📦 Included data length:', data.included?.length || 0);
@@ -333,35 +396,26 @@ export const useEnterpriseDocs = () => {
         documents = data.data;
         console.log('📋 JSON:API documents found:', documents.length);
         
-        // Check if included data is missing and try to fetch it separately
-        if (!data.included || data.included.length === 0) {
-          console.log('⚠️ No included data found, trying different approach...');
+        // If no documents found or no included data, try without filter
+        if (documents.length === 0 || !data.included || data.included.length === 0) {
+          console.log('🔄 No documents found or missing included data, trying without filter...');
           
-          // Try fetching without category filter to get all documents with included data
-          const noFilterEndpoint = `${DRUPAL_BASE_URL}/jsonapi/node/tai_lieu_doanh_nghiep?include=field_loai_tai_lieu,field_file_dinh_kem,field_file_dinh_kem.field_media_document&sort=-created`;
-          const noFilterResponse = await fetch(noFilterEndpoint, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/vnd.api+json',
-              'Content-Type': 'application/vnd.api+json',
-            },
-          });
-          
-          if (noFilterResponse.ok) {
-            const noFilterData = await noFilterResponse.json();
+          // Try fetching without category filter using language-aware API
+          try {
+            const noFilterOptions = {
+              include: 'field_loai_tai_lieu,field_file_dinh_kem,field_file_dinh_kem.field_media_document',
+              sort: '-created'
+            };
+            
+            const noFilterData = await apiGet('/jsonapi/node/tai_lieu_doanh_nghiep', noFilterOptions);
             console.log('📋 All documents found:', noFilterData.data?.length || 0);
             console.log('📦 Included entities found:', noFilterData.included?.length || 0);
             
-            // Use all data with includes, will filter on frontend
             documents = noFilterData.data || [];
             data.included = noFilterData.included || [];
+          } catch (noFilterError) {
+            console.log('❌ No filter API call also failed:', noFilterError);
           }
-        }
-        
-        // If still no documents found with category filter, try without filter
-        if (documents.length === 0) {
-          console.log('🔄 No documents found, using all available documents...');
-          // documents were already set above if noFilterResponse was successful
         }
         
         // Filter documents by category if needed (when we fetched all documents)
@@ -376,9 +430,32 @@ export const useEnterpriseDocs = () => {
             });
             console.log(`🔍 Filtered ${filteredDocuments.length} documents from ${documents.length} total for category: ${categoryName}`);
           } else {
-            // If categoryId not found, return empty array instead of all documents
-            console.warn(`⚠️ Category ID not found for category: ${categoryName}, returning empty array`);
-            filteredDocuments = [];
+            // If categoryId not found, try with both language variants
+            const viCategoryName = categoryMapping[categoryParam]?.vi;
+            const enCategoryName = categoryMapping[categoryParam]?.en;
+            
+            let viCategoryId = null;
+            let enCategoryId = null;
+            
+            if (viCategoryName) {
+              viCategoryId = getCategoryIdFromName(viCategoryName, data.included);
+            }
+            if (enCategoryName) {
+              enCategoryId = getCategoryIdFromName(enCategoryName, data.included);
+            }
+            
+            const targetCategoryId = viCategoryId || enCategoryId;
+            
+            if (targetCategoryId) {
+              filteredDocuments = documents.filter((item: any) => {
+                const categoryRelationship = item.relationships?.field_loai_tai_lieu?.data;
+                return categoryRelationship && categoryRelationship.id === targetCategoryId;
+              });
+              console.log(`🔍 Filtered ${filteredDocuments.length} documents using fallback category ID`);
+            } else {
+              console.warn(`⚠️ No category ID found for any language variant of: ${categoryParam}, returning empty array`);
+              filteredDocuments = [];
+            }
           }
         }
 
@@ -479,7 +556,7 @@ export const useEnterpriseDocs = () => {
   };
 
   return useQuery<EnterpriseDocument[], Error>({
-    queryKey: ['enterpriseDocs', categoryParam],
+    queryKey: ['enterpriseDocs', categoryParam, language], // Include language in query key
     queryFn: fetchDocuments,
     enabled: !!categoryParam, // Chỉ chạy khi có categoryParam
     staleTime: 5 * 60 * 1000, // 5 minutes

@@ -1,10 +1,12 @@
 import { Link, useParams } from "react-router-dom";
+import { useEffect } from "react";
 import { useArticles } from "../../hooks/useArticles";
 import { useAllNewsCategories } from "../../hooks/useNewsCategories";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
 import { ChevronRight, ChevronLeft, Calendar, ArrowRight, Star, Filter } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileLayout from "@/components/mobile/MobileLayout";
 import TopBar from "@/components/hero/TopBar";
@@ -16,38 +18,105 @@ import { generateArticleLink } from "@/utils/generateArticleLink";
 import { translatePath } from "@/utils/seo";
 
 // Hàm để định dạng tiêu đề với real categories
-const formatTitle = (slug: string, categoriesData?: any[]) => {
-  // URL mapping cho các category routes
-  const urlToCategoryMap: { [key: string]: string } = {
-    'dau-tu-hop-tac-quoc-te': 'Đầu tư – Hợp tác quốc tế',
-    'dao-tao-uom-tao-khoi-nghiep': 'Đào tạo, Ươm tạo khởi nghiệp',
-    'chuyen-doi-so': 'Chuyển đổi số',
-    'hoat-dong-ban-quan-ly': 'Hoạt động Ban quản lý',
-    'tin-khac': 'Tin khác',
-    'doanh-nghiep': 'Doanh nghiệp',
-    'su-kien': 'Tin tức & Sự kiện',
-    'thong-bao': 'Thông báo',
-    'hoat-dong': 'Hoạt động',
-    'tin-tuc': 'Tin tức',
+const formatTitle = (slug: string, categoriesData?: any[], language: 'vi' | 'en' = 'vi') => {
+  // URL mapping cho các category routes với hỗ trợ đa ngôn ngữ
+  const urlToCategoryMap: { [key: string]: { vi: string; en: string } } = {
+    'dau-tu-hop-tac-quoc-te': {
+      vi: 'Đầu tư – Hợp tác quốc tế',
+      en: 'Investment – International Cooperation'
+    },
+    'dao-tao-uom-tao-khoi-nghiep': {
+      vi: 'Đào tạo, Ươm tạo khởi nghiệp',
+      en: 'Training, Startup Incubation'
+    },
+    'chuyen-doi-so': {
+      vi: 'Chuyển đổi số',
+      en: 'Digital Transformation'
+    },
+    'hoat-dong-ban-quan-ly': {
+      vi: 'Hoạt động Ban quản lý',
+      en: 'Management Board Activities'
+    },
+    'tin-khac': {
+      vi: 'Tin khác',
+      en: 'Other News'
+    },
+    'doanh-nghiep': {
+      vi: 'Doanh nghiệp',
+      en: 'Enterprises'
+    },
+    'su-kien': {
+      vi: 'Tin tức & Sự kiện',
+      en: 'News & Events'
+    },
+    'events': {
+      vi: 'Tin tức & Sự kiện',
+      en: 'News & Events'
+    },
+    'thong-bao': {
+      vi: 'Thông báo',
+      en: 'Announcements'
+    },
+    'hoat-dong': {
+      vi: 'Hoạt động',
+      en: 'Activities'
+    },
+    'tin-tuc': {
+      vi: 'Tin tức',
+      en: 'News'
+    },
     // Add missing investment-related categories
-    'quy-trinh-linh-vuc-dau-tu': 'Quy trình lĩnh vực đầu tư',
-    'linh-vuc-khuyen-khich-dau-tu': 'Lĩnh vực thu hút đầu tư',
-    'linh-vuc-thu-hut-dau-tu': 'Lĩnh vực thu hút đầu tư', // Alternative slug
-    'danh-cho-nha-dau-tu': 'Dành cho nhà đầu tư', // Parent category
+    'quy-trinh-linh-vuc-dau-tu': {
+      vi: 'Quy trình lĩnh vực đầu tư',
+      en: 'Investment Process'
+    },
+    'linh-vuc-khuyen-khich-dau-tu': {
+      vi: 'Lĩnh vực thu hút đầu tư',
+      en: 'Investment Attraction Fields'
+    },
+    'linh-vuc-thu-hut-dau-tu': {
+      vi: 'Lĩnh vực thu hút đầu tư',
+      en: 'Investment Attraction Fields'
+    },
+    'danh-cho-nha-dau-tu': {
+      vi: 'Dành cho nhà đầu tư',
+      en: 'For Investors'
+    },
     
     // Add investment environment subcategories
-    'moi-truong-dau-tu': 'Môi trường đầu tư', // Parent category
-    'ha-tang-giao-thong': 'Hạ tầng giao thông',
-    'khoa-hoc-cong-nghe-moi-truong': 'Khoa học công nghệ - Môi trường',
-    'logistics': 'Logistics',
-    'ha-tang-xa-hoi': 'Hạ tầng xã hội',
-    'nguon-nhan-luc': 'Nguồn nhân lực',
-    'cai-cach-hanh-chinh': 'Cải cách hành chính',
+    'moi-truong-dau-tu': {
+      vi: 'Môi trường đầu tư',
+      en: 'Investment Environment'
+    },
+    'ha-tang-giao-thong': {
+      vi: 'Hạ tầng giao thông',
+      en: 'Transportation Infrastructure'
+    },
+    'khoa-hoc-cong-nghe-moi-truong': {
+      vi: 'Khoa học công nghệ - Môi trường',
+      en: 'Science Technology - Environment'
+    },
+    'logistics': {
+      vi: 'Logistics',
+      en: 'Logistics'
+    },
+    'ha-tang-xa-hoi': {
+      vi: 'Hạ tầng xã hội',
+      en: 'Social Infrastructure'
+    },
+    'nguon-nhan-luc': {
+      vi: 'Nguồn nhân lực',
+      en: 'Human Resources'
+    },
+    'cai-cach-hanh-chinh': {
+      vi: 'Cải cách hành chính',
+      en: 'Administrative Reform'
+    },
   };
   
   // Trước tiên thử mapping cố định
   if (urlToCategoryMap[slug]) {
-    return urlToCategoryMap[slug];
+    return urlToCategoryMap[slug][language];
   }
   
   // Nếu có categories data thì tìm trong đó
@@ -57,7 +126,7 @@ const formatTitle = (slug: string, categoriesData?: any[]) => {
       slug.replace(/-/g, ' ').toLowerCase().includes(cat.name.toLowerCase())
     );
     if (foundCategory) {
-      return foundCategory.name;
+      return language === 'en' && foundCategory.nameEn ? foundCategory.nameEn : foundCategory.name;
     }
   }
   
@@ -69,10 +138,11 @@ const formatTitle = (slug: string, categoriesData?: any[]) => {
 };
 
 // Hàm format ngày tháng
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string, lang: 'vi' | 'en' = 'vi') => {
   if (!dateString) return "";
   const date = new Date(dateString);
-  return date.toLocaleDateString('vi-VN', {
+  const locale = lang === 'en' ? 'en-GB' : 'vi-VN';
+  return date.toLocaleDateString(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric'
@@ -85,21 +155,181 @@ const ArticleListPage = () => {
   const { data: categoriesData } = useAllNewsCategories(); // Use ALL categories instead of just event categories
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
 
   // Tạo tiêu đề động với real categories
   const pageTitle = subcategory 
-    ? `${formatTitle(category!, categoriesData)} - ${formatTitle(subcategory, categoriesData)}`
-    : formatTitle(category!, categoriesData);
+    ? `${formatTitle(category!, categoriesData, language)} - ${formatTitle(subcategory, categoriesData, language)}`
+    : formatTitle(category!, categoriesData, language);
 
-  // Tạo description động
+  // Dynamic description based on language with better SEO
   const getPageDescription = () => {
     const targetCategory = subcategory || category;
-    if (targetCategory === 'su-kien' || targetCategory === 'tin-tuc') {
-      return 'Khám phá tất cả các thông tin mới nhất, sự kiện và hoạt động từ Ban Quản lý Khu công nghệ cao và các khu công nghiệp Đà Nẵng';
+    if (language === 'en') {
+      if (targetCategory === 'su-kien' || targetCategory === 'tin-tuc' || targetCategory === 'events') {
+        return 'Discover all the latest news, events and activities from the Management Board of Da Nang Hi-Tech Park and Industrial Zones. Stay updated with official announcements, investment opportunities, and development initiatives.';
+      }
+      return `Discover the latest information about ${pageTitle.toLowerCase()} from the Management Board of Da Nang Hi-Tech Park and Industrial Zones. Get insights into policies, developments, and opportunities in ${pageTitle.toLowerCase()}.`;
     }
-    return `Khám phá các thông tin mới nhất về ${pageTitle.toLowerCase()} từ Ban Quản lý Khu công nghệ cao và các khu công nghiệp Đà Nẵng`;
+    if (targetCategory === 'su-kien' || targetCategory === 'tin-tuc' || targetCategory === 'events') {
+      return 'Khám phá tất cả các thông tin mới nhất, sự kiện và hoạt động từ Ban Quản lý Khu công nghệ cao và các khu công nghiệp Đà Nẵng. Cập nhật các thông báo chính thức, cơ hội đầu tư và các sáng kiến phát triển.';
+    }
+    return `Khám phá các thông tin mới nhất về ${pageTitle.toLowerCase()} từ Ban Quản lý Khu công nghệ cao và các khu công nghiệp Đà Nẵng. Nắm bắt thông tin về chính sách, phát triển và cơ hội trong lĩnh vực ${pageTitle.toLowerCase()}.`;
   };
+
+  // Enhanced SEO: update document title & meta tags
+  useEffect(() => {
+    // Set page title
+    document.title = `${pageTitle} | DSEZA`;
+    
+    // Set meta description
+    const metaDesc = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (metaDesc) {
+      metaDesc.setAttribute('content', getPageDescription());
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = getPageDescription();
+      document.head.appendChild(meta);
+    }
+    
+    // Set language meta tag
+    document.documentElement.lang = language;
+    
+    // Add/update Open Graph meta tags for better social sharing
+    const updateOrCreateMetaTag = (property: string, content: string) => {
+      let metaTag = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null;
+      if (metaTag) {
+        metaTag.setAttribute('content', content);
+      } else {
+        metaTag = document.createElement('meta');
+        metaTag.setAttribute('property', property);
+        metaTag.setAttribute('content', content);
+        document.head.appendChild(metaTag);
+      }
+    };
+    
+    updateOrCreateMetaTag('og:title', `${pageTitle} | DSEZA`);
+    updateOrCreateMetaTag('og:description', getPageDescription());
+    updateOrCreateMetaTag('og:type', 'website');
+    updateOrCreateMetaTag('og:url', window.location.href);
+    updateOrCreateMetaTag('og:site_name', 'DSEZA - Da Nang Hi-Tech Park and Industrial Zones');
+    
+    // Twitter Card meta tags
+    const updateOrCreateTwitterMetaTag = (name: string, content: string) => {
+      let metaTag = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
+      if (metaTag) {
+        metaTag.setAttribute('content', content);
+      } else {
+        metaTag = document.createElement('meta');
+        metaTag.setAttribute('name', name);
+        metaTag.setAttribute('content', content);
+        document.head.appendChild(metaTag);
+      }
+    };
+    
+    updateOrCreateTwitterMetaTag('twitter:card', 'summary_large_image');
+    updateOrCreateTwitterMetaTag('twitter:title', `${pageTitle} | DSEZA`);
+    updateOrCreateTwitterMetaTag('twitter:description', getPageDescription());
+    
+    // Canonical URL
+    let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (canonicalLink) {
+      canonicalLink.href = window.location.href;
+    } else {
+      canonicalLink = document.createElement('link');
+      canonicalLink.rel = 'canonical';
+      canonicalLink.href = window.location.href;
+      document.head.appendChild(canonicalLink);
+    }
+    
+    // Add structured data for better SEO
+    const addStructuredData = () => {
+      // Remove existing structured data
+      const existingScript = document.querySelector('script[type="application/ld+json"]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+      
+      // Create new structured data
+      const structuredData = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": pageTitle,
+        "description": getPageDescription(),
+        "url": window.location.href,
+        "inLanguage": language === 'en' ? 'en-US' : 'vi-VN',
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "DSEZA",
+          "url": window.location.origin,
+          "description": language === 'en' 
+            ? "Da Nang Hi-Tech Park and Industrial Zones Management Board"
+            : "Ban Quản lý Khu công nghệ cao và các khu công nghiệp Đà Nẵng"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "DSEZA",
+          "url": window.location.origin
+        },
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": language === 'en' ? "Home" : "Trang chủ",
+              "item": window.location.origin
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": pageTitle,
+              "item": window.location.href
+            }
+          ]
+        }
+      };
+      
+      // Add articles data if available
+      if (articles && articles.length > 0) {
+        (structuredData as any).mainEntity = {
+          "@type": "ItemList",
+          "numberOfItems": articles.length,
+          "itemListElement": articles.slice(0, 10).map((article, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "Article",
+              "headline": article.title,
+              "description": article.summary,
+              "url": `${window.location.origin}${article.path}`,
+              "datePublished": article.published_date,
+              "publisher": {
+                "@type": "Organization",
+                "name": "DSEZA"
+              },
+              ...(article.imageUrl && {
+                "image": {
+                  "@type": "ImageObject",
+                  "url": article.imageUrl.startsWith('http') ? article.imageUrl : `${window.location.origin}${article.imageUrl}`
+                }
+              })
+            }
+          }))
+        };
+      }
+      
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(structuredData);
+      document.head.appendChild(script);
+    };
+    
+    addStructuredData();
+    
+  }, [pageTitle, language, getPageDescription, articles]);
 
   // Check if this is a subcategory of su-kien
   const isSubcategoryOfSuKien = category === 'su-kien' && subcategory;
@@ -119,7 +349,7 @@ const ArticleListPage = () => {
                 <div className="flex flex-col items-center space-y-4">
                   <LoadingSpinner size="lg" />
                   <p className={`text-base ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                    Đang tải tin tức...
+                    {language === 'en' ? 'Loading news...' : 'Đang tải tin tức...'}
                   </p>
                 </div>
               </div>
@@ -142,7 +372,7 @@ const ArticleListPage = () => {
               <div className="flex flex-col items-center space-y-4">
                 <LoadingSpinner size="lg" />
                 <p className={`text-lg ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                  Đang tải danh sách bài viết...
+                  {language === 'en' ? 'Loading articles...' : 'Đang tải danh sách bài viết...'}
                 </p>
               </div>
             </div>
@@ -163,8 +393,8 @@ const ArticleListPage = () => {
             <main className="flex-1 px-4 py-6">
               <div className="text-center py-12">
                 <div className={`text-red-500 mb-4`}>
-                  <p className="text-lg font-semibold mb-2">Có lỗi xảy ra</p>
-                  <p className="text-sm">Không thể tải tin tức. Vui lòng thử lại sau.</p>
+                  <p className="text-lg font-semibold mb-2">{language === 'en' ? 'An error occurred' : 'Có lỗi xảy ra'}</p>
+                  <p className="text-sm">{language === 'en' ? 'Unable to load news. Please try again later.' : 'Không thể tải tin tức. Vui lòng thử lại sau.'}</p>
                 </div>
               </div>
             </main>
@@ -184,8 +414,8 @@ const ArticleListPage = () => {
           <div className="container mx-auto px-4 py-8">
             <div className="text-center py-12">
               <div className={`text-red-500 mb-4`}>
-                <p className="text-xl font-semibold mb-2">Có lỗi xảy ra</p>
-                <p className="text-sm">Không thể tải danh sách bài viết. Vui lòng thử lại sau.</p>
+                <p className="text-xl font-semibold mb-2">{language === 'en' ? 'An error occurred' : 'Có lỗi xảy ra'}</p>
+                <p className="text-sm">{language === 'en' ? 'Unable to load articles. Please try again later.' : 'Không thể tải danh sách bài viết. Vui lòng thử lại sau.'}</p>
               </div>
             </div>
           </div>
@@ -210,7 +440,7 @@ const ArticleListPage = () => {
                   to="/" 
                   className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                 >
-                  Trang chủ
+                  {language === 'en' ? 'Home' : 'Trang chủ'}
                 </Link>
                 <ChevronRight className="h-2.5 w-2.5" />
                 
@@ -220,26 +450,25 @@ const ArticleListPage = () => {
                       to={`/${translatePath('news', language)}/${translatePath('event', language)}`}
                       className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                     >
-                      Tin tức & Sự kiện
+                      {language === 'en' ? 'News & Events' : 'Tin tức & Sự kiện'}
                     </Link>
                     <ChevronRight className="h-2.5 w-2.5" />
                     <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                      {formatTitle(subcategory!, categoriesData)}
+                      {formatTitle(subcategory!, categoriesData, language)}
                     </span>
                   </>
                 ) : (
                   <>
                     <Link 
-                      to={`/${translatePath('news', language)}`}
-                      className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                      to={"#"}
+                      className="hidden"
                     >
-                      Tin tức
+                      {language === 'en' ? 'News' : 'Tin tức'}
                     </Link>
                     {category && (
                       <>
-                        <ChevronRight className="h-2.5 w-2.5" />
                         <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                          {formatTitle(category, categoriesData)}
+                          {formatTitle(category, categoriesData, language)}
                         </span>
                       </>
                     )}
@@ -349,10 +578,10 @@ const ArticleListPage = () => {
                                   : 'bg-dseza-light-primary/20 text-dseza-light-primary'
                               }`}
                             >
-                              {article.categories.length > 0 ? article.categories[0] : formatTitle(subcategory || category!, categoriesData)}
+                              {article.categories.length > 0 ? article.categories[0] : formatTitle(subcategory || category!, categoriesData, language)}
                             </Badge>
                             <span className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                              {formatDate(article.published_date)}
+                              {formatDate(article.published_date, language)}
                             </span>
                           </div>
 
@@ -401,7 +630,7 @@ const ArticleListPage = () => {
                         : 'bg-dseza-light-primary text-white hover:bg-dseza-light-primary/80'
                     }`}
                   >
-                    Xem tất cả tin tức
+                    {language === 'en' ? 'View all news' : 'Xem tất cả tin tức'}
                   </Link>
                 </div>
               </div>
@@ -474,14 +703,13 @@ const ArticleListPage = () => {
                 <>
                   {/* Normal breadcrumb for other routes */}
                   <Link 
-                    to={`/${translatePath('news', language)}`}
-                    className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                    to={"#"}
+                    className="hidden"
                   >
                     Tin tức
                   </Link>
                   {category && (
                     <>
-                      <ChevronRight className="h-4 w-4" />
                       <Link 
                         to={`/${translatePath('news', language)}/${category}`} 
                         className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
@@ -529,7 +757,7 @@ const ArticleListPage = () => {
                       : 'bg-dseza-light-primary/20 text-dseza-light-primary border-dseza-light-primary/30'
                   }`}
                 >
-                  {articles.length} bài viết
+                  {articles.length} {language === 'en' ? (articles.length === 1 ? 'article' : 'articles') : 'bài viết'}
                 </Badge>
                 {/* Featured articles count */}
                 {articles.filter(article => article.is_featured).length > 0 && (
@@ -542,7 +770,7 @@ const ArticleListPage = () => {
                     }`}
                   >
                     <Star className="h-3 w-3 mr-1" />
-                    {articles.filter(article => article.is_featured).length} sự kiện tiêu biểu
+                    {articles.filter(article => article.is_featured).length} {language === 'en' ? 'featured events' : 'sự kiện tiêu biểu'}
                   </Badge>
                 )}
               </div>
@@ -588,7 +816,7 @@ const ArticleListPage = () => {
                               : 'bg-dseza-light-primary text-white'
                           }`}
                         >
-                          {article.categories.length > 0 ? article.categories[0] : formatTitle(subcategory || category!, categoriesData)}
+                          {article.categories.length > 0 ? article.categories[0] : formatTitle(subcategory || category!, categoriesData, language)}
                         </Badge>
                       </div>
 
@@ -604,7 +832,7 @@ const ArticleListPage = () => {
                             }`}
                           >
                             <Star className="h-3 w-3 mr-1" />
-                            Tiêu biểu
+                            {language === 'en' ? 'Featured' : 'Tiêu biểu'}
                           </Badge>
                         </div>
                       )}
@@ -629,7 +857,7 @@ const ArticleListPage = () => {
                       }`}>
                         <Calendar className="h-4 w-4 mr-2" />
                         <time dateTime={article.published_date}>
-                          {formatDate(article.published_date)}
+                          {formatDate(article.published_date, language)}
                         </time>
                       </div>
 
@@ -675,7 +903,7 @@ const ArticleListPage = () => {
                             ? 'text-dseza-dark-primary group-hover:text-dseza-dark-primary-hover' 
                             : 'text-dseza-light-primary group-hover:text-dseza-light-primary-hover'
                         }`}>
-                          Đọc thêm →
+                          {language === 'en' ? 'Read more →' : 'Đọc thêm →'}
                         </span>
                       </div>
                     </div>
@@ -694,10 +922,13 @@ const ArticleListPage = () => {
                   </svg>
                 </div>
                 <h3 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                  Chưa có bài viết nào
+                  {language === 'en' ? 'No articles yet' : 'Chưa có bài viết nào'}
                 </h3>
                 <p className="text-lg mb-6">
-                  Hiện tại chưa có bài viết nào trong chuyên mục "{pageTitle}".
+                  {language === 'en' 
+                    ? `Currently there are no articles in the "${pageTitle}" category.`
+                    : `Hiện tại chưa có bài viết nào trong chuyên mục "${pageTitle}".`
+                  }
                 </p>
                 <Link 
                   to={`/${translatePath('news', language)}`}
@@ -708,7 +939,7 @@ const ArticleListPage = () => {
                   }`}
                 >
                   <ArrowRight className="h-5 w-5 mr-2" />
-                  Xem tất cả tin tức
+                  {language === 'en' ? 'View all news' : 'Xem tất cả tin tức'}
                 </Link>
               </div>
             </div>
@@ -725,7 +956,10 @@ const ArticleListPage = () => {
                     : 'border-dseza-light-primary text-dseza-light-primary hover:bg-dseza-light-primary hover:text-white'
                 }`}
               >
-                ← {isSubcategoryOfSuKien ? "Quay lại Tin tức & Sự kiện" : "Quay lại danh mục tin tức"}
+                ← {isSubcategoryOfSuKien 
+                  ? (language === 'en' ? 'Back to News & Events' : 'Quay lại Tin tức & Sự kiện')
+                  : (language === 'en' ? 'Back to news categories' : 'Quay lại danh mục tin tức')
+                }
               </Link>
             </div>
           )}

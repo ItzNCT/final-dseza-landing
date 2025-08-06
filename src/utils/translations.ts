@@ -293,6 +293,12 @@ const viTranslations: TranslationObject = {
     debugInfo: "Thông tin debug",
     home: "Trang chủ"
   },
+  
+  // Partners Section
+  partners: {
+    noData: "Chưa có thông tin đối tác nào được đăng tải.",
+    error: "Có lỗi xảy ra khi tải thông tin đối tác."
+  },
 
   // Contact Page
   contact: {
@@ -632,6 +638,12 @@ const enTranslations: TranslationObject = {
     tryAgain: "Try again",
     debugInfo: "Debug information",
     home: "Home"
+  },
+  
+  // Partners Section
+  partners: {
+    noData: "No partner information available.",
+    error: "An error occurred while fetching partner information."
   },
 
   // Contact Page

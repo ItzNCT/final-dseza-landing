@@ -8,12 +8,12 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const InvestmentInformation: React.FC = () => {
   const { theme } = useTheme();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<"investors" | "environment">("investors");
   const carouselRef = useRef<HTMLDivElement>(null);
   
   // Fetch investment cards using the custom hook
-  const { data: investmentCards, isLoading, isError } = useInvestmentCards();
+  const { data: investmentCards, isLoading, isError } = useInvestmentCards(language);
   
   // Theme-specific styles
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
@@ -25,6 +25,9 @@ const InvestmentInformation: React.FC = () => {
   const navArrowHoverTextColor = theme === "dark" ? "hover:text-dseza-dark-primary-accent" : "hover:text-dseza-light-primary-accent";
   
   // Filter investment cards by category
+  const forInvestorsCategory = language === 'en' ? 'For Investors' : 'Dành cho nhà đầu tư';
+  const investmentEnvironmentCategory = language === 'en' ? 'Investment Environment' : 'Môi trường đầu tư';
+
   const forInvestorsData = investmentCards?.filter(card => 
     card.category === 'Dành cho nhà đầu tư'
   ) || [];
@@ -84,7 +87,7 @@ const InvestmentInformation: React.FC = () => {
         {isError && (
           <div className="text-center py-16">
             <p className={cn("text-lg", textColor)}>
-              Đã xảy ra lỗi khi tải thông tin đầu tư. Vui lòng thử lại sau.
+              {language === 'en' ? 'An error occurred while loading investment information. Please try again later.' : 'Đã xảy ra lỗi khi tải thông tin đầu tư. Vui lòng thử lại sau.'}
             </p>
           </div>
         )}
@@ -192,8 +195,8 @@ const InvestmentInformation: React.FC = () => {
                 <div className="text-center py-12">
                   <p className={cn("text-lg", textColor)}>
                     {activeTab === "environment" 
-                      ? "Chưa có thông tin môi trường đầu tư nào được đăng tải." 
-                      : "Chưa có thông tin dành cho nhà đầu tư nào được đăng tải."}
+                      ? (language === 'en' ? 'No investment environment information has been posted yet.' : 'Chưa có thông tin môi trường đầu tư nào được đăng tải.') 
+                      : (language === 'en' ? 'No investor information has been posted yet.' : 'Chưa có thông tin dành cho nhà đầu tư nào được đăng tải.') }
                   </p>
                 </div>
               )}

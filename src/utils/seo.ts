@@ -67,17 +67,42 @@ export function translatePath(segmentKey: string, lang: 'vi' | 'en'): string {
 }
 
 export function getArticleSlug(article: any): string {
+  if (!article) {
+    return '';
+  }
+
+  // 1. Prefer explicit path alias when available (e.g. from Drupal JSON:API)
   const alias = article?.attributes?.path?.alias;
   if (alias) {
     const trimmedAlias = alias.replace(/^\/|\/$/g, '');
     const parts = trimmedAlias.split('/');
-    const slug = parts[parts.length - 1];
-    if (slug) {
-      return slug;
+    const slugFromAlias = parts[parts.length - 1];
+    if (slugFromAlias) {
+      return slugFromAlias;
     }
   }
 
-  return slugifyTitle(article.attributes.title) + '-' + article.id.slice(0, 8);
+  // 2. Fall back to a provided "slug" field or path string (flattened Article object)
+  if (typeof article.slug === 'string' && article.slug.trim() !== '') {
+    return article.slug;
+  }
+
+  if (typeof article.path === 'string' && article.path.trim() !== '') {
+    const trimmedPath = article.path.replace(/^\/|\/$/g, '');
+    const pathParts = trimmedPath.split('/');
+    const slugFromPath = pathParts[pathParts.length - 1];
+    if (slugFromPath) {
+      return slugFromPath;
+    }
+  }
+
+  // 3. Derive slug from the article title (support both flattened and nested structures)
+  const rawTitle = article?.attributes?.title || article?.title || '';
+  const safeTitle = rawTitle ? slugifyTitle(rawTitle) : 'article';
+
+  // 4. Append a shortened id (if present) to keep slugs unique
+  const idFragment = typeof article.id === 'string' ? article.id.slice(0, 8) : '';
+  return idFragment ? `${safeTitle}-${idFragment}` : safeTitle;
 }
 
 export function getArticleUrl(lang: 'vi' | 'en', article: any): string {

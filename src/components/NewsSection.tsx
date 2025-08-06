@@ -290,7 +290,7 @@ const NewsSection: React.FC = () => {
         {filteredNews.length > 0 && !newsLoading && !newsError && !categoriesLoading && !categoriesError && (
           <div className="flex justify-center mt-8">
             <Link
-              to={`${language === 'en' ? '/en' : ''}/tin-tuc`}
+              to={`${language === 'en' ? '/en' : ''}/tin-tuc/su-kien`}
               className={cn(
                 "py-2.5 px-6 rounded-full font-inter font-medium text-sm",
                 "border transition-colors duration-200",

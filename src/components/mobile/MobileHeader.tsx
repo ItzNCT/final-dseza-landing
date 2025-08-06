@@ -130,7 +130,12 @@ const MobileHeader: React.FC = () => {
   // Navigation handler
   const handleNavigation = (url: string) => {
     console.log(`📱 Mobile Navigation: ${url} [Language: ${language}]`);
-    navigate(url);
+    if (/^\/?https?:\/\//.test(url)) {
+      const cleanUrl = url.replace(/^\/+/, '');
+      window.open(cleanUrl, "_blank", "noopener noreferrer");
+    } else {
+      navigate(url);
+    }
     setIsMenuOpen(false); // Close menu after navigation
   };
   

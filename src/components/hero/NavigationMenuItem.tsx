@@ -24,12 +24,18 @@ const NavigationMenuItem = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   
+  const isExternalUrl = /^\/?https?:\/\//.test(item.url);
+
   const handleClick = (e: React.MouseEvent) => {
     if (item.megaMenuConfig) {
       e.preventDefault();
       onMenuClick(index);
     } else {
-      // For regular menu items, use React Router navigation
+      if (isExternalUrl) {
+        // Allow default anchor behavior for external links (open in new tab)
+        return; // Do not prevent default
+      }
+      // For internal links, prevent default and use React Router navigation
       e.preventDefault();
       console.log(`🔗 Navigating to: ${item.url} [Language: ${language}]`);
       navigate(item.url);
@@ -50,7 +56,9 @@ const NavigationMenuItem = ({
   return (
     <li className="py-4"> {/* Giữ py-4 để đảm bảo chiều cao nhất quán cho li */}
       <a 
-        href={item.url}
+        href={isExternalUrl ? item.url.replace(/^\/+/, '') : item.url}
+        target={isExternalUrl ? "_blank" : undefined}
+        rel={isExternalUrl ? "noopener noreferrer" : undefined}
         className={cn(
           "group relative flex items-center font-medium text-base transition-colors duration-300 ease-in-out px-1", // Thêm group và px-1 để underline không quá sát lề
           isActive 

@@ -96,9 +96,15 @@ const App: React.FC = () => (
                         <Route path="bai-viet/*" element={<DynamicArticleHandler />} />
                         <Route path="article/*" element={<DynamicArticleHandler />} />
                         
-                        {/* Document pages with nested routes */}
+                        {/* Document pages with nested routes - Vietnamese */}
                         <Route path="van-ban" element={<DocumentTabLayout />}>
                           <Route index element={<Navigate to="van-ban-phap-luat/phap-quy-trung-uong" replace />} />
+                          <Route path=":category/:subcategory" element={<DocumentSearchPage />} />
+                        </Route>
+                        
+                        {/* Document pages with nested routes - English */}
+                        <Route path="documents" element={<DocumentTabLayout />}>
+                          <Route index element={<Navigate to="legal-documents/central-legal-regulations" replace />} />
                           <Route path=":category/:subcategory" element={<DocumentSearchPage />} />
                         </Route>
                         
@@ -107,26 +113,61 @@ const App: React.FC = () => (
                         <Route path="van-ban/huong-dan-gop-y/gop-y-du-thao-van-ban/:id" element={<DraftDetailPage />} />
                         <Route path="van-ban/huong-dan-gop-y/van-ban-huong-dan" element={<VanBanHuongDanPage />} />
                         
-                        {/* Enterprise routes */}
+                        {/* Enterprise routes - Vietnamese */}
                         <Route path="doanh-nghiep/thong-tin-doanh-nghiep/thong-ke-doanh-nghiep" element={<EnterpriseListPage />} />
                         <Route path="doanh-nghiep/van-ban/chi-tiet/:docId" element={<DocumentViewerPage />} />
+                        <Route path="doanh-nghiep/tai-lieu/chi-tiet/:docId" element={<DocumentViewerPage />} />
+                        <Route path="doanh-nghiep/bao-cao-du-lieu/chi-tiet/:docId" element={<DocumentViewerPage />} />
                         <Route path="doanh-nghiep/tuyen-dung" element={<RecruitmentPage />} />
                         <Route path="doanh-nghiep/thong-tin-doanh-nghiep/:docCategorySlug" element={<DocumentListPage />} />
                         <Route path="doanh-nghiep/van-ban/:docCategorySlug" element={<DocumentListPage />} />
+                        <Route path="doanh-nghiep/tai-lieu/:docCategorySlug" element={<DocumentListPage />} />
                         <Route path="doanh-nghiep/bao-cao-du-lieu/:docCategory" element={<DocumentListPage />} />
                         
-                        {/* News routes */}
+                        {/* Enterprise routes - English (business) */}
+                        <Route path="business/enterprise-information/enterprise-statistics" element={<EnterpriseListPage />} />
+                        <Route path="business/documents/detail/:docId" element={<DocumentViewerPage />} />
+                        <Route path="business/reports-data/chi-tiet/:docId" element={<DocumentViewerPage />} />
+                        <Route path="business/recruitment" element={<RecruitmentPage />} />
+                        <Route path="business/enterprise-information/:docCategorySlug" element={<DocumentListPage />} />
+                        <Route path="business/documents/:docCategorySlug" element={<DocumentListPage />} />
+                        <Route path="business/reports-data/:docCategory" element={<DocumentListPage />} />
+                        
+                        {/* Enterprise routes - English (enterprises) */}
+                        <Route path="enterprises/enterprise-information/enterprise-statistics" element={<EnterpriseListPage />} />
+                        <Route path="enterprises/documents/detail/:docId" element={<DocumentViewerPage />} />
+                        {/* Fallback old detail path for backward compatibility */}
+                        <Route path="enterprises/reports-data/chi-tiet/:docId" element={<DocumentViewerPage />} />
+                        <Route path="enterprises/recruitment" element={<RecruitmentPage />} />
+                        <Route path="enterprises/enterprise-information/:docCategorySlug" element={<DocumentListPage />} />
+                        <Route path="enterprises/documents/:docCategorySlug" element={<DocumentListPage />} />
+                        <Route path="enterprises/reports-data/:docCategory" element={<DocumentListPage />} />
+                        
+                        {/* News routes - Vietnamese */}
                         <Route path="tin-tuc/lich-cong-tac" element={<WorkSchedulePage />} />
                         <Route path="tin-tuc/moi-truong-dau-tu" element={<InvestmentEnvironmentPage />} />
                         <Route path="tin-tuc/danh-cho-nha-dau-tu" element={<InvestorGuidelinesPage />} />
                         <Route path="tin-tuc/:category/:subcategory" element={<ArticleListPage />} />
                         <Route path="tin-tuc/:category" element={<ArticleListPage />} />
                         
-                        {/* Q&A and utilities routes */}
+                        {/* News routes - English */}
+                        <Route path="news/work-schedule" element={<WorkSchedulePage />} />
+                        <Route path="news/investment-environment" element={<InvestmentEnvironmentPage />} />
+                        <Route path="news/for-investors" element={<InvestorGuidelinesPage />} />
+                        <Route path="news/:category/:subcategory" element={<ArticleListPage />} />
+                        <Route path="news/:category" element={<ArticleListPage />} />
+                        
+                        {/* Q&A and utilities routes - Vietnamese */}
                         <Route path="tien-ich/hoi-dap/:id" element={<QnADetailPage />} />
                         <Route path="tien-ich/hoi-dap/tao-moi" element={<CreateQuestionPage />} />
                         <Route path="tien-ich/hoi-dap" element={<QnAListPage />} />
                         <Route path="tien-ich/cau-hoi-thuong-gap" element={<FaqPage />} />
+                        
+                        {/* Q&A and utilities routes - English */}
+                        <Route path="utilities/qna/:id" element={<QnADetailPage />} />
+                        <Route path="utilities/qna/create" element={<CreateQuestionPage />} />
+                        <Route path="utilities/qna" element={<QnAListPage />} />
+                        <Route path="utilities/faq" element={<FaqPage />} />
                         <Route path="utilities/qa/:id" element={<QnADetailPage />} />
                         <Route path="utilities/qa" element={<QnAListPage />} />
                         <Route path="utilities/frequently-asked-questions" element={<FaqPage />} />

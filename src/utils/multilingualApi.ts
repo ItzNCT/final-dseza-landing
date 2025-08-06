@@ -368,6 +368,10 @@ export const multilingualUtils = {
    * Create language-specific URLs
    */
   createLanguageUrl(path: string, language: 'vi' | 'en'): string {
+    // Preserve external URLs (http://, https://, //) without adding language prefix
+    if (/^(https?:)?\/\//.test(path)) {
+      return path;
+    }
     const cleanPath = path.startsWith('/') ? path.slice(1) : path;
     return `/${language}/${cleanPath}`;
   },

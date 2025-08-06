@@ -42,7 +42,13 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
 
   const handleNavigation = (url: string) => {
     console.log(`🔗 MegaMenu Navigation: ${url} [Language: ${language}]`);
-    navigate(url);
+    if (/^\/?https?:\/\//.test(url)) {
+      // External link - open in new tab without affecting SPA routing
+      const cleanUrl = url.replace(/^\/+/, '');
+      window.open(cleanUrl, "_blank", "noopener noreferrer");
+    } else {
+      navigate(url);
+    }
   };
 
   const gridCols = config.columns.length <= 2 ?
