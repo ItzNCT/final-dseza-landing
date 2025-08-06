@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Search, ChevronRight, Loader2, Building, MapPin, Users, Calendar, Globe, Phone, Mail, Link } from "lucide-react";
+import { Search, ChevronRight, Loader2, Building, MapPin, Users, Calendar, Globe, Phone, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

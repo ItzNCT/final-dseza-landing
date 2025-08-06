@@ -11,7 +11,6 @@ const URL_MAPPING = {
     'introduction': 'gioi-thieu',
     'news': 'tin-tuc',
     'article': 'bai-viet',
-    'business': 'doanh-nghiep',
     'documents': 'van-ban',
     'administrative-reform': 'cai-cach-hanh-chinh',
     'utilities': 'tien-ich',
@@ -44,7 +43,7 @@ const URL_MAPPING = {
     // News & Events section
     'events': 'su-kien',
     'investment-international-cooperation': 'dau-tu-hop-tac-quoc-te',
-    'enterprises': 'doanh-nghiep', // Lưu ý: 'enterprises' và 'business' cùng trỏ đến 'doanh-nghiep'
+    'enterprise': 'doanh-nghiep',
     'digital-transformation': 'chuyen-doi-so',
     'training-startup-incubation': 'dao-tao-uom-tao-khoi-nghiep',
     'management-board-activities': 'hoat-dong-ban-quan-ly',

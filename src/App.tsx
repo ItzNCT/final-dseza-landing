@@ -125,19 +125,19 @@ const App: React.FC = () => (
                         <Route path="doanh-nghiep/bao-cao-du-lieu/:docCategory" element={<DocumentListPage />} />
                         
                         {/* Enterprise routes - English (business) */}
-                        <Route path="business/enterprise-information/enterprise-statistics" element={<EnterpriseListPage />} />
-                        <Route path="business/documents/detail/:docId" element={<DocumentViewerPage />} />
-                        <Route path="business/reports-data/chi-tiet/:docId" element={<DocumentViewerPage />} />
-                        <Route path="business/recruitment" element={<RecruitmentPage />} />
-                        <Route path="business/enterprise-information/:docCategorySlug" element={<DocumentListPage />} />
-                        <Route path="business/documents/:docCategorySlug" element={<DocumentListPage />} />
-                        <Route path="business/reports-data/:docCategory" element={<DocumentListPage />} />
+                        <Route path="enterprise/enterprise-information/enterprise-statistics" element={<EnterpriseListPage />} />
+                        <Route path="enterprise/documents/detail/:docId" element={<DocumentViewerPage />} />
+                        <Route path="enterprise/reports-data/detail/:docId" element={<DocumentViewerPage />} />
+                        <Route path="enterprise/recruitment" element={<RecruitmentPage />} />
+                        <Route path="enterprise/enterprise-information/:docCategorySlug" element={<DocumentListPage />} />
+                        <Route path="enterprise/documents/:docCategorySlug" element={<DocumentListPage />} />
+                        <Route path="enterprise/reports-data/:docCategory" element={<DocumentListPage />} />
                         
                         {/* Enterprise routes - English (enterprises) */}
                         <Route path="enterprises/enterprise-information/enterprise-statistics" element={<EnterpriseListPage />} />
                         <Route path="enterprises/documents/detail/:docId" element={<DocumentViewerPage />} />
                         {/* Fallback old detail path for backward compatibility */}
-                        <Route path="enterprises/reports-data/chi-tiet/:docId" element={<DocumentViewerPage />} />
+                        <Route path="enterprises/reports-data/detail/:docId" element={<DocumentViewerPage />} />
                         <Route path="enterprises/recruitment" element={<RecruitmentPage />} />
                         <Route path="enterprises/enterprise-information/:docCategorySlug" element={<DocumentListPage />} />
                         <Route path="enterprises/documents/:docCategorySlug" element={<DocumentListPage />} />
