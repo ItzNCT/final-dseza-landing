@@ -10,6 +10,7 @@ const URL_MAPPING = {
     // Core sections
     'introduction': 'gioi-thieu',
     'news': 'tin-tuc',
+    'article': 'bai-viet',
     'business': 'doanh-nghiep',
     'documents': 'van-ban',
     'administrative-reform': 'cai-cach-hanh-chinh',

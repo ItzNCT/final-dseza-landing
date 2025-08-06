@@ -11,8 +11,6 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { AccessibilityProvider } from "@/context/AccessibilityContext";
 import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import ArticleDetailPage from "@/pages/Article/ArticleDetailPage";
 import ArticleRouter from "@/pages/Article/ArticleRouter";
 import DynamicArticleHandler from "@/pages/Article/DynamicArticleHandler";
 import ArticleListPage from "@/pages/News/ArticleListPage";

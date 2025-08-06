@@ -408,7 +408,7 @@ async function fetchArticleById(uuid: string, language: 'vi' | 'en' = 'vi'): Pro
     // Try a simpler include first to avoid API errors, then fetch additional data if needed
     console.log('🚀 Fetching article with UUID:', uuid, 'Language:', language);
     
-    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document';
+    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document,translations';
     
     // Use language-specific endpoint
     const languagePrefix = language === 'en' ? '/en' : '/vi';
@@ -487,7 +487,7 @@ async function fetchArticleByPath(pathAlias: string, language: 'vi' | 'en' = 'vi
   try {
     console.log('🚀 Fetching article with path alias:', pathAlias, 'Language:', language);
     
-    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document';
+    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document,translations';
     
     // Use language-specific endpoint with path filter
     const languagePrefix = language === 'en' ? '/en' : '/vi';
@@ -495,13 +495,114 @@ async function fetchArticleByPath(pathAlias: string, language: 'vi' | 'en' = 'vi
     // Ensure path starts with /
     const normalizedPath = pathAlias.startsWith('/') ? pathAlias : `/${pathAlias}`;
     
-    // Try different approaches to filter by path alias
-    // Approach 1: Try filter[path][alias]
-    let url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/bai-viet?filter[path][alias]=${encodeURIComponent(normalizedPath)}&include=${basicInclude}`;
+    // Try different approaches to find the article
+    // Skip the problematic filter[path][alias] approach and go directly to client-side filtering
+    console.log('🔄 Skipping problematic filter approach, using client-side filtering...');
     
-    console.log('📡 Trying approach 1 - filter[path][alias]:', url);
+    // Approach 1: Fetch all articles and filter client-side (most reliable)
+    const fallbackUrl = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/bai-viet?include=${basicInclude}`;
+    console.log('📡 Fetching all articles for client-side filtering:', fallbackUrl);
     
-    console.log('📡 API URL:', url);
+    const response = await fetch(fallbackUrl, {
+      method: 'GET',
+      headers: {
+        ...jsonApiHeaders,
+        'Accept-Language': language,
+        'Content-Language': language,
+      },
+    });
+
+    console.log('📊 Response status:', response.status, response.statusText);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Failed to fetch articles for filtering:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ Fetched all articles, filtering by path alias...');
+    
+    // Filter articles by path alias client-side
+    const matchedArticle = data.data.find((article: any) => 
+      article.attributes.path?.alias === normalizedPath
+    );
+    
+    if (matchedArticle) {
+      console.log('✅ Found matching article by client-side filtering:', matchedArticle);
+      const articleData = { data: matchedArticle, included: data.included };
+      
+      // Enrich with media if needed
+      if (articleData?.data?.relationships?.field_noi_dung_bai_viet?.data?.length > 0) {
+        await enrichParagraphsWithMedia(articleData, language);
+      }
+      
+      return articleData;
+    } else {
+      console.log('❌ No article found with path alias after client-side filtering');
+      console.log('📋 Available path aliases:', data.data.map((a: any) => a.attributes.path?.alias).filter(Boolean));
+      
+      // Try to extract potential UUID from path (if path ends with hash-like suffix)
+      const pathParts = normalizedPath.split('-');
+      const lastPart = pathParts[pathParts.length - 1];
+      
+      if (lastPart && lastPart.length >= 6) {
+        console.log('🔍 Trying to find article by title or URL suffix:', lastPart);
+        
+        // Try to find by title containing the path elements or by similar path
+        const titleMatch = data.data.find((article: any) => {
+          const title = article.attributes.title?.toLowerCase() || '';
+          const pathSlug = normalizedPath.toLowerCase().replace(/[^a-z0-9\-]/g, '');
+          return title.includes(lastPart) || 
+                 article.attributes.path?.alias?.includes(lastPart) ||
+                 pathSlug.includes(title.replace(/[^a-z0-9\-]/g, '').substring(0, 20));
+        });
+        
+        if (titleMatch) {
+          console.log('✅ Found article by title/content matching:', titleMatch);
+          const articleData = { data: titleMatch, included: data.included };
+          
+          // Enrich with media if needed
+          if (articleData?.data?.relationships?.field_noi_dung_bai_viet?.data?.length > 0) {
+            await enrichParagraphsWithMedia(articleData, language);
+          }
+          
+          return articleData;
+        }
+      }
+      
+      throw new Error(`No article found with path alias: ${pathAlias}`);
+    }
+  } catch (error) {
+    console.error('❌ fetchArticleByPath error:', error);
+    throw new Error(`Failed to fetch article by path: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Fetch article by UUID (more reliable than path alias)
+ * @param uuid - The UUID of the article from Drupal
+ * @param language - Language for localized content
+ * @returns Promise with article data
+ * 
+ * @example
+ * ```typescript
+ * const article = await fetchArticleByUuid('626f1276-6f9a-4e6b-ab38-72e8718ae2fd', 'vi');
+ * ```
+ */
+async function fetchArticleByUuid(uuid: string, language: 'vi' | 'en' = 'vi'): Promise<any> {
+  try {
+    console.log('🚀 Fetching article with UUID:', uuid, 'Language:', language);
+    
+    const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document,translations';
+    
+    // Use language-specific endpoint with UUID
+    const languagePrefix = language === 'en' ? '/en' : '/vi';
+    
+    // Direct UUID endpoint - most reliable approach
+    const url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/bai-viet/${uuid}?include=${basicInclude}`;
+    
+    console.log('📡 Fetching article by UUID:', url);
     
     const response = await fetch(url, {
       method: 'GET',
@@ -515,95 +616,16 @@ async function fetchArticleByPath(pathAlias: string, language: 'vi' | 'en' = 'vi
     console.log('📊 Response status:', response.status, response.statusText);
 
     if (!response.ok) {
-      console.log('❌ Approach 1 failed, trying approach 2...');
-      
-      // Approach 2: Fetch all articles and filter client-side
-      const fallbackUrl = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/bai-viet?include=${basicInclude}`;
-      console.log('📡 Trying approach 2 - fetch all and filter client-side:', fallbackUrl);
-      
-      const fallbackResponse = await fetch(fallbackUrl, {
-        method: 'GET',
-        headers: {
-          ...jsonApiHeaders,
-          'Accept-Language': language,
-          'Content-Language': language,
-        },
-      });
-      
-      if (fallbackResponse.ok) {
-        const fallbackData = await fallbackResponse.json();
-        console.log('✅ Fetched all articles, filtering by path alias...');
-        
-        // Filter articles by path alias client-side
-        const matchedArticle = fallbackData.data.find((article: any) => 
-          article.attributes.path?.alias === normalizedPath
-        );
-        
-        if (matchedArticle) {
-          console.log('✅ Found matching article by client-side filtering:', matchedArticle);
-          return { data: matchedArticle, included: fallbackData.included };
-        } else {
-          console.log('❌ No article found with path alias after client-side filtering');
-          console.log('📋 Available path aliases:', fallbackData.data.map((a: any) => a.attributes.path?.alias).filter(Boolean));
-        }
-      }
-      
       const errorText = await response.text();
-      console.error('❌ All approaches failed. Original API Error:', errorText);
+      console.error('❌ Failed to fetch article by UUID:', errorText);
       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('✅ Approach 1 successful - Article data fetched by path:', data);
+    console.log('✅ Article data fetched by UUID:', data);
     
-    // Check if we found an article with Approach 1
-    if (!data.data || data.data.length === 0) {
-      console.log('❌ Approach 1 returned no results, trying approach 2...');
-      
-      // Approach 2: Fetch all articles and filter client-side
-      const fallbackUrl = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/bai-viet?include=${basicInclude}`;
-      console.log('📡 Trying approach 2 - fetch all and filter client-side:', fallbackUrl);
-      
-      const fallbackResponse = await fetch(fallbackUrl, {
-        method: 'GET',
-        headers: {
-          ...jsonApiHeaders,
-          'Accept-Language': language,
-          'Content-Language': language,
-        },
-      });
-      
-      if (fallbackResponse.ok) {
-        const fallbackData = await fallbackResponse.json();
-        console.log('✅ Fetched all articles, filtering by path alias...');
-        
-        // Filter articles by path alias client-side
-        const matchedArticle = fallbackData.data.find((article: any) => 
-          article.attributes.path?.alias === normalizedPath
-        );
-        
-        if (matchedArticle) {
-          console.log('✅ Found matching article by client-side filtering:', matchedArticle);
-          const articleData = { data: matchedArticle, included: fallbackData.included };
-          
-          // Enrich with media if needed
-          if (articleData?.data?.relationships?.field_noi_dung_bai_viet?.data?.length > 0) {
-            await enrichParagraphsWithMedia(articleData, language);
-          }
-          
-          return articleData;
-        } else {
-          console.log('❌ No article found with path alias after client-side filtering');
-          console.log('📋 Available path aliases:', fallbackData.data.map((a: any) => a.attributes.path?.alias).filter(Boolean));
-          throw new Error(`No article found with path alias: ${pathAlias}`);
-        }
-      } else {
-        throw new Error(`No article found with path alias: ${pathAlias}`);
-      }
-    }
-    
-    // Return the first (and should be only) article from Approach 1
-    const articleData = { data: data.data[0], included: data.included };
+    // The response for UUID fetch is a single object, not an array
+    const articleData = { data: data.data, included: data.included };
     
     // Enrich with media if needed
     if (articleData?.data?.relationships?.field_noi_dung_bai_viet?.data?.length > 0) {
@@ -612,8 +634,46 @@ async function fetchArticleByPath(pathAlias: string, language: 'vi' | 'en' = 'vi
     
     return articleData;
   } catch (error) {
-    console.error('❌ fetchArticleByPath error:', error);
-    throw new Error(`Failed to fetch article by path: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('❌ fetchArticleByUuid error:', error);
+    throw new Error(`Failed to fetch article by UUID: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Debug function to list all available articles with their path aliases and UUIDs
+ * @param language - Language for localized content
+ * @returns Promise with array of article info
+ */
+async function fetchAllArticlesDebugInfo(language: 'vi' | 'en' = 'vi'): Promise<any[]> {
+  try {
+    const languagePrefix = language === 'en' ? '/en' : '/vi';
+    const url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/bai-viet`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        ...jsonApiHeaders,
+        'Accept-Language': language,
+        'Content-Language': language,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    return data.data.map((article: any) => ({
+      uuid: article.id,
+      title: article.attributes.title,
+      pathAlias: article.attributes.path?.alias,
+      created: article.attributes.created,
+      nid: article.attributes.drupal_internal__nid,
+    }));
+  } catch (error) {
+    console.error('❌ fetchAllArticlesDebugInfo error:', error);
+    throw error;
   }
 }
 
@@ -798,33 +858,7 @@ export const useArticleViewCount = (nid: string) => {
  *   - isSuccess: Boolean indicating if the request was successful
  *   - refetch: Function to manually refetch the data
  */
-export const useArticleDetail = (uuid: string, language: 'vi' | 'en' = 'vi') => {
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    isSuccess,
-    refetch,
-  } = useQuery({
-    queryKey: ['article', uuid, language],
-    queryFn: () => fetchArticleById(uuid, language),
-    enabled: !!uuid,
-    staleTime: 5 * 60 * 1000, // 5 minutes - article data is relatively static
-    gcTime: 15 * 60 * 1000, // 15 minutes cache time
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
-  });
 
-  return {
-    data,
-    isLoading,
-    isError,
-    error,
-    isSuccess,
-    refetch,
-  };
-};
 
 /**
  * React Query hook to fetch article details by path alias with language support
@@ -843,33 +877,26 @@ export const useArticleDetail = (uuid: string, language: 'vi' | 'en' = 'vi') => 
  * const { data, isLoading, isError } = useArticleByPath('/some-article-path', 'vi');
  * ```
  */
-export const useArticleByPath = (pathAlias: string, language: 'vi' | 'en' = 'vi') => {
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    isSuccess,
-    refetch,
-  } = useQuery({
-    queryKey: ['articleByPath', pathAlias, language],
-    queryFn: () => fetchArticleByPath(pathAlias, language),
-    enabled: !!pathAlias,
-    staleTime: 5 * 60 * 1000, // 5 minutes - article data is relatively static
-    gcTime: 15 * 60 * 1000, // 15 minutes cache time
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
-  });
 
-  return {
-    data,
-    isLoading,
-    isError,
-    error,
-    isSuccess,
-    refetch,
-  };
-};
+
+/**
+ * React Query hook to fetch article by UUID with language support
+ * @param uuid - The UUID of the article from Drupal
+ * @param language - Language for localized content ('vi' or 'en')
+ * @returns Object containing:
+ *   - data: The article data object with included relationships
+ *   - isLoading: Boolean indicating if the request is in progress
+ *   - isError: Boolean indicating if an error occurred
+ *   - error: The error object if an error occurred
+ *   - isSuccess: Boolean indicating if the request was successful
+ *   - refetch: Function to manually refetch the data
+ *
+ * @example
+ * ```typescript
+ * const { data, isLoading, isError } = useArticleByUuid('626f1276-6f9a-4e6b-ab38-72e8718ae2fd', 'vi');
+ * ```
+ */
+
 
 /**
  * Smart hook that detects identifier type and calls appropriate fetch method
@@ -878,19 +905,49 @@ export const useArticleByPath = (pathAlias: string, language: 'vi' | 'en' = 'vi'
  * @returns Same shape as useArticleDetail hook
  */
 export const useArticle = (identifier: string, language: 'vi' | 'en' = 'vi') => {
-  // Detect if identifier is a UUID (36 chars with hyphens) or numeric
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier) || /^\d+$/.test(identifier);
-  
-  // Use conditional hook calls based on identifier type
-  const uuidResult = useArticleDetail(isUuid ? identifier : '', language);
-  const pathResult = useArticleByPath(isUuid ? '' : '/' + identifier, language);
-  
-  // Return the appropriate result based on identifier type
-  if (isUuid) {
-    return uuidResult;
-  } else {
-    return pathResult;
-  }
+  // ────────────────────────────────────────────────────────────────────────
+  // 1. Normalize & detect identifier type
+  // ────────────────────────────────────────────────────────────────────────
+  const normalizedId = (identifier || '').trim();
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const numericRegex = /^\d+$/;
+
+  const isUuid = uuidRegex.test(normalizedId);
+  const isNumeric = numericRegex.test(normalizedId);
+  const isPath = !isUuid && !isNumeric;
+
+  // ────────────────────────────────────────────────────────────────────────
+  // 2. Build a single queryFn based on identifier type
+  // ────────────────────────────────────────────────────────────────────────
+  const queryFn = () => {
+    if (isPath) {
+      // Ensure path alias always starts with '/'
+      const pathAlias = normalizedId.startsWith('/') ? normalizedId : `/${normalizedId}`;
+      return fetchArticleByPath(pathAlias, language);
+    }
+
+    // UUID or legacy NID share the same fetcher (handles fallback internally)
+    return fetchArticleByUuid(normalizedId, language);
+  };
+
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+  } = useQuery({
+    queryKey: ['articleDetail', normalizedId, language], // unified cache key
+    queryFn,
+    enabled: !!normalizedId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000,  // 15 minutes
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+
+  return { data, isLoading, isError, error, isSuccess, refetch };
 };
 
 /**
@@ -1878,7 +1935,7 @@ async function fetchContentByPath(
     try {
       console.log(`🔍 Trying content type: ${contentType}`);
       
-      const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document';
+      const basicInclude = 'field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document,translations';
       
       // Approach 1: Try filter[path][alias]
       let url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/${contentType}?filter[path][alias]=${encodeURIComponent(normalizedPath)}&include=${basicInclude}`;
@@ -1962,4 +2019,4 @@ export const useContentByPath = (
 export type { ContactFormData, ContactFormResponse, RegistrationFormData, RegistrationResponse, ChangePasswordFormData, ChangePasswordResponse };
 
 // Export the fetch function for potential standalone use
-export { submitContactForm, submitRegistrationForm, submitChangePasswordForm, fetchContentByPath }; 
+export { submitContactForm, submitRegistrationForm, submitChangePasswordForm, fetchContentByPath, fetchArticleByUuid, fetchAllArticlesDebugInfo }; 
