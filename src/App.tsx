@@ -96,9 +96,13 @@ const App: React.FC = () => (
                         <Route path="bai-viet/*" element={<DynamicArticleHandler />} />
                         <Route path="article/*" element={<DynamicArticleHandler />} />
                         
+                        {/* Redirect old search paths */}
+                        <Route path="van-ban/tim-kiem" element={<Navigate to="../van-ban" replace />} />
+                        <Route path="documents/search" element={<Navigate to="../documents" replace />} />
+
                         {/* Document pages with nested routes - Vietnamese */}
                         <Route path="van-ban" element={<DocumentTabLayout />}>
-                          <Route index element={<Navigate to="van-ban-phap-luat/phap-quy-trung-uong" replace />} />
+                          <Route index element={<Navigate to="van-ban-phap-luat/quy-dinh-trung-uong" replace />} />
                           <Route path=":category/:subcategory" element={<DocumentSearchPage />} />
                         </Route>
                         
@@ -111,7 +115,10 @@ const App: React.FC = () => (
                         {/* Draft feedback routes */}
                         <Route path="van-ban/huong-dan-gop-y/gop-y-du-thao-van-ban" element={<DraftFeedbackPage />} />
                         <Route path="van-ban/huong-dan-gop-y/gop-y-du-thao-van-ban/:id" element={<DraftDetailPage />} />
+                        <Route path="documents/guidelines-feedback/draft-document-feedback" element={<DraftFeedbackPage />} />
+                        <Route path="documents/guidelines-feedback/draft-document-feedback/:id" element={<DraftDetailPage />} />
                         <Route path="van-ban/huong-dan-gop-y/van-ban-huong-dan" element={<VanBanHuongDanPage />} />
+                        <Route path="documents/guidelines-feedback/guideline-documents" element={<VanBanHuongDanPage />} />
                         
                         {/* Enterprise routes - Vietnamese */}
                         <Route path="doanh-nghiep/thong-tin-doanh-nghiep/thong-ke-doanh-nghiep" element={<EnterpriseListPage />} />

@@ -141,15 +141,15 @@ const DocumentListPage: React.FC = () => {
     if (language === 'en') {
       return {
         home: '/',
-        business: isEnterpriseRoute ? '/enterprises' : '/business',
+        enterprise: isEnterpriseRoute ? '/enterprises' : '/business',
         documents: isEnterpriseRoute ? '/enterprises/reports-data' : '/business/reports-data',
-        businessLabel: isEnterpriseRoute ? 'Enterprises' : 'Business',
+        enterpriseLabel: isEnterpriseRoute ? 'Enterprises' : 'Business',
         documentsLabel: 'Reports & Data'
       };
     } else {
       return {
         home: '/',
-        business: '/doanh-nghiep',
+        enterprise: '/doanh-nghiep',
         documents: isDocumentRoute ? '/doanh-nghiep/tai-lieu' : (isVanBanRoute ? '/doanh-nghiep/van-ban' : '/doanh-nghiep/bao-cao-du-lieu'),
         businessLabel: 'Doanh nghiệp',
         documentsLabel: isDocumentRoute ? 'Tài liệu' : (isVanBanRoute ? 'Văn bản' : 'Báo cáo dữ liệu')
@@ -422,10 +422,10 @@ const DocumentListPage: React.FC = () => {
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to={breadcrumbLinks.business} 
+                to={breadcrumbLinks.enterprise} 
                 className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                {breadcrumbLinks.businessLabel}
+                {breadcrumbLinks.enterpriseLabel}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 

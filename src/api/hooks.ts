@@ -1044,6 +1044,7 @@ interface DocumentFilters {
   documentNumber?: string;
   summary?: string;
   category?: string; // Add category filter for document type classification
+  language?: 'vi' | 'en'; // UI language to fetch correct data version
   page?: number;
   pageSize?: number;
 }
@@ -1106,11 +1107,18 @@ async function fetchDocuments({ queryKey }: { queryKey: readonly unknown[] }): P
     // Include all related fields and taxonomy terms
     queryParams.append('include', 'field_file_dinh_kem.field_media_document,field_loai_van_ban,field_cac_loai_van_ban,field_linh_vuc,field_cap_ban_hanh,field_co_quan_ban_hanh');
     
-    const url = `${JSON_API_BASE_URL}/jsonapi/node/legal_document?${queryParams.toString()}`;
+    const language = filters.language === 'en' ? 'en' : 'vi';
+    const languagePrefix = language === 'en' ? '/en' : '/vi';
+
+    const url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/legal_document?${queryParams.toString()}`;
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: jsonApiHeaders,
+      headers: {
+        ...jsonApiHeaders,
+        'Accept-Language': language,
+        'Content-Language': language,
+      },
     });
 
     if (!response.ok) {
@@ -1181,10 +1189,20 @@ function filterDocumentsClientSide(documents: any[], filters: DocumentFilters): 
   console.log('🔧 Client-side filtering for category:', filters.category);
   
   const categoryMapping: { [key: string]: string } = {
-    'phap-quy-trung-uong': '13',     // Match URL param format
-    'phap-quy-dia-phuong': '14',     // Match URL param format  
-    'chi-dao-dieu-hanh': '15',       // Match URL param format
-    'cchc': '16'                     // Match URL param format
+    // Vietnamese slugs (updated)
+    'quy-dinh-trung-uong': '13',
+    'quy-dinh-dia-phuong': '14',
+    'chi-dao-dieu-hanh': '15',
+    'cai-cach-hanh-chinh': '16',
+    // Legacy Vietnamese slugs for backward compatibility
+    'phap-quy-trung-uong': '13',
+    'phap-quy-dia-phuong': '14',
+    'cchc': '16',
+    // English slugs
+    'central-legal-regulations': '13',
+    'local-legal-regulations': '14',
+    'directive-management-documents': '15',
+    'administrative-reform-documents': '16'
   };
   
   const expectedCategoryId = categoryMapping[filters.category];

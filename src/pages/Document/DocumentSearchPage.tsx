@@ -41,6 +41,7 @@ import { useDocuments, DocumentFilters } from "@/api/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/context/ThemeContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLanguage } from "@/context/LanguageContext";
 
 /**
  * DocumentSearchPage component for searching legal documents
@@ -57,6 +58,8 @@ const DocumentSearchPage: React.FC = () => {
     (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
   const { toast } = useToast();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = (vi: string, en: string) => (language === 'en' ? en : vi);
   const isMobile = useIsMobile();
   
   const [filters, setFilters] = useState<DocumentFilters>({
@@ -66,6 +69,7 @@ const DocumentSearchPage: React.FC = () => {
     endDate: "",
     documentType: "",
     category: subcategory || "", // Use subcategory as the filter category
+    language,
     page: 1,
     pageSize: 5, // Maximum 5 results per page
   });
@@ -88,6 +92,14 @@ const DocumentSearchPage: React.FC = () => {
       page: 1 // Reset to first page when category changes
     }));
   }, [subcategory]);
+
+  // Update language in filters when language context changes
+  React.useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      language,
+    }));
+  }, [language]);
 
   const handleInputChange = (field: keyof DocumentFilters, value: string | number) => {
     setFilters(prev => ({
@@ -314,7 +326,7 @@ const DocumentSearchPage: React.FC = () => {
           <DialogTitle className={`text-xl font-bold ${
             theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
           }`}>
-            THUỘC TÍNH VĂN BẢN
+            {t('THUỘC TÍNH VĂN BẢN','DOCUMENT PROPERTIES')}
           </DialogTitle>
           <p className={`text-sm mt-1 ${
             theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
@@ -335,7 +347,7 @@ const DocumentSearchPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Số ký hiệu:</span>
+                  }`}>{t('Số ký hiệu','Document No.')}: </span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{document.attributes?.field_so_ky_hieu || "N/A"}</span>
@@ -343,7 +355,7 @@ const DocumentSearchPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Người ký:</span>
+                  }`}>{t('Người ký','Signer')}:</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{document.attributes?.field_nguoi_ky || "N/A"}</span>
@@ -351,7 +363,7 @@ const DocumentSearchPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Lĩnh vực:</span>
+                  }`}>{t('Lĩnh vực','Field')}:</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{getTaxonomyTermName(document.relationships?.field_linh_vuc?.data, data?.included)}</span>
@@ -359,7 +371,7 @@ const DocumentSearchPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Loại văn bản:</span>
+                  }`}>{t('Loại văn bản','Document Type')}: </span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{getTaxonomyTermName(document.relationships?.field_loai_van_ban?.data, data?.included)}</span>
@@ -367,7 +379,7 @@ const DocumentSearchPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Các loại văn bản:</span>
+                  }`}>{t('Các loại văn bản','Document Categories')}:</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{getTaxonomyTermName(document.relationships?.field_cac_loai_van_ban?.data, data?.included)}</span>
@@ -378,7 +390,7 @@ const DocumentSearchPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Ngày ban hành:</span>
+                  }`}>{t('Ngày ban hành','Issue Date')}: </span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{formatDate(document.attributes?.field_ngay_ban_hanh || "")}</span>
@@ -386,7 +398,7 @@ const DocumentSearchPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Ngày hiệu lực:</span>
+                  }`}>{t('Ngày hiệu lực','Effective Date')}:</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{formatDate(document.attributes?.field_ngay_hieu_luc || "")}</span>
@@ -394,7 +406,7 @@ const DocumentSearchPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Ngày hết hiệu lực:</span>
+                  }`}>{t('Ngày hết hiệu lực','Expiry Date')}:</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{formatDate(document.attributes?.field_ngay_het_hieu_luc || "")}</span>
@@ -402,7 +414,7 @@ const DocumentSearchPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Cấp ban hành:</span>
+                  }`}>{t('Cấp ban hành','Promulgating Level')}:</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{getTaxonomyTermName(document.relationships?.field_cap_ban_hanh?.data, data?.included)}</span>
@@ -410,7 +422,7 @@ const DocumentSearchPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between">
                   <span className={`font-medium ${
                     theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                  }`}>Cơ quan ban hành:</span>
+                  }`}>{t('Cơ quan ban hành','Issuing Agency')}:</span>
                   <span className={`sm:text-right ${
                     theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                   }`}>{getTaxonomyTermName(document.relationships?.field_co_quan_ban_hanh?.data, data?.included)}</span>
@@ -424,7 +436,7 @@ const DocumentSearchPage: React.FC = () => {
             <div>
               <h3 className={`font-semibold text-lg mb-2 ${
                 theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-              }`}>Nội dung:</h3>
+              }`}>{t('Nội dung','Content')}:</h3>
               <div className={`p-4 rounded-lg border ${
                 theme === 'dark' 
                   ? 'bg-dseza-dark-hover border-dseza-dark-border' 
@@ -435,7 +447,7 @@ const DocumentSearchPage: React.FC = () => {
                 }`}>
                   {getTextContent(document.attributes?.field_noi_dung) || 
                    getTextContent(document.attributes?.field_trich_yeu) || 
-                   getTextContent(document.attributes?.title) || "Không có nội dung"}
+                   getTextContent(document.attributes?.title) || t('Không có nội dung','No content')}
                 </p>
               </div>
             </div>
@@ -444,7 +456,7 @@ const DocumentSearchPage: React.FC = () => {
             <div>
               <h3 className={`font-semibold text-lg mb-2 ${
                 theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-              }`}>File đính kèm:</h3>
+              }`}>{t('File đính kèm','Attachments')}:</h3>
               <div className={`p-4 rounded-lg border ${
                 theme === 'dark' 
                   ? 'bg-dseza-dark-hover border-dseza-dark-border' 
@@ -467,7 +479,7 @@ const DocumentSearchPage: React.FC = () => {
                       ) : (
                         <Download className="h-4 w-4" />
                       )}
-                      Tải xuống ({document.attributes?.field_so_ky_hieu || "document"})
+                      {t('Tải xuống','Download')} ({document.attributes?.field_so_ky_hieu || "document"})
                     </Button>
                   ) : (
                     <Badge variant="secondary" className={`${
@@ -475,7 +487,7 @@ const DocumentSearchPage: React.FC = () => {
                         ? 'bg-dseza-dark-secondary text-dseza-dark-secondary-text border-dseza-dark-border' 
                         : 'bg-dseza-light-secondary text-dseza-light-secondary-text border-dseza-light-border'
                     }`}>
-                      Không có file đính kèm
+                      {t('Không có file đính kèm','No attachments')}
                     </Badge>
                   )}
                 </div>
@@ -486,7 +498,7 @@ const DocumentSearchPage: React.FC = () => {
             <div>
               <h3 className={`font-semibold text-lg mb-2 ${
                 theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-              }`}>VĂN BẢN LIÊN QUAN THEO LĨNH VỰC</h3>
+              }`}>{t('VĂN BẢN LIÊN QUAN THEO LĨNH VỰC','RELATED DOCUMENTS BY FIELD')}</h3>
               <div className={`p-4 rounded-lg border ${
                 theme === 'dark' 
                   ? 'bg-dseza-dark-hover border-dseza-dark-border' 
@@ -495,7 +507,7 @@ const DocumentSearchPage: React.FC = () => {
                 <p className={`text-sm italic ${
                   theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                 }`}>
-                  Chức năng hiển thị văn bản liên quan sẽ được phát triển trong phiên bản tiếp theo.
+                  {t('Chức năng hiển thị văn bản liên quan sẽ được phát triển trong phiên bản tiếp theo.','The related documents feature will be developed in the next release.')}
                 </p>
               </div>
             </div>
@@ -515,7 +527,7 @@ const DocumentSearchPage: React.FC = () => {
                 : 'bg-dseza-light-main-bg text-dseza-light-main-text border-dseza-light-border hover:bg-dseza-light-hover hover:text-dseza-light-main-text'
             }`}
           >
-            Đóng
+            {t('Đóng','Close')}
           </Button>
         </div>
       </DialogContent>
@@ -538,9 +550,9 @@ const DocumentSearchPage: React.FC = () => {
               <Skeleton className="h-4 w-4" />
             </TableHead>
             <TableHead className="w-[200px]">Số/Ký hiệu</TableHead>
-            <TableHead>Trích yếu</TableHead>
-            <TableHead className="w-[150px]">Ngày ban hành</TableHead>
-            <TableHead className="w-[100px] text-center">Tải về</TableHead>
+            <TableHead>{t('Trích yếu','Summary')}</TableHead>
+            <TableHead className="w-[150px]">{t('Ngày ban hành','Issue Date')}</TableHead>
+            <TableHead className="w-[100px] text-center">{t('Tải về','Download')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -617,7 +629,7 @@ const DocumentSearchPage: React.FC = () => {
               </Label>
               <Input
                 id="documentNumber"
-                placeholder="Nhập số/ký hiệu văn bản"
+                placeholder={t('Nhập số/ký hiệu văn bản','Enter document number')}
                 value={filters.documentNumber || ""}
                 onChange={(e) => handleInputChange("documentNumber", e.target.value)}
                 className={`${
@@ -634,11 +646,11 @@ const DocumentSearchPage: React.FC = () => {
                 htmlFor="summary"
                 className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
               >
-                Trích yếu
+                {t('Trích yếu','Summary')}
               </Label>
               <Input
                 id="summary"
-                placeholder="Nhập từ khóa trích yếu"
+                placeholder={t('Nhập từ khóa trích yếu','Enter summary keyword')}
                 value={filters.summary || ""}
                 onChange={(e) => handleInputChange("summary", e.target.value)}
                 className={`${
@@ -661,7 +673,7 @@ const DocumentSearchPage: React.FC = () => {
                 disabled={isLoading}
               >
                 <Search className={`h-4 w-4 mr-2`} />
-                {isLoading ? "Đang tìm kiếm..." : "Tìm kiếm"}
+                {isLoading ? t('Đang tìm kiếm...','Searching...') : t('Tìm kiếm','Search')}
               </Button>
             </div>
           </div>
@@ -719,16 +731,16 @@ const DocumentSearchPage: React.FC = () => {
                     </TableHead>
                     <TableHead className={`w-[200px] ${
                       theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                    }`}>Số/Ký hiệu</TableHead>
+                    }`}>{t('Số/Ký hiệu','Doc No.')}</TableHead>
                     <TableHead className={`${
                       theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                    }`}>Trích yếu</TableHead>
+                    }`}>{t('Trích yếu','Summary')}</TableHead>
                     <TableHead className={`w-[150px] ${
                       theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                    }`}>Ngày ban hành</TableHead>
+                    }`}>{t('Ngày ban hành','Issue Date')}</TableHead>
                     <TableHead className={`w-[100px] text-center ${
                       theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
-                    }`}>Tải về</TableHead>
+                    }`}>{t('Tải về','Download')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
