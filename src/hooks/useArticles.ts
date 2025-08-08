@@ -72,6 +72,16 @@ export const useArticles = () => {
       'ha-tang-xa-hoi': 'Hạ tầng xã hội',
       'nguon-nhan-luc': 'Nguồn nhân lực',
       'cai-cach-hanh-chinh': 'Cải cách hành chính',
+      // English slugs for Investment Environment categories mapping to Vietnamese category names
+      'transportation-infrastructure': 'Hạ tầng giao thông',
+      'science-technology-environment': 'Khoa học công nghệ - Môi trường',
+      'social-infrastructure': 'Hạ tầng xã hội',
+      'human-resources': 'Nguồn nhân lực',
+      'industrial-park-infrastructure': 'Hạ tầng khu công nghiệp',
+      // English slugs for Investor-related categories
+      'investment-sector-procedures': 'Quy trình lĩnh vực đầu tư',
+      'investment-incentive-sectors': 'Lĩnh vực thu hút đầu tư',
+      'administrative-reform': 'Cải cách hành chính',
     };
 
     // Lấy category name từ mapping, hoặc nếu không có trong map thì tìm trong categoriesData

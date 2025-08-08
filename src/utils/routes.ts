@@ -56,9 +56,8 @@ const URL_MAPPING = {
     // Investment Environment
     'for-investors': 'danh-cho-nha-dau-tu',
     'investment-environment': 'moi-truong-dau-tu',
-    'investment-sector-procedures': 'thu-tuc-linh-vuc-dau-tu',
+    'investment-sector-procedures': 'quy-trinh-linh-vuc-dau-tu',
     'investment-incentive-sectors': 'linh-vuc-khuyen-khich-dau-tu',
-    // 'investment-attraction-sectors': 'linh-vuc-thu-hut-dau-tu', // Nhãn EN/VI khác nhau
     'transportation-infrastructure': 'ha-tang-giao-thong',
     'science-technology-environment': 'khoa-hoc-cong-nghe-moi-truong',
     'logistics': 'logistics',

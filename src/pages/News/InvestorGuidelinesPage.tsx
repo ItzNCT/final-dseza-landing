@@ -11,6 +11,7 @@ import {
   Users
 } from 'lucide-react';
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
@@ -22,9 +23,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const InvestorGuidelinesPage = () => {
   const { theme } = useTheme();
   const isMobile = useIsMobile();
+  const { language } = useLanguage();
 
-  // Investor guidelines categories data
-  const investorCategories = [
+  // Investor guidelines categories data with bilingual support
+  const investorCategories = (
+    language === 'en'
+      ? [
+        {
+          id: 'investment-sector-procedures',
+          title: 'Investment Sector Procedures',
+          description: 'Detailed guidance on investment procedures and necessary steps for investors',
+          icon: FileCheck,
+          url: '/news/for-investors/investment-sector-procedures',
+          color: theme === 'dark' ? 'text-blue-400' : 'text-blue-600',
+          bgColor: theme === 'dark' ? 'bg-blue-900/20' : 'bg-blue-50'
+        },
+        {
+          id: 'investment-incentive-sectors',
+          title: 'Investment Incentive Sectors',
+          description: 'Information on sectors encouraged for investment and special incentive policies',
+          icon: TrendingUp,
+          url: '/news/for-investors/investment-incentive-sectors',
+          color: theme === 'dark' ? 'text-green-400' : 'text-green-600',
+          bgColor: theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'
+        }
+      ]
+      : [
     {
       id: 'quy-trinh-linh-vuc-dau-tu',
       title: 'Quy trình lĩnh vực đầu tư',
@@ -43,10 +67,39 @@ const InvestorGuidelinesPage = () => {
       color: theme === 'dark' ? 'text-green-400' : 'text-green-600',
       bgColor: theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'
     }
-  ];
+  ]
+  );
 
-  // Quick access resources
-  const quickResources = [
+  // Quick access resources with bilingual support
+  const quickResources = (
+    language === 'en'
+      ? [
+        {
+          title: 'Investment Handbook',
+          description: 'Comprehensive document about investment at DSEZA',
+          url: '/investment-handbook',
+          icon: Building
+        },
+        {
+          title: 'Incentive Policies',
+          description: 'Detailed information on special incentive policies',
+          url: '/investment-handbook/policies',
+          icon: TrendingUp
+        },
+        {
+          title: 'DSEZA Brochure',
+          description: 'Overview introduction of DSEZA',
+          url: '/investment-handbook/brochure',
+          icon: FileCheck
+        },
+        {
+          title: 'Contact for Support',
+          description: 'Direct assistance for investors',
+          url: '/contact',
+          icon: Users
+        }
+      ]
+      : [
     {
       title: 'Cẩm nang đầu tư',
       description: 'Tài liệu tổng hợp về đầu tư tại DSEZA',
@@ -71,7 +124,8 @@ const InvestorGuidelinesPage = () => {
       url: '/lien-he',
       icon: Users
     }
-  ];
+  ]
+  );
 
   // Mobile Layout
   if (isMobile) {
@@ -88,18 +142,18 @@ const InvestorGuidelinesPage = () => {
                   to="/" 
                   className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                 >
-                  Trang chủ
+                  {language === 'en' ? 'Home' : 'Trang chủ'}
                 </Link>
                 <ChevronRight className="h-2.5 w-2.5" />
                 <Link 
-                  to="/tin-tuc" 
+                  to={language === 'en' ? '/news' : '/tin-tuc'} 
                   className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                 >
-                  Tin tức
+                  {language === 'en' ? 'News' : 'Tin tức'}
                 </Link>
                 <ChevronRight className="h-2.5 w-2.5" />
                 <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                  Dành cho nhà đầu tư
+                  {language === 'en' ? 'For Investors' : 'Dành cho nhà đầu tư'}
                 </span>
               </nav>
             </div>
@@ -107,7 +161,7 @@ const InvestorGuidelinesPage = () => {
             {/* Page Header - Mobile optimized */}
             <div className="text-center py-3">
               <h1 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Dành Cho Nhà Đầu Tư
+                {language === 'en' ? 'For Investors' : 'Dành Cho Nhà Đầu Tư'}
               </h1>
               <div className={`w-12 h-0.5 mx-auto mb-2 rounded-full ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></div>
               <p className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
@@ -335,18 +389,18 @@ const InvestorGuidelinesPage = () => {
                 to="/" 
                 className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {language === 'en' ? 'Home' : 'Trang chủ'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/tin-tuc" 
+                to={language === 'en' ? '/news' : '/tin-tuc'} 
                 className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Tin tức
+                {language === 'en' ? 'News' : 'Tin tức'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Dành cho nhà đầu tư
+                {language === 'en' ? 'For Investors' : 'Dành cho nhà đầu tư'}
               </span>
             </nav>
           </div>
@@ -357,7 +411,7 @@ const InvestorGuidelinesPage = () => {
           {/* Page Header */}
           <div className="text-center mb-16">
             <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-              Dành Cho Nhà Đầu Tư
+              {language === 'en' ? 'For Investors' : 'Dành Cho Nhà Đầu Tư'}
             </h1>
             <div className={`w-24 h-1 mx-auto mb-6 rounded-full ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></div>
             <p className={`text-lg max-w-3xl mx-auto leading-relaxed ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>

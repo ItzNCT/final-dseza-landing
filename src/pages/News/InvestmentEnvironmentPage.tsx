@@ -11,6 +11,7 @@ import {
   Network
 } from 'lucide-react';
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
@@ -22,9 +23,68 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const InvestmentEnvironmentPage = () => {
   const { theme } = useTheme();
   const isMobile = useIsMobile();
+  const { language } = useLanguage();
 
-  // Investment environment categories data
-  const investmentEnvironmentCategories = [
+  // Investment environment categories data with bilingual support
+  const investmentEnvironmentCategories = (
+    language === 'en'
+      ? [
+        {
+          id: 'transportation-infrastructure',
+          title: 'Transportation Infrastructure',
+          description: 'Information about transportation system, regional connectivity and key infrastructure projects',
+          icon: Truck,
+          url: '/news/investment-environment/transportation-infrastructure',
+          color: theme === 'dark' ? 'text-blue-400' : 'text-blue-600',
+          bgColor: theme === 'dark' ? 'bg-blue-900/20' : 'bg-blue-50'
+        },
+        {
+          id: 'science-technology-environment',
+          title: 'Science, Technology & Environment',
+          description: 'Clean technology development, environmental protection and sustainable technology solutions',
+          icon: Leaf,
+          url: '/news/investment-environment/science-technology-environment',
+          color: theme === 'dark' ? 'text-green-400' : 'text-green-600',
+          bgColor: theme === 'dark' ? 'bg-green-900/20' : 'bg-green-50'
+        },
+        {
+          id: 'logistics',
+          title: 'Logistics',
+          description: 'Logistics system, supply chain and modern transportation and warehousing services',
+          icon: Package,
+          url: '/news/investment-environment/logistics',
+          color: theme === 'dark' ? 'text-orange-400' : 'text-orange-600',
+          bgColor: theme === 'dark' ? 'bg-orange-900/20' : 'bg-orange-50'
+        },
+        {
+          id: 'social-infrastructure',
+          title: 'Social Infrastructure',
+          description: 'Education, healthcare, culture, sports and social services for residents',
+          icon: Network,
+          url: '/news/investment-environment/social-infrastructure',
+          color: theme === 'dark' ? 'text-purple-400' : 'text-purple-600',
+          bgColor: theme === 'dark' ? 'bg-purple-900/20' : 'bg-purple-50'
+        },
+        {
+          id: 'human-resources',
+          title: 'Human Resources',
+          description: 'Human resource policies, vocational training and development of high-quality workforce',
+          icon: Users,
+          url: '/news/investment-environment/human-resources',
+          color: theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600',
+          bgColor: theme === 'dark' ? 'bg-indigo-900/20' : 'bg-indigo-50'
+        },
+        {
+          id: 'administrative-reform',
+          title: 'Administrative Reform',
+          description: 'Modernizing processes, improving public services and business environment',
+          icon: FileCheck,
+          url: '/news/investment-environment/administrative-reform',
+          color: theme === 'dark' ? 'text-teal-400' : 'text-teal-600',
+          bgColor: theme === 'dark' ? 'bg-teal-900/20' : 'bg-teal-50'
+        }
+      ]
+      : [
     {
       id: 'ha-tang-giao-thong',
       title: 'Hạ tầng giao thông',
@@ -79,7 +139,8 @@ const InvestmentEnvironmentPage = () => {
       color: theme === 'dark' ? 'text-teal-400' : 'text-teal-600',
       bgColor: theme === 'dark' ? 'bg-teal-900/20' : 'bg-teal-50'
     }
-  ];
+  ]
+  );
 
   // Mobile Layout
   if (isMobile) {
@@ -96,18 +157,18 @@ const InvestmentEnvironmentPage = () => {
                   to="/" 
                   className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                 >
-                  Trang chủ
+                  {language === 'en' ? 'Home' : 'Trang chủ'}
                 </Link>
                 <ChevronRight className="h-2.5 w-2.5" />
                 <Link 
                   to="/tin-tuc" 
                   className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                 >
-                  Tin tức
+                  {language === 'en' ? 'News' : 'Tin tức'}
                 </Link>
                 <ChevronRight className="h-2.5 w-2.5" />
                 <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                  Môi trường đầu tư
+                  {language === 'en' ? 'Investment Environment' : 'Môi trường đầu tư'}
                 </span>
               </nav>
             </div>
@@ -115,7 +176,7 @@ const InvestmentEnvironmentPage = () => {
             {/* Page Header - Mobile optimized */}
             <div className="text-center py-3">
               <h1 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Môi Trường Đầu Tư
+                {language === 'en' ? 'Investment Environment' : 'Môi Trường Đầu Tư'}
               </h1>
               <div className={`w-12 h-0.5 mx-auto mb-2 rounded-full ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></div>
               <p className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
@@ -173,7 +234,7 @@ const InvestmentEnvironmentPage = () => {
             }`}>
               <CardHeader className="pb-4">
                 <CardTitle className={`text-lg text-center ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                  Môi Trường Đầu Tư Đà Nẵng
+                  {language === 'en' ? 'Investment Environment' : 'Môi Trường Đầu Tư'} Đà Nẵng
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -280,18 +341,18 @@ const InvestmentEnvironmentPage = () => {
                 to="/" 
                 className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {language === 'en' ? 'Home' : 'Trang chủ'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
                 to="/tin-tuc" 
                 className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Tin tức
+                {language === 'en' ? 'News' : 'Tin tức'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Môi trường đầu tư
+                {language === 'en' ? 'Investment Environment' : 'Môi trường đầu tư'}
               </span>
             </nav>
           </div>
@@ -302,7 +363,7 @@ const InvestmentEnvironmentPage = () => {
           {/* Page Header */}
           <div className="text-center mb-16">
             <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-              Môi Trường Đầu Tư
+              {language === 'en' ? 'Investment Environment' : 'Môi Trường Đầu Tư'}
             </h1>
             <div className={`w-24 h-1 mx-auto mb-6 rounded-full ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`}></div>
             <p className={`text-lg max-w-3xl mx-auto leading-relaxed ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
@@ -365,7 +426,7 @@ const InvestmentEnvironmentPage = () => {
           }`}>
             <div className="text-center mb-8">
               <h2 className={`text-3xl font-bold mb-4 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Môi Trường Đầu Tư Đà Nẵng
+                {language === 'en' ? 'Investment Environment' : 'Môi Trường Đầu Tư'} Đà Nẵng
               </h2>
               <p className={`text-lg ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                 Những con số ấn tượng về môi trường đầu tư
