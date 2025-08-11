@@ -34,6 +34,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -42,6 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/context/ThemeContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguage } from "@/context/LanguageContext";
+import MobileLayout from "@/components/mobile/MobileLayout";
 
 /**
  * DocumentSearchPage component for searching legal documents
@@ -328,11 +330,11 @@ const DocumentSearchPage: React.FC = () => {
           }`}>
             {t('THUỘC TÍNH VĂN BẢN','DOCUMENT PROPERTIES')}
           </DialogTitle>
-          <p className={`text-sm mt-1 ${
+          <DialogDescription className={`text-sm mt-1 ${
             theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
           }`}>
             {document.attributes?.field_so_ky_hieu || document.attributes?.title || "N/A"}
-          </p>
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
@@ -600,6 +602,102 @@ const DocumentSearchPage: React.FC = () => {
         return 'Tra cứu văn bản';
     }
   };
+
+  // Mobile standalone page when used inside DocumentTabLayout mobile content
+  if (isMobile) {
+    return (
+      <div className="p-4">
+        {/* Category Header */}
+        <div className="mb-4">
+          <h2 className={`text-lg font-semibold ${
+            theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
+          }`}>
+            {getCategoryDisplayName()}
+          </h2>
+        </div>
+
+        {/* Search Filters */}
+        <div className={`p-4 rounded-lg mb-6 ${
+          theme === 'dark' 
+            ? 'bg-dseza-dark-hover border border-dseza-dark-border' 
+            : 'bg-dseza-light-hover border border-dseza-light-border'
+        }`}>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="documentNumber" className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Số/Ký hiệu</Label>
+              <Input id="documentNumber" placeholder={t('Nhập số/ký hiệu văn bản','Enter document number')} value={filters.documentNumber || ""} onChange={(e) => handleInputChange("documentNumber", e.target.value)} className={`${theme === 'dark' ? 'bg-dseza-dark-secondary border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="summary" className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{t('Trích yếu','Summary')}</Label>
+              <Input id="summary" placeholder={t('Nhập từ khóa trích yếu','Enter summary keyword')} value={filters.summary || ""} onChange={(e) => handleInputChange("summary", e.target.value)} className={`${theme === 'dark' ? 'bg-dseza-dark-secondary border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`} />
+            </div>
+            <div>
+              <Button onClick={handleSearch} className={`w-full h-11 ${theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary-hover' : 'bg-dseza-light-primary text-dseza-light-main-bg hover:bg-dseza-light-primary-hover'}`} disabled={isLoading}>
+                <Search className="h-4 w-4 mr-2" />
+                {isLoading ? t('Đang tìm kiếm...','Searching...') : t('Tìm kiếm','Search')}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Results */}
+        <div className="space-y-4">
+          {/* Count */}
+          <div className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} text-sm`}>
+            {isLoading ? <Skeleton className="h-4 w-48" /> : `Hiển thị ${startResult}-${endResult} của ${totalResults} kết quả`}
+          </div>
+
+          {/* Data */}
+          {isLoading ? (
+            <TableSkeleton />
+          ) : documents.length > 0 ? (
+            <div className="space-y-3">
+              {documents.map((doc: any) => {
+                const fileUrl = getDocumentFileUrl(doc, data?.included);
+                return (
+                  <div key={doc.id} className={`rounded-lg p-3 border ${theme === 'dark' ? 'bg-dseza-dark-secondary border-dseza-dark-border' : 'bg-white border-dseza-light-border'}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <button onClick={() => handleDocumentClick(doc)} className={`text-left font-semibold ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'} hover:underline`}>
+                        {doc.attributes?.field_so_ky_hieu || 'N/A'}
+                      </button>
+                      <Button variant="outline" size="sm" onClick={() => handleDownload(doc.id)} disabled={!fileUrl || downloadingIds.has(doc.id)} className={`${theme === 'dark' ? 'border-dseza-dark-primary text-dseza-dark-primary' : 'border-dseza-light-primary text-dseza-light-primary'}`}>
+                        {downloadingIds.has(doc.id) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      {getTextContent(doc.attributes?.field_trich_yeu) || getTextContent(doc.attributes?.title) || 'N/A'}
+                    </p>
+                    <div className={`mt-2 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                      {formatDate(doc.attributes?.field_ngay_ban_hanh || doc.attributes?.created)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className={`rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary'} border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'} p-8 text-center`}>
+              <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>Không tìm thấy kết quả</p>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {!isLoading && documents.length > 0 && totalPages > 1 && (
+            <div className="flex justify-between items-center text-sm">
+              <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>
+                Trước
+              </Button>
+              <span className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>{currentPage}/{totalPages}</span>
+              <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)}>
+                Sau
+              </Button>
+            </div>
+          )}
+
+          {/* Dialog stays as-is (mounted by parent) */}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={isMobile ? "p-4" : "p-6"}>

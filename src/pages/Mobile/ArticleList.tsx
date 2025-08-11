@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useArticles } from "../../hooks/useArticles";
 import { useAllNewsCategories } from "../../hooks/useNewsCategories";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
-import { ChevronRight, ChevronLeft, Star, Filter } from "lucide-react";
+import { ChevronRight, Star, Filter } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { translatePath } from "@/utils/seo";
@@ -268,22 +268,7 @@ const MobileArticleListPage: React.FC = () => {
           </div>
         )}
 
-        {/* Back Button */}
-        {category && (
-          <div className="pt-6">
-            <Link 
-              to={isSubcategoryOfSuKien ? "/tin-tuc/su-kien" : "/tin-tuc"}
-              className={`inline-flex items-center px-4 py-3 rounded-lg border font-medium transition-all duration-200 active:scale-95 ${
-                theme === 'dark' 
-                  ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-dseza-dark-secondary-bg' 
-                  : 'border-dseza-light-border text-dseza-light-main-text hover:bg-dseza-light-secondary-bg'
-              }`}
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-              {isSubcategoryOfSuKien ? "Quay lại Sự kiện" : "Quay lại Tin tức"}
-            </Link>
-          </div>
-        )}
+        {/* Removed back button per request */}
 
       </main>
 

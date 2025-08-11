@@ -56,6 +56,7 @@ import InvestorGuidelinesPage from "./pages/News/InvestorGuidelinesPage";
 import DraftFeedbackPage from "./pages/Feedback/DraftFeedbackPage";
 import DraftDetailPage from "./pages/Feedback/DraftDetailPage";
 import VanBanHuongDanPage from "./pages/Feedback/VanBanHuongDanPage";
+import ResourceListPage from "@/pages/Resource/ResourceListPage";
 import FaqPage from "./pages/QnA/FaqPage";
 import MobileLayout from "./components/mobile/MobileLayout";
 import AccessibilityPanel from "./components/AccessibilityPanel";
@@ -169,6 +170,10 @@ const App: React.FC = () => (
                         <Route path="tien-ich/hoi-dap/tao-moi" element={<CreateQuestionPage />} />
                         <Route path="tien-ich/hoi-dap" element={<QnAListPage />} />
                         <Route path="tien-ich/cau-hoi-thuong-gap" element={<FaqPage />} />
+
+                         {/* Resources - Vietnamese and English top-level shortcuts */}
+                         <Route path="tai-nguyen" element={<ResourceListPage />} />
+                         <Route path="resources" element={<ResourceListPage />} />
                         
                         {/* Q&A and utilities routes - English */}
                         <Route path="utilities/qna/:id" element={<QnADetailPage />} />

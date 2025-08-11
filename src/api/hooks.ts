@@ -1401,7 +1401,7 @@ export { fetchEnterprises };
  * @param weekRange - The week range in format 'YYYY-MM-DD_YYYY-MM-DD' (e.g., '2025-07-07_2025-07-13')
  * @returns Promise containing the work schedule data
  */
-async function fetchWorkSchedule(weekRange: string): Promise<any> {
+async function fetchWorkSchedule(weekRange: string, language: 'vi' | 'en' = 'vi'): Promise<any> {
   try {
     // Parse week range to get start and end dates
     const [startDate, endDate] = weekRange.split('_');
@@ -1418,22 +1418,30 @@ async function fetchWorkSchedule(weekRange: string): Promise<any> {
     
     // Sort by date and time
     queryParams.append('sort', 'field_ngay,field_thoi_gian');
-    
-    const url = `${JSON_API_BASE_URL}/jsonapi/node/schedule_item?${queryParams.toString()}`;
+    const languagePrefix = language === 'en' ? '/en' : '/vi';
+    const url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/schedule_item?${queryParams.toString()}`;
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: jsonApiHeaders,
+      headers: {
+        ...jsonApiHeaders,
+        'Accept-Language': language,
+        'Content-Language': language,
+      },
     });
 
     if (!response.ok) {
       // If filtering fails, try without any filters as fallback
       if (response.status === 500) {
         console.warn('Date filtering failed, fetching all schedule items');
-        const fallbackUrl = `${JSON_API_BASE_URL}/jsonapi/node/schedule_item?sort=field_ngay,field_thoi_gian`;
+        const fallbackUrl = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/schedule_item?sort=field_ngay,field_thoi_gian`;
         const fallbackResponse = await fetch(fallbackUrl, {
           method: 'GET',
-          headers: jsonApiHeaders,
+          headers: {
+            ...jsonApiHeaders,
+            'Accept-Language': language,
+            'Content-Language': language,
+          },
         });
         
         if (fallbackResponse.ok) {
@@ -1485,7 +1493,7 @@ async function fetchWorkSchedule(weekRange: string): Promise<any> {
  *   - isSuccess: Boolean indicating if the request was successful
  *   - refetch: Function to manually refetch the data
  */
-export const useWorkSchedule = (weekRange: string) => {
+export const useWorkSchedule = (weekRange: string, language: 'vi' | 'en' = 'vi') => {
   const {
     data,
     isLoading,
@@ -1494,8 +1502,8 @@ export const useWorkSchedule = (weekRange: string) => {
     isSuccess,
     refetch,
   } = useQuery({
-    queryKey: ['schedule', weekRange],
-    queryFn: () => fetchWorkSchedule(weekRange),
+    queryKey: ['schedule', weekRange, language],
+    queryFn: () => fetchWorkSchedule(weekRange, language),
     enabled: !!weekRange,
     staleTime: 5 * 60 * 1000, // 5 minutes - schedule data is relatively static
     gcTime: 15 * 60 * 1000, // 15 minutes cache time
@@ -1538,6 +1546,7 @@ interface QuestionFilters {
 async function fetchQuestions({ queryKey }: { queryKey: readonly unknown[] }): Promise<any> {
   try {
     const filters = queryKey[1] as QuestionFilters;
+    const language = (queryKey[2] as 'vi' | 'en') || 'vi';
     const queryParams = new URLSearchParams();
     
     // IMPORTANT: Only get Q&A questions (exclude FAQ questions)
@@ -1575,13 +1584,18 @@ async function fetchQuestions({ queryKey }: { queryKey: readonly unknown[] }): P
     // Include related taxonomy terms if needed
     queryParams.append('include', 'field_linh_vuc');
     
-    const url = `${JSON_API_BASE_URL}/jsonapi/node/question?${queryParams.toString()}`;
+    const languagePrefix = language === 'en' ? '/en' : '/vi';
+    const url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/question?${queryParams.toString()}`;
     
     console.log('🔍 Fetching Q&A questions from:', url);
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: jsonApiHeaders,
+      headers: {
+        ...jsonApiHeaders,
+        'Accept-Language': language,
+        'Content-Language': language,
+      },
     });
 
     if (!response.ok) {
@@ -1631,7 +1645,7 @@ async function fetchQuestions({ queryKey }: { queryKey: readonly unknown[] }): P
  *   - isSuccess: Boolean indicating if the request was successful
  *   - refetch: Function to manually refetch the data
  */
-export const useQuestions = (filters: QuestionFilters = {}) => {
+export const useQuestions = (filters: QuestionFilters = {}, language: 'vi' | 'en' = 'vi') => {
   const {
     data,
     isLoading,
@@ -1640,7 +1654,7 @@ export const useQuestions = (filters: QuestionFilters = {}) => {
     isSuccess,
     refetch,
   } = useQuery({
-    queryKey: ['questions', filters],
+    queryKey: ['questions', filters, language],
     queryFn: fetchQuestions,
     staleTime: 2 * 60 * 1000, // 2 minutes - question search results can be cached briefly
     gcTime: 5 * 60 * 1000, // 5 minutes cache time

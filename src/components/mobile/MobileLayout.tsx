@@ -41,6 +41,25 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
 
     // Khu chức năng
     "cac-khu-chuc-nang", "functional",
+
+    // Lịch công tác
+    "lich-cong-tac", "work-schedule",
+
+    // Doanh nghiệp
+    "doanh-nghiep", "enterprise",
+
+    // Văn bản
+    "van-ban", "documents",   
+
+    // Tiện ích
+    "tien-ich", "utilities",
+
+    // Câu hỏi thường gặp
+    "cau-hoi-thuong-gap", "faq",
+
+    // Tài nguyên
+    "tai-nguyen", "resources",
+    
   ];
 
   // Ẩn hero nếu path chứa 1 trong các khoá trên

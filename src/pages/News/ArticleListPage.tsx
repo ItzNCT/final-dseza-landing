@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useArticles } from "../../hooks/useArticles";
 import { useAllNewsCategories } from "../../hooks/useNewsCategories";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
-import { ChevronRight, ChevronLeft, Calendar, ArrowRight, Star, Filter } from "lucide-react";
+import { ChevronRight, Calendar, ArrowRight, Star, Filter } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTranslation } from "react-i18next";
@@ -636,22 +636,7 @@ const ArticleListPage = () => {
               </div>
             )}
 
-            {/* Back Button - Mobile optimized */}
-            {!isSuKienMainPage && (
-                             <div className="pt-6">
-                <Link 
-                  to={isSubcategoryOfSuKien ? `/${translatePath('news', language)}/${translatePath('event', language)}` : `/${translatePath('news', language)}`}
-                  className={`inline-flex items-center px-4 py-3 rounded-lg border font-medium transition-all duration-200 active:scale-[0.95] ${
-                    theme === 'dark' 
-                      ? 'border-dseza-dark-border text-dseza-dark-main-text hover:bg-dseza-dark-secondary-bg' 
-                      : 'border-dseza-light-border text-dseza-light-main-text hover:bg-dseza-light-secondary-bg'
-                  }`}
-                                 >
-                   <ChevronLeft className="h-4 w-4 mr-2" />
-                   {isSubcategoryOfSuKien ? "Quay lại Tin tức & Sự kiện" : "Quay lại danh mục tin tức"}
-                 </Link>
-              </div>
-            )}
+            {/* Removed back navigation link per request */}
 
           </main>
 
@@ -945,24 +930,7 @@ const ArticleListPage = () => {
             </div>
           )}
 
-          {/* Back to Categories Button - Conditional Logic */}
-          {!isSuKienMainPage && (
-            <div className="mt-16 text-center">
-              <Link 
-                to={isSubcategoryOfSuKien ? `/${translatePath('news', language)}/${translatePath('event', language)}` : `/${translatePath('news', language)}`}
-                className={`inline-flex items-center px-6 py-3 rounded-lg border-2 font-medium transition-all duration-300 hover:-translate-y-1 ${
-                  theme === 'dark' 
-                    ? 'border-dseza-dark-primary text-dseza-dark-primary hover:bg-dseza-dark-primary hover:text-dseza-dark-main-text' 
-                    : 'border-dseza-light-primary text-dseza-light-primary hover:bg-dseza-light-primary hover:text-white'
-                }`}
-              >
-                ← {isSubcategoryOfSuKien 
-                  ? (language === 'en' ? 'Back to News & Events' : 'Quay lại Tin tức & Sự kiện')
-                  : (language === 'en' ? 'Back to news categories' : 'Quay lại danh mục tin tức')
-                }
-              </Link>
-            </div>
-          )}
+          {/* Removed back-to-categories link per request */}
         </div>
       </main>
 

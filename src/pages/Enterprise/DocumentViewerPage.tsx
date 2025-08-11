@@ -10,6 +10,8 @@ import TopBar from '../../components/hero/TopBar';
 import LogoSearchBar from '../../components/hero/LogoSearchBar';
 import NavigationBar from '../../components/hero/NavigationBar';
 import Footer from '../../components/Footer';
+import MobileLayout from "@/components/mobile/MobileLayout";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Interface for single document
 interface DocumentDetails {
@@ -153,6 +155,7 @@ const DocumentViewerPage: React.FC = () => {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const { docId } = useParams<{ docId: string }>();
+  const isMobile = useIsMobile();
 
   // Dynamic breadcrumb links based on language and current path
   const getBreadcrumbLinks = () => {
@@ -347,6 +350,71 @@ const DocumentViewerPage: React.FC = () => {
   const cardClass = isDark ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary';
   const borderClass = isDark ? 'border-dseza-dark-border' : 'border-dseza-light-border';
 
+  // Mobile layout for loading
+  if (isLoading) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${bgClass}`}>
+          <main className="flex-1 px-4 py-6">
+            <div className="flex justify-center items-center h-64">
+              <div className="text-center">
+                <LoadingSpinner size="lg" />
+                <p className={`mt-4 text-sm ${secondaryTextClass}`}>
+                  {language === 'en' ? 'Loading document...' : 'Đang tải tài liệu...'}
+                </p>
+              </div>
+            </div>
+          </main>
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Mobile layout for errors
+  if (isMobile && isError) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${bgClass}`}>
+          <main className="flex-1 px-4 py-6">
+            <div className="text-center py-12">
+              <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <h2 className={`text-lg font-semibold mb-2 ${textClass}`}>
+                {language === 'en' ? 'Error Loading Data' : 'Lỗi khi tải dữ liệu'}
+              </h2>
+              <p className={secondaryTextClass}>
+                {language === 'en' ? 'Unable to load document data. Please try again later.' : 'Không thể tải dữ liệu tài liệu. Vui lòng thử lại sau.'}
+              </p>
+            </div>
+          </main>
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  // Mobile layout for missing document
+  if (isMobile && !documentData) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${bgClass}`}>
+          <main className="flex-1 px-4 py-6">
+            <div className="text-center py-12">
+              <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <h2 className={`text-lg font-semibold mb-2 ${textClass}`}>
+                {language === 'en' ? 'Document Not Found' : 'Không tìm thấy tài liệu'}
+              </h2>
+              <p className={secondaryTextClass}>
+                {language === 'en' ? 'The document you are looking for does not exist or has been deleted.' : 'Tài liệu bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.'}
+              </p>
+            </div>
+          </main>
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className={`min-h-screen flex flex-col ${bgClass}`}>
@@ -540,7 +608,7 @@ const DocumentViewerPage: React.FC = () => {
           {/* PDF Viewer */}
           {documentData.fileUrl ? (
             <div className={`rounded-lg ${cardClass} ${borderClass} border overflow-hidden`}>
-              <div className="w-full h-[80vh] bg-gray-100">
+              <div className="w-full h-[80vh] bg-gray-100 md:h-[80vh] h-[70vh]">
                 <iframe
                   src={documentData.fileUrl}
                   title={documentData.title}

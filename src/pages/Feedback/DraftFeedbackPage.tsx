@@ -11,7 +11,9 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useDraftDocuments } from "@/hooks/useDraftDocuments";
+import { useTranslation } from "react-i18next";
 
 // Import complete header structure
 import TopBar from "@/components/hero/TopBar";
@@ -44,6 +46,7 @@ interface DraftDocumentCardProps {
 }
 
 const DraftDocumentCard: React.FC<DraftDocumentCardProps> = ({ document, theme }) => {
+  const { t } = useTranslation();
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('vi-VN', {
@@ -78,12 +81,12 @@ const DraftDocumentCard: React.FC<DraftDocumentCardProps> = ({ document, theme }
             {document.isOpen ? (
               <>
                 <Clock className="w-3 h-3 mr-1" />
-                Đang lấy ý kiến
+                {t('draft.card.statusOpen')}
               </>
             ) : (
               <>
                 <CheckCircle className="w-3 h-3 mr-1" />
-                Hết thời gian
+                {t('draft.card.statusClosed')}
               </>
             )}
           </Badge>
@@ -102,14 +105,14 @@ const DraftDocumentCard: React.FC<DraftDocumentCardProps> = ({ document, theme }
         <div className="space-y-2 mb-4">
           <div className={`flex items-center gap-2 text-sm ${secondaryTextColor}`}>
             <Calendar className="w-4 h-4" />
-            <span>Ngày công bố: {formatDate(document.publishedDate)}</span>
+            <span>{t('draft.card.published')} {formatDate(document.publishedDate)}</span>
           </div>
           
           {document.feedbackEndDate && (
             <div className={`flex items-center gap-2 text-sm ${secondaryTextColor}`}>
               <AlertTriangle className="w-4 h-4" />
               <span>
-                Hết hạn góp ý: {formatDate(document.feedbackEndDate)}
+                {t('draft.card.deadline')} {formatDate(document.feedbackEndDate)}
               </span>
             </div>
           )}
@@ -125,7 +128,7 @@ const DraftDocumentCard: React.FC<DraftDocumentCardProps> = ({ document, theme }
           >
             <Link to={document.path}>
               <FileText className="w-4 h-4 mr-2" />
-              Xem chi tiết
+              {t('draft.card.viewDetail')}
             </Link>
           </Button>
 
@@ -142,7 +145,7 @@ const DraftDocumentCard: React.FC<DraftDocumentCardProps> = ({ document, theme }
                 rel="noopener noreferrer"
               >
                 <Download className="w-4 h-4 mr-2" />
-                Tải tài liệu
+                {t('draft.card.download')}
                 <ExternalLink className="w-3 h-3 ml-1" />
               </a>
             </Button>
@@ -158,7 +161,9 @@ const DraftDocumentCard: React.FC<DraftDocumentCardProps> = ({ document, theme }
  */
 const DraftFeedbackPage: React.FC = () => {
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const { openDrafts, closedDrafts, isLoading, isError, error } = useDraftDocuments();
+  const { t } = useTranslation();
 
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
   const secondaryTextColor = theme === "dark" ? "text-dseza-dark-secondary-text" : "text-dseza-light-secondary-text";
@@ -179,28 +184,28 @@ const DraftFeedbackPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${secondaryTextColor}`}>
               <Link 
-                to="/" 
+                to={language === 'en' ? '/en' : '/'} 
                 className={`transition-colors ${primaryHoverColor}`}
               >
-                Trang chủ
+                {t('draft.breadcrumb.home')}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/van-ban" 
+                to={`${language === 'en' ? '/en' : ''}/van-ban`} 
                 className={`transition-colors ${primaryHoverColor}`}
               >
-                Văn bản
+                {t('draft.breadcrumb.documents')}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/van-ban/huong-dan-gop-y" 
+                to={`${language === 'en' ? '/en' : ''}/van-ban/huong-dan-gop-y`} 
                 className={`transition-colors ${primaryHoverColor}`}
               >
-                Hướng dẫn góp ý
+                {t('draft.breadcrumb.guide')}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${textColor}`}>
-                Góp ý dự thảo văn bản
+                {t('draft.breadcrumb.list')}
               </span>
             </nav>
           </div>
@@ -210,10 +215,10 @@ const DraftFeedbackPage: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center mb-8">
             <h1 className={`text-3xl md:text-4xl font-bold ${textColor} mb-4`}>
-              Góp ý dự thảo văn bản
+              {t('draft.pageTitle')}
             </h1>
             <p className={`text-lg ${secondaryTextColor} max-w-3xl mx-auto`}>
-              Danh sách các dự thảo văn bản đang được lấy ý kiến và đã hết thời gian lấy ý kiến từ Ban Quản lý Khu công nghệ cao Đà Nẵng.
+              {t('draft.description')}
             </p>
           </div>
 
@@ -221,7 +226,7 @@ const DraftFeedbackPage: React.FC = () => {
           {isLoading && (
             <div className="flex justify-center items-center py-16">
               <LoadingSpinner size="lg" />
-              <span className={`ml-3 ${textColor}`}>Đang tải dữ liệu...</span>
+              <span className={`ml-3 ${textColor}`}>{t('draft.loading')}</span>
             </div>
           )}
 
@@ -230,8 +235,8 @@ const DraftFeedbackPage: React.FC = () => {
             <div className="text-center py-16">
               <div className={`text-red-500 mb-4`}>
                 <AlertTriangle className="w-16 h-16 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Có lỗi xảy ra</h3>
-                <p>{error?.message || 'Không thể tải dữ liệu dự thảo văn bản'}</p>
+                <h3 className="text-xl font-semibold mb-2">{t('draft.errorTitle')}</h3>
+                <p>{error?.message || t('draft.errorLoading')}</p>
               </div>
             </div>
           )}
@@ -249,14 +254,14 @@ const DraftFeedbackPage: React.FC = () => {
                   className={`${textColor} data-[state=active]:${primaryColor}`}
                 >
                   <Clock className="w-4 h-4 mr-2" />
-                  Dự thảo lấy ý kiến ({openDrafts.length})
+                  {t('draft.tabs.open')} ({openDrafts.length})
                 </TabsTrigger>
                 <TabsTrigger 
                   value="closed"
                   className={`${textColor} data-[state=active]:${primaryColor}`}
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Dự thảo hết thời gian lấy ý kiến ({closedDrafts.length})
+                  {t('draft.tabs.closed')} ({closedDrafts.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -276,10 +281,10 @@ const DraftFeedbackPage: React.FC = () => {
                   <div className="text-center py-16">
                     <Clock className={`w-16 h-16 mx-auto mb-4 ${secondaryTextColor}`} />
                     <h3 className={`text-xl font-semibold mb-2 ${textColor}`}>
-                      Hiện tại không có dự thảo văn bản nào đang lấy ý kiến
+                      {t('draft.emptyOpen.title')}
                     </h3>
                     <p className={secondaryTextColor}>
-                      Vui lòng kiểm tra lại sau hoặc xem các dự thảo đã hết thời gian lấy ý kiến.
+                      {t('draft.emptyOpen.desc')}
                     </p>
                   </div>
                 )}
@@ -301,10 +306,10 @@ const DraftFeedbackPage: React.FC = () => {
                   <div className="text-center py-16">
                     <CheckCircle className={`w-16 h-16 mx-auto mb-4 ${secondaryTextColor}`} />
                     <h3 className={`text-xl font-semibold mb-2 ${textColor}`}>
-                      Chưa có dự thảo văn bản nào hết thời gian lấy ý kiến
+                      {t('draft.emptyClosed.title')}
                     </h3>
                     <p className={secondaryTextColor}>
-                      Danh sách này sẽ hiển thị các dự thảo đã hết thời gian lấy ý kiến.
+                      {t('draft.emptyClosed.desc')}
                     </p>
                   </div>
                 )}

@@ -22,6 +22,8 @@ import TopBar from "../../components/hero/TopBar";
 import LogoSearchBar from "../../components/hero/LogoSearchBar";
 import NavigationBar from "../../components/hero/NavigationBar";
 import Footer from "../../components/Footer";
+import MobileLayout from "@/components/mobile/MobileLayout";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Hàm hỗ trợ định dạng tiêu đề với mapping cho các danh mục cụ thể (đa ngôn ngữ)
 const formatTitle = (slug: string = "", language: 'vi' | 'en' = 'vi') => {
@@ -123,6 +125,7 @@ const DocumentListPage: React.FC = () => {
   }>();
   const { data: documents, isLoading, isError, error } = useEnterpriseDocs();
   const [searchTerm, setSearchTerm] = useState("");
+  const isMobile = useIsMobile();
 
   // Sử dụng docCategorySlug nếu có, nếu không thì fallback về docCategory (để tương thích với route cũ)
   const categoryParam = docCategorySlug || docCategory;
@@ -400,6 +403,99 @@ const DocumentListPage: React.FC = () => {
       </Table>
     </div>
   );
+
+  // Mobile layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${bgClass}`}>
+          <main className="flex-1 px-4 py-4 space-y-4">
+            <div className={`${isDark ? 'bg-dseza-dark-secondary/30' : 'bg-dseza-light-secondary/30'} rounded-lg px-2 py-1`}>
+              <nav className={`flex items-center space-x-1 text-xs ${secondaryTextClass}`}>
+                <Link 
+                  to={breadcrumbLinks.home} 
+                  className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  {language === 'en' ? 'Home' : 'Trang chủ'}
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <Link 
+                  to={breadcrumbLinks.enterprise}
+                  className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  {breadcrumbLinks.enterpriseLabel || (language === 'en' ? 'Business' : 'Doanh nghiệp')}
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`font-medium ${textClass}`}>
+                  {formatTitle(categoryParam, language)}
+                </span>
+              </nav>
+            </div>
+
+            <div className="text-center py-2">
+              <h1 className={`text-xl font-bold mb-1 ${textClass}`}>{pageTitle}</h1>
+              <div className={`w-12 h-0.5 mx-auto mb-2 rounded-full ${isDark ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`} />
+              <p className={`text-xs ${secondaryTextClass}`}>{getPageDescription()}</p>
+            </div>
+
+            <div className={`p-3 rounded-lg ${cardClass} ${borderClass} border`}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-60" />
+                <Input
+                  type="text"
+                  placeholder={language === 'en' ? 'Search by document name or number...' : 'Tìm kiếm theo tên tài liệu hoặc số ký hiệu...'}
+                  className="pl-10 h-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {isError && (
+              <Alert className="mb-2">
+                <AlertDescription>
+                  {language === 'en' 
+                    ? `Error loading documents: ${error?.message || 'Unknown error'}`
+                    : `Có lỗi xảy ra khi tải tài liệu: ${error?.message || 'Lỗi không xác định'}`}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {isLoading && (
+              <div className="flex justify-center items-center py-10">
+                <div className="flex flex-col items-center space-y-2">
+                  <LoadingSpinner size="lg" />
+                  <p className={`text-xs ${secondaryTextClass}`}>
+                    {language === 'en' ? 'Loading documents...' : 'Đang tải danh sách tài liệu...'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {!isLoading && !isError && (
+              filteredDocuments && filteredDocuments.length > 0 ? (
+                <div className="space-y-3">
+                  {renderCardView()}
+                </div>
+              ) : (
+                <div className={`rounded-lg ${cardClass} ${borderClass} border p-8 text-center`}>
+                  <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className={`text-sm font-medium mb-1 ${textClass}`}>
+                    {language === 'en' ? 'No documents found' : 'Không tìm thấy tài liệu nào'}
+                  </p>
+                  <p className={`text-xs ${secondaryTextClass}`}>
+                    {language === 'en' ? 'Try different keywords or clear the search.' : 'Hãy thử từ khóa khác hoặc xóa từ khóa tìm kiếm.'}
+                  </p>
+                </div>
+              )
+            )}
+
+          </main>
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
 
   return (
     <div className={`min-h-screen flex flex-col ${bgClass}`}>

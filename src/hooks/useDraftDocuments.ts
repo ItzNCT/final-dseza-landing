@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useLanguage } from '@/context/LanguageContext';
 
 // Base URL pattern consistent with other hooks in the project
 const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
@@ -34,10 +35,11 @@ export interface DraftDocumentsResult {
 /**
  * Fetch draft documents from Drupal JSON:API
  */
-async function fetchDraftDocuments(): Promise<DraftDocument[]> {
+async function fetchDraftDocuments(language: 'vi' | 'en'): Promise<DraftDocument[]> {
   try {
     // Fetch all du_thao_van_ban nodes with necessary includes
-    const url = `${DRUPAL_BASE_URL}/jsonapi/node/du_thao_van_ban`
+    const langPrefix = language === 'en' ? '/en' : '';
+    const url = `${DRUPAL_BASE_URL}${langPrefix}/jsonapi/node/du_thao_van_ban`
       + '?filter[status][value]=1'  // Only published content
       + '&sort=-created'             // Sort by creation date (newest first)
       + '&include=field_linh_vuc,field_file_dinh_kem,field_file_dinh_kem.field_media_document'; // Include attached files
@@ -110,7 +112,8 @@ async function fetchDraftDocuments(): Promise<DraftDocument[]> {
       }
 
       // Generate path for the detail page
-      const path = `/van-ban/huong-dan-gop-y/gop-y-du-thao-van-ban/${item.id}`;
+      const pathPrefix = language === 'en' ? '/en' : '';
+      const path = `${pathPrefix}/van-ban/huong-dan-gop-y/gop-y-du-thao-van-ban/${item.id}`;
 
               return {
           id: item.id,
@@ -138,11 +141,11 @@ async function fetchDraftDocuments(): Promise<DraftDocument[]> {
 /**
  * Process and categorize draft documents
  */
-async function processDraftDocuments(): Promise<{
+async function processDraftDocuments(language: 'vi' | 'en'): Promise<{
   openDrafts: DraftDocument[];
   closedDrafts: DraftDocument[];
 }> {
-  const allDrafts = await fetchDraftDocuments();
+  const allDrafts = await fetchDraftDocuments(language);
   
   // Separate into open and closed drafts
   const openDrafts = allDrafts.filter(draft => draft.isOpen);
@@ -164,6 +167,7 @@ async function processDraftDocuments(): Promise<{
  * @returns Object containing openDrafts, closedDrafts, and loading states
  */
 export const useDraftDocuments = (): DraftDocumentsResult => {
+  const { language } = useLanguage();
   const {
     data,
     isLoading,
@@ -171,8 +175,8 @@ export const useDraftDocuments = (): DraftDocumentsResult => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['draftDocuments'],
-    queryFn: processDraftDocuments,
+    queryKey: ['draftDocuments', language],
+    queryFn: () => processDraftDocuments(language),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes cache time
     retry: 3,

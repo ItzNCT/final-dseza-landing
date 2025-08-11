@@ -15,10 +15,13 @@ import TopBar from "../../components/hero/TopBar";
 import LogoSearchBar from "../../components/hero/LogoSearchBar";
 import NavigationBar from "../../components/hero/NavigationBar";
 import Footer from "../../components/Footer";
+import MobileLayout from "@/components/mobile/MobileLayout";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const RecruitmentPage: React.FC = () => {
   const { theme } = useTheme();
   const { data: jobs, isLoading, isError, error } = useJobs();
+  const isMobile = useIsMobile();
 
   const isDark = theme === 'dark';
   const bgClass = isDark ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg';
@@ -26,6 +29,106 @@ const RecruitmentPage: React.FC = () => {
   const secondaryTextClass = isDark ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text';
   const cardClass = isDark ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary';
   const borderClass = isDark ? 'border-dseza-dark-border' : 'border-dseza-light-border';
+
+  // Mobile layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${bgClass}`}>
+          <main className="flex-1 px-4 py-4 space-y-4">
+            {/* Breadcrumb - Mobile */}
+            <div className={`${isDark ? 'bg-dseza-dark-secondary/30' : 'bg-dseza-light-secondary/30'} rounded-lg px-2 py-1`}>
+              <nav className={`flex items-center space-x-1 text-xs ${secondaryTextClass}`}>
+                <Link to="/" className={`${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'} hover:underline`}>
+                  Trang chủ
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <Link to="/doanh-nghiep" className={`${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'} hover:underline`}>
+                  Doanh nghiệp
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`font-medium ${textClass}`}>Tuyển dụng</span>
+              </nav>
+            </div>
+
+            {/* Header - Mobile */}
+            <div className="text-center">
+              <h1 className={`text-xl font-bold ${textClass}`}>Cơ hội nghề nghiệp</h1>
+              <div className={`w-12 h-0.5 mx-auto mt-2 rounded-full ${isDark ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`} />
+              <p className={`text-xs mt-2 ${secondaryTextClass}`}>Cơ hội việc làm tại Khu Công nghệ cao Đà Nẵng</p>
+            </div>
+
+            {/* Error - Mobile */}
+            {isError && (
+              <Alert className="mb-2">
+                <AlertDescription>
+                  Có lỗi xảy ra khi tải tin tuyển dụng: {error?.message || 'Lỗi không xác định'}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Loading - Mobile */}
+            {isLoading && (
+              <div className="flex justify-center items-center py-10">
+                <div className="text-center">
+                  <LoadingSpinner size="lg" />
+                  <p className={`mt-3 text-xs ${secondaryTextClass}`}>Đang tải danh sách tuyển dụng...</p>
+                </div>
+              </div>
+            )}
+
+            {/* Jobs - Mobile Accordion */}
+            {!isLoading && !isError && (
+              jobs && jobs.length > 0 ? (
+                <div className="space-y-3">
+                  {jobs.map((job) => (
+                    <div key={job.id} className={`${cardClass} ${borderClass} border rounded-lg p-3`}>
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="flex-1">
+                          <h2 className={`text-base font-semibold mb-1 ${textClass}`}>{job.position || 'Vị trí tuyển dụng'}</h2>
+                          {job.deadline && (
+                            <p className={`text-xs flex items-center ${secondaryTextClass}`}>
+                              <Calendar className="w-3.5 h-3.5 mr-1" /> Hạn nộp hồ sơ: {job.deadline}
+                            </p>
+                          )}
+                        </div>
+                        {job.salary && (
+                          <span className={`text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap ${isDark ? 'text-dseza-dark-primary bg-dseza-dark-primary/20' : 'text-dseza-light-primary bg-dseza-light-primary/20'}`}>
+                            {job.salary}
+                          </span>
+                        )}
+                      </div>
+
+                      {job.description && (
+                        <div className={`mt-2 text-xs ${secondaryTextClass}`} dangerouslySetInnerHTML={{ __html: job.description }} />
+                      )}
+
+                      {job.requirements && (
+                        <div className={`mt-2 text-xs ${secondaryTextClass}`} dangerouslySetInnerHTML={{ __html: job.requirements }} />
+                      )}
+
+                      <div className={`mt-3 p-2 rounded ${isDark ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'} ${borderClass} border`}>
+                        <p className={`text-xs ${secondaryTextClass}`}>
+                          Liên hệ: <span className={`${isDark ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'} font-medium`}>tuyendung@dseza.danang.gov.vn</span>
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={`rounded-lg ${cardClass} ${borderClass} border p-10 text-center`}>
+                  <DollarSign className={`w-12 h-12 mx-auto mb-3 ${secondaryTextClass} opacity-50`} />
+                  <h3 className={`text-base font-semibold mb-2 ${textClass}`}>Hiện tại không có tin tuyển dụng</h3>
+                  <p className={`text-xs ${secondaryTextClass}`}>Chúng tôi sẽ cập nhật thông tin tuyển dụng mới nhất tại đây. Vui lòng quay lại sau.</p>
+                </div>
+              )
+            )}
+          </main>
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
 
   return (
     <div className={`min-h-screen flex flex-col ${bgClass}`}>

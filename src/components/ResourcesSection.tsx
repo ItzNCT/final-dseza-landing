@@ -11,6 +11,8 @@ import { useImages } from "@/hooks/useImages";
 import { useVideos } from "@/hooks/useVideos";
 import { useDocuments } from "@/hooks/useDocuments";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useLanguageRoutes } from "@/utils/routes";
 
 // Modal component for video playback
 const VideoModal: React.FC<{
@@ -176,6 +178,8 @@ const ResourcesSection: React.FC = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { createUrl, language } = useLanguageRoutes();
   const [activeTab, setActiveTab] = useState<'images' | 'videos' | 'documents'>('images');
   const [selectedVideo, setSelectedVideo] = useState<{url: string, title: string} | null>(null);
 
@@ -580,6 +584,10 @@ const ResourcesSection: React.FC = () => {
                 viewAllButtonHoverText,
                 "hover:scale-105 hover:shadow-md transition-all duration-300 ease-in-out"
               )}
+              onClick={() => {
+                const targetPath = language === 'en' ? 'resources' : 'tai-nguyen';
+                navigate(createUrl(targetPath));
+              }}
             >
               {t('resourcesSection.viewAll')}
             </Button>

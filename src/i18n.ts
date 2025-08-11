@@ -270,6 +270,52 @@ const viTranslation = {
     "successTitle": "Cảm ơn bạn đã gửi bình luận!",
     "successDesc": "Do cấu hình hệ thống, bình luận hiện đang được xử lý và sẽ hiển thị sau khi được quản trị viên duyệt."
   },
+  "draft": {
+    "breadcrumb": {
+      "home": "Trang chủ",
+      "documents": "Văn bản",
+      "guide": "Hướng dẫn góp ý",
+      "list": "Góp ý dự thảo văn bản"
+    },
+    "pageTitle": "Góp ý dự thảo văn bản",
+    "description": "Danh sách các dự thảo văn bản đang được lấy ý kiến và đã hết thời gian lấy ý kiến từ Ban Quản lý Khu công nghệ cao Đà Nẵng.",
+    "loading": "Đang tải dữ liệu...",
+    "errorTitle": "Có lỗi xảy ra",
+    "errorLoading": "Không thể tải dữ liệu dự thảo văn bản",
+    "tabs": {
+      "open": "Dự thảo lấy ý kiến",
+      "closed": "Dự thảo hết thời gian lấy ý kiến"
+    },
+    "emptyOpen": {
+      "title": "Hiện tại không có dự thảo văn bản nào đang lấy ý kiến",
+      "desc": "Vui lòng kiểm tra lại sau hoặc xem các dự thảo đã hết thời gian lấy ý kiến."
+    },
+    "emptyClosed": {
+      "title": "Chưa có dự thảo văn bản nào hết thời gian lấy ý kiến",
+      "desc": "Danh sách này sẽ hiển thị các dự thảo đã hết thời gian lấy ý kiến."
+    },
+    "card": {
+      "statusOpen": "Đang lấy ý kiến",
+      "statusClosed": "Hết thời gian",
+      "published": "Ngày công bố:",
+      "deadline": "Hết hạn góp ý:",
+      "viewDetail": "Xem chi tiết",
+      "download": "Tải tài liệu"
+    },
+    "detail": {
+      "statusOpen": "Đang lấy ý kiến",
+      "statusClosed": "Hết thời gian lấy ý kiến",
+      "published": "Ngày công bố:",
+      "deadline": "Hết hạn góp ý:",
+      "field": "Lĩnh vực:",
+      "attachments": "Tài liệu đính kèm",
+      "download": "Tải xuống",
+      "commentsTitle": "Góp ý và bình luận",
+      "openNotice": "Dự thảo này đang trong thời gian lấy ý kiến. Bạn có thể gửi góp ý, bình luận bên dưới.",
+      "closedNotice": "Thời gian lấy ý kiến cho dự thảo này đã kết thúc. Bạn vẫn có thể xem các bình luận đã được gửi.",
+      "backList": "Quay lại danh sách"
+    }
+  },
   "welcome": {
     "title": "Thư ngỏ",
     "pageTitle": "Thư ngỏ",
@@ -898,6 +944,52 @@ const enTranslation = {
     "pending": "Your comment will be displayed after approval.",
     "successTitle": "Thank you for your comment!",
     "successDesc": "Due to system configuration, comments are currently being processed and will be displayed after administrator approval."
+  },
+  "draft": {
+    "breadcrumb": {
+      "home": "Home",
+      "documents": "Documents",
+      "guide": "Feedback guide",
+      "list": "Draft document feedback"
+    },
+    "pageTitle": "Draft document feedback",
+    "description": "List of draft documents currently open for feedback and those that have closed from the Da Nang High-Tech Park Authority.",
+    "loading": "Loading data...",
+    "errorTitle": "An error occurred",
+    "errorLoading": "Unable to load draft documents",
+    "tabs": {
+      "open": "Open for feedback",
+      "closed": "Feedback closed"
+    },
+    "emptyOpen": {
+      "title": "There are currently no draft documents open for feedback",
+      "desc": "Please check back later or view drafts whose feedback period has ended."
+    },
+    "emptyClosed": {
+      "title": "No draft documents have closed feedback yet",
+      "desc": "This list will display drafts whose feedback period has ended."
+    },
+    "card": {
+      "statusOpen": "Open for feedback",
+      "statusClosed": "Closed",
+      "published": "Published:",
+      "deadline": "Feedback deadline:",
+      "viewDetail": "View details",
+      "download": "Download document"
+    },
+    "detail": {
+      "statusOpen": "Open for feedback",
+      "statusClosed": "Feedback closed",
+      "published": "Published:",
+      "deadline": "Feedback deadline:",
+      "field": "Field:",
+      "attachments": "Attachments",
+      "download": "Download",
+      "commentsTitle": "Feedback and comments",
+      "openNotice": "This draft is open for feedback. You can submit comments below.",
+      "closedNotice": "The feedback period for this draft has ended. You can still view submitted comments.",
+      "backList": "Back to list"
+    }
   },
   "welcome": {
     "title": "Welcome Letter",

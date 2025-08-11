@@ -34,6 +34,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useEnterprises } from "@/api/hooks";
@@ -44,6 +45,8 @@ import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
 import Footer from "@/components/Footer";
+import MobileLayout from "@/components/mobile/MobileLayout";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /**
  * EnterpriseListPage component for displaying and filtering enterprises
@@ -52,6 +55,7 @@ const EnterpriseListPage: React.FC = () => {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const [filters, setFilters] = useState({
     keyword: "",
     location: "",
@@ -313,11 +317,11 @@ const EnterpriseListPage: React.FC = () => {
           }`}>
             {language === 'en' ? 'ENTERPRISE DETAILED INFORMATION' : 'THÔNG TIN CHI TIẾT DOANH NGHIỆP'}
           </DialogTitle>
-          <p className={`text-sm mt-1 ${
+          <DialogDescription className={`text-sm mt-1 ${
             theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
           }`}>
             {enterprise.name || enterprise.title || "N/A"}
-          </p>
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
@@ -543,6 +547,146 @@ const EnterpriseListPage: React.FC = () => {
   const startResult = (currentPage - 1) * resultsPerPage + 1;
   const endResult = Math.min(currentPage * resultsPerPage, totalResults);
   const totalPages = Math.ceil(totalResults / resultsPerPage);
+
+  // Mobile layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          <main className="flex-1 px-4 py-4 space-y-4">
+            {/* Breadcrumb - Mobile */}
+            <div className={`${theme === 'dark' ? 'bg-dseza-dark-secondary/30' : 'bg-dseza-light-secondary/30'} rounded-lg px-2 py-1`}>
+              <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <Link to={language === 'en' ? '/en' : '/vi'} className={`${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'} hover:underline`}>
+                  {language === 'en' ? 'Home' : 'Trang chủ'}
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  {language === 'en' ? 'Enterprise Statistics' : 'Thống kê doanh nghiệp'}
+                </span>
+              </nav>
+            </div>
+
+            {/* Title */}
+            <div className="text-center">
+              <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                {language === 'en' ? 'Enterprise Directory' : 'Danh sách Doanh nghiệp'}
+              </h1>
+              <div className={`w-12 h-0.5 mx-auto mt-2 rounded-full ${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'}`} />
+            </div>
+
+            {/* Filters - Mobile */}
+            <div className={`${theme === 'dark' ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary'} border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'} rounded-lg p-3 space-y-3`}>
+              <div>
+                <Label className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} text-xs`}>{language === 'en' ? 'Administrative Zone' : 'Khu hành chính'}</Label>
+                <Select onValueChange={(value) => handleFilterChange('location', value)}>
+                  <SelectTrigger className={`${theme === 'dark' ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'} h-9`}>
+                    <SelectValue placeholder={language === 'en' ? 'Select administrative zone' : 'Chọn khu hành chính'} />
+                  </SelectTrigger>
+                  <SelectContent className={`${theme === 'dark' ? 'bg-dseza-dark-secondary border-dseza-dark-border' : 'bg-dseza-light-main-bg border-dseza-light-border'}`}>
+                    <SelectItem value="all">{language === 'en' ? 'All' : 'Tất cả'}</SelectItem>
+                    <SelectItem value="khu-cong-nghe-cao">{language === 'en' ? 'High-tech Park' : 'Khu Công nghệ cao'}</SelectItem>
+                    <SelectItem value="kcn-hoa-khanh">{language === 'en' ? 'Hoa Khanh IP' : 'KCN Hòa Khánh'}</SelectItem>
+                    <SelectItem value="kcn-lien-chieu">{language === 'en' ? 'Lien Chieu IP' : 'KCN Liên Chiểu'}</SelectItem>
+                    <SelectItem value="kcn-da-nang">{language === 'en' ? 'Da Nang IP' : 'KCN Đà Nẵng'}</SelectItem>
+                    <SelectItem value="kdt-an-don">{language === 'en' ? 'An Don New Urban Area' : 'KĐT An Đồn'}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} text-xs`}>{language === 'en' ? 'Enterprise Name' : 'Tên doanh nghiệp'}</Label>
+                <Input
+                  placeholder={language === 'en' ? 'Enter enterprise name' : 'Nhập tên doanh nghiệp'}
+                  value={filters.keyword}
+                  onChange={(e) => handleFilterChange('keyword', e.target.value)}
+                  className={`${theme === 'dark' ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'} h-9`}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} text-xs`}>{language === 'en' ? 'Country' : 'Quốc gia'}</Label>
+                  <Select onValueChange={(value) => handleFilterChange('country', value)}>
+                    <SelectTrigger className={`${theme === 'dark' ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'} h-9`}>
+                      <SelectValue placeholder={language === 'en' ? 'Select country' : 'Chọn quốc gia'} />
+                    </SelectTrigger>
+                    <SelectContent className={`${theme === 'dark' ? 'bg-dseza-dark-secondary border-dseza-dark-border' : 'bg-dseza-light-main-bg border-dseza-light-border'}`}>
+                      <SelectItem value="all">{language === 'en' ? 'All' : 'Tất cả'}</SelectItem>
+                      <SelectItem value="viet-nam">{language === 'en' ? 'Vietnam' : 'Việt Nam'}</SelectItem>
+                      <SelectItem value="han-quoc">{language === 'en' ? 'South Korea' : 'Hàn Quốc'}</SelectItem>
+                      <SelectItem value="nhat-ban">{language === 'en' ? 'Japan' : 'Nhật Bản'}</SelectItem>
+                      <SelectItem value="hoa-ky">{language === 'en' ? 'United States' : 'Hoa Kỳ'}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} text-xs`}>{language === 'en' ? 'Industry' : 'Lĩnh vực hoạt động'}</Label>
+                  <Select onValueChange={(value) => handleFilterChange('industry', value)}>
+                    <SelectTrigger className={`${theme === 'dark' ? 'bg-dseza-dark-hover border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'} h-9`}>
+                      <SelectValue placeholder={language === 'en' ? 'Select industry' : 'Chọn lĩnh vực'} />
+                    </SelectTrigger>
+                    <SelectContent className={`${theme === 'dark' ? 'bg-dseza-dark-secondary border-dseza-dark-border' : 'bg-dseza-light-main-bg border-dseza-light-border'}`}>
+                      <SelectItem value="all">{language === 'en' ? 'All' : 'Tất cả'}</SelectItem>
+                      <SelectItem value="cong-nghe-thong-tin">{language === 'en' ? 'Information Technology' : 'Công nghệ thông tin'}</SelectItem>
+                      <SelectItem value="dien-tu-vien-thong">{language === 'en' ? 'Electronics & Telecommunications' : 'Điện tử viễn thông'}</SelectItem>
+                      <SelectItem value="logistics">Logistics</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={handleSearch} disabled={isLoading} size="sm" className={`${theme === 'dark' ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary-hover' : 'bg-dseza-light-primary text-white hover:bg-dseza-light-primary-hover'}`}>
+                  <Search className="h-4 w-4 mr-1" /> {language === 'en' ? 'Search' : 'Tìm kiếm'}
+                </Button>
+              </div>
+            </div>
+
+            {/* Results - Mobile */}
+            <div className="space-y-3">
+              {!isLoading && enterprises.length === 0 && (
+                <div className={`rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary' : 'bg-white'} border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'} p-6 text-center`}>
+                  <span className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} text-sm`}>
+                    {language === 'en' ? 'No enterprises found.' : 'Không tìm thấy doanh nghiệp.'}
+                  </span>
+                </div>
+              )}
+
+              {enterprises.map((enterprise: any, index: number) => (
+                <div key={enterprise.id || index} className={`rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary' : 'bg-white'} border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'} p-3`}>
+                  <button onClick={() => handleEnterpriseClick(enterprise)} className={`text-left w-full font-semibold ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'} hover:underline`}>
+                    {(filters.page - 1) * filters.pageSize + index + 1}. {enterprise.attributes?.title || 'N/A'}
+                  </button>
+                  <div className={`mt-2 grid grid-cols-2 gap-2 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                    <div>
+                      {language === 'en' ? 'Zone:' : 'Khu:'} {getTaxonomyTermName(enterprise.relationships?.field_khu_hanh_chinh?.data, data?.included)}
+                    </div>
+                    <div>
+                      {language === 'en' ? 'Industry:' : 'Lĩnh vực:'} {getTaxonomyTermName(enterprise.relationships?.field_linh_vuc_hoat_dong?.data, data?.included)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination - Mobile */}
+            {!isLoading && enterprises.length > 0 && totalPages > 1 && (
+              <div className="flex justify-between items-center text-sm">
+                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>
+                  {language === 'en' ? 'Previous' : 'Trước'}
+                </Button>
+                <span className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                  {currentPage}/{totalPages}
+                </span>
+                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => handlePageChange(currentPage + 1)}>
+                  {language === 'en' ? 'Next' : 'Sau'}
+                </Button>
+              </div>
+            )}
+          </main>
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
 
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>

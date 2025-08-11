@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { HelpCircle, Search, Plus, User, Calendar, ChevronRight, AlertCircle } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { useQuestions } from "@/api/hooks";
+import { useLanguage } from "@/context/LanguageContext";
 import TopBar from "@/components/hero/TopBar";
 import LogoSearchBar from "@/components/hero/LogoSearchBar";
 import NavigationBar from "@/components/hero/NavigationBar";
@@ -28,12 +29,15 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import MobileLayout from "@/components/mobile/MobileLayout";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /**
  * QnAListPage component for displaying Q&A list with filters and pagination
  */
 const QnAListPage: React.FC = () => {
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
   
   // Filter state management
   const [filters, setFilters] = useState({
@@ -48,6 +52,7 @@ const QnAListPage: React.FC = () => {
   // Debounced search state to avoid excessive API calls
   const [searchFilters, setSearchFilters] = useState(filters);
 
+  const { language } = useLanguage();
   // Fetch questions using the API hook
   const { 
     questions, 
@@ -57,7 +62,7 @@ const QnAListPage: React.FC = () => {
     totalResults, 
     hasQuestions,
     refetch 
-  } = useQuestions(searchFilters);
+  } = useQuestions(searchFilters, language);
 
   // Handle filter changes
   const handleFilterChange = (field: keyof typeof filters, value: string | number) => {
@@ -88,7 +93,7 @@ const QnAListPage: React.FC = () => {
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
+    return date.toLocaleDateString(language === 'en' ? 'en-GB' : 'vi-VN');
   };
 
   // Skeleton loading component
@@ -107,6 +112,122 @@ const QnAListPage: React.FC = () => {
     </div>
   );
 
+  // Mobile layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          <main className="flex-1 px-4 py-4 space-y-4">
+            {/* Breadcrumb */}
+            <div className={`${theme === 'dark' ? 'bg-dseza-dark-secondary/30' : 'bg-dseza-light-secondary/30'} rounded-lg px-2 py-1`}>
+              <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <Link to={`/${language}`} className={`${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'} hover:underline`}>
+                  {language === 'en' ? 'Home' : 'Trang chủ'}
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} font-medium`}>
+                  {language === 'en' ? 'Q&A' : 'Hỏi đáp'}
+                </span>
+              </nav>
+            </div>
+
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <h1 className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} text-xl font-bold`}>{language === 'en' ? 'Q&A List' : 'Danh sách câu hỏi đáp'}</h1>
+              <Link to={`/${language}/${language === 'en' ? 'utilities/qna/create' : 'tien-ich/hoi-dap/tao-moi'}`}>
+                <Button className={`${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'} h-9 px-3`}>{language === 'en' ? 'Create' : 'Tạo mới'}</Button>
+              </Link>
+            </div>
+
+            {/* Filters */}
+            <div className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg' : 'bg-dseza-light-secondary-bg'} p-3 rounded-lg space-y-3`}>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="keyword" className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{language === 'en' ? 'Search content' : 'Nội dung tìm'}</Label>
+                  <Input id="keyword" placeholder={language === 'en' ? 'Enter keywords' : 'Nhập từ khóa tìm kiếm'} value={filters.keyword} onChange={(e) => handleFilterChange('keyword', e.target.value)} className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'} h-9`} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="topic" className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{language === 'en' ? 'Topic' : 'Lĩnh vực'}</Label>
+                    <Select value={filters.topic} onValueChange={(value) => handleFilterChange('topic', value)}>
+                      <SelectTrigger className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'} h-9`}>
+                        <SelectValue placeholder={language === 'en' ? 'Select topic' : 'Chọn lĩnh vực'} />
+                      </SelectTrigger>
+                      <SelectContent className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'}`}>
+                        <SelectItem value="all">{language === 'en' ? 'All' : 'Tất cả'}</SelectItem>
+                        <SelectItem value="thu-tuc-hanh-chinh">{language === 'en' ? 'Administrative procedures' : 'Thủ tục hành chính'}</SelectItem>
+                        <SelectItem value="chinh-sach-uu-dai">{language === 'en' ? 'Incentive policies' : 'Chính sách ưu đãi'}</SelectItem>
+                        <SelectItem value="quy-hoach-xay-dung">{language === 'en' ? 'Construction planning' : 'Quy hoạch xây dựng'}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="dateFrom" className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{language === 'en' ? 'From date' : 'Từ ngày'}</Label>
+                    <Input id="dateFrom" type="date" value={filters.dateFrom} onChange={(e) => handleFilterChange('dateFrom', e.target.value)} className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'} h-9`} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="dateTo" className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{language === 'en' ? 'To date' : 'Đến ngày'}</Label>
+                    <Input id="dateTo" type="date" value={filters.dateTo} onChange={(e) => handleFilterChange('dateTo', e.target.value)} className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'} h-9`} />
+                  </div>
+                  <div className="flex items-end justify-end">
+                    <Button onClick={handleSearch} disabled={isLoading} className={`${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'} h-9 px-4`}>{isLoading ? (language === 'en' ? 'Searching...' : 'Đang tìm kiếm...') : (language === 'en' ? 'Search' : 'Tìm kiếm')}</Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Results */}
+            {isError && (
+              <Alert className={`mb-2 ${theme === 'dark' ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'}`}>
+                <AlertDescription className={theme === 'dark' ? 'text-red-300' : 'text-red-800'}>
+                  {language === 'en' ? 'An error occurred while loading data' : 'Có lỗi xảy ra khi tải dữ liệu'}: {error?.message || (language === 'en' ? 'Please try again later' : 'Vui lòng thử lại sau')}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {isLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <QuestionSkeleton key={index} />
+                ))}
+              </div>
+            ) : hasQuestions ? (
+              <div className="space-y-3">
+                {questions.map((question: any) => (
+                  <div key={question.id} className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg' : 'bg-dseza-light-secondary-bg'} p-3 rounded-lg`}>
+                    <Link to={`/${language}/${language === 'en' ? 'utilities/qna' : 'tien-ich/hoi-dap'}/${question.id}`} className={`${theme === 'dark' ? 'text-dseza-dark-main-text hover:text-dseza-dark-primary' : 'text-dseza-light-main-text hover:text-dseza-light-primary'} font-semibold block mb-1`}>
+                      {question.attributes?.title || (language === 'en' ? 'Untitled question' : 'Câu hỏi không có tiêu đề')}
+                    </Link>
+                    {question.attributes?.field_linh_vuc && (
+                      <div className="mb-1">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${theme === 'dark' ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-100 text-blue-800'}`}>{question.attributes.field_linh_vuc}</span>
+                      </div>
+                    )}
+                    <div className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} text-xs`}>{formatDate(question.attributes?.created)}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className={`text-center py-12 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>{language === 'en' ? 'No questions found' : 'Không tìm thấy câu hỏi nào'}</div>
+            )}
+
+            {/* Pagination */}
+            {!isLoading && hasQuestions && totalPages > 1 && (
+              <div className="flex justify-between items-center text-sm">
+                <Button variant="outline" size="sm" disabled={filters.page === 1} onClick={() => handlePageChange(filters.page - 1)}>{language === 'en' ? 'Previous' : 'Trước'}</Button>
+                <span className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>{filters.page}/{totalPages}</span>
+                <Button variant="outline" size="sm" disabled={filters.page === totalPages} onClick={() => handlePageChange(filters.page + 1)}>{language === 'en' ? 'Next' : 'Sau'}</Button>
+              </div>
+            )}
+          </main>
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}
@@ -121,14 +242,14 @@ const QnAListPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
               <Link 
-                to="/" 
+                to={`/${language}`} 
                 className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {language === 'en' ? 'Home' : 'Trang chủ'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Hỏi đáp
+                {language === 'en' ? 'Q&A' : 'Hỏi đáp'}
               </span>
             </nav>
           </div>
@@ -140,14 +261,14 @@ const QnAListPage: React.FC = () => {
           {/* Header Action Area */}
           <div className="flex justify-between items-center mb-8">
             <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-              Danh sách câu hỏi đáp
+              {language === 'en' ? 'Q&A List' : 'Danh sách câu hỏi đáp'}
             </h1>
-            <Link to="/tien-ich/hoi-dap/tao-moi">
+            <Link to={`/${language}/${language === 'en' ? 'utilities/qna/create' : 'tien-ich/hoi-dap/tao-moi'}`}>
               <Button 
                 className={`flex items-center gap-2 ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'}`}
               >
                 <Plus className="h-4 w-4" />
-                Tạo câu hỏi
+                {language === 'en' ? 'Create question' : 'Tạo câu hỏi'}
               </Button>
             </Link>
           </div>
@@ -159,11 +280,11 @@ const QnAListPage: React.FC = () => {
               {/* Keyword Search */}
               <div className="space-y-2">
                 <Label htmlFor="keyword" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Nội dung tìm
+                  {language === 'en' ? 'Search content' : 'Nội dung tìm'}
                 </Label>
                 <Input
                   id="keyword"
-                  placeholder="Nhập từ khóa tìm kiếm"
+                  placeholder={language === 'en' ? 'Enter keywords' : 'Nhập từ khóa tìm kiếm'}
                   value={filters.keyword}
                   onChange={(e) => handleFilterChange("keyword", e.target.value)}
                   className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
@@ -173,21 +294,21 @@ const QnAListPage: React.FC = () => {
               {/* Topic Filter */}
               <div className="space-y-2">
                 <Label htmlFor="topic" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Lĩnh vực
+                  {language === 'en' ? 'Topic' : 'Lĩnh vực'}
                 </Label>
                 <Select value={filters.topic} onValueChange={(value) => handleFilterChange("topic", value)}>
                   <SelectTrigger className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'}`}>
-                    <SelectValue placeholder="Chọn lĩnh vực" />
+                    <SelectValue placeholder={language === 'en' ? 'Select topic' : 'Chọn lĩnh vực'} />
                   </SelectTrigger>
                   <SelectContent className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'}`}>
-                    <SelectItem value="all">Tất cả</SelectItem>
-                    <SelectItem value="thu-tuc-hanh-chinh">Thủ tục hành chính</SelectItem>
-                    <SelectItem value="chinh-sach-uu-dai">Chính sách ưu đãi</SelectItem>
-                    <SelectItem value="quy-hoach-xay-dung">Quy hoạch xây dựng</SelectItem>
-                    <SelectItem value="chinh-sach-lao-dong">Chính sách lao động</SelectItem>
-                    <SelectItem value="giay-phep-kinh-doanh">Giấy phép kinh doanh</SelectItem>
-                    <SelectItem value="ho-tro-khoi-nghiep">Hỗ trợ khởi nghiệp</SelectItem>
-                    <SelectItem value="ha-tang-ky-thuat">Hạ tầng kỹ thuật</SelectItem>
+                    <SelectItem value="all">{language === 'en' ? 'All' : 'Tất cả'}</SelectItem>
+                    <SelectItem value="thu-tuc-hanh-chinh">{language === 'en' ? 'Administrative procedures' : 'Thủ tục hành chính'}</SelectItem>
+                    <SelectItem value="chinh-sach-uu-dai">{language === 'en' ? 'Incentive policies' : 'Chính sách ưu đãi'}</SelectItem>
+                    <SelectItem value="quy-hoach-xay-dung">{language === 'en' ? 'Construction planning' : 'Quy hoạch xây dựng'}</SelectItem>
+                    <SelectItem value="chinh-sach-lao-dong">{language === 'en' ? 'Labor policies' : 'Chính sách lao động'}</SelectItem>
+                    <SelectItem value="giay-phep-kinh-doanh">{language === 'en' ? 'Business license' : 'Giấy phép kinh doanh'}</SelectItem>
+                    <SelectItem value="ho-tro-khoi-nghiep">{language === 'en' ? 'Startup support' : 'Hỗ trợ khởi nghiệp'}</SelectItem>
+                    <SelectItem value="ha-tang-ky-thuat">{language === 'en' ? 'Technical infrastructure' : 'Hạ tầng kỹ thuật'}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -195,7 +316,7 @@ const QnAListPage: React.FC = () => {
               {/* Date From */}
               <div className="space-y-2">
                 <Label htmlFor="dateFrom" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Thời gian từ ngày
+                  {language === 'en' ? 'From date' : 'Thời gian từ ngày'}
                 </Label>
                 <Input
                   id="dateFrom"
@@ -209,7 +330,7 @@ const QnAListPage: React.FC = () => {
               {/* Date To */}
               <div className="space-y-2">
                 <Label htmlFor="dateTo" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Đến ngày
+                  {language === 'en' ? 'To date' : 'Đến ngày'}
                 </Label>
                 <Input
                   id="dateTo"
@@ -230,7 +351,7 @@ const QnAListPage: React.FC = () => {
                 className={`px-8 ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'}`}
               >
                 <Search className="h-4 w-4 mr-2" />
-                {isLoading ? 'Đang tìm kiếm...' : 'Tìm kiếm'}
+                {isLoading ? (language === 'en' ? 'Searching...' : 'Đang tìm kiếm...') : (language === 'en' ? 'Search' : 'Tìm kiếm')}
               </Button>
             </div>
           </div>
@@ -240,7 +361,7 @@ const QnAListPage: React.FC = () => {
             
             {/* Questions Title */}
             <h2 className={`text-2xl font-semibold mb-6 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-              CÂU HỎI
+              {language === 'en' ? 'QUESTIONS' : 'CÂU HỎI'}
             </h2>
 
             {/* Error State */}
@@ -248,14 +369,14 @@ const QnAListPage: React.FC = () => {
               <Alert className={`mb-6 ${theme === 'dark' ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'}`}>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className={theme === 'dark' ? 'text-red-300' : 'text-red-800'}>
-                  Có lỗi xảy ra khi tải dữ liệu: {error?.message || 'Vui lòng thử lại sau'}
+                  {language === 'en' ? 'An error occurred while loading data' : 'Có lỗi xảy ra khi tải dữ liệu'}: {error?.message || (language === 'en' ? 'Please try again later' : 'Vui lòng thử lại sau')}
                   <Button 
                     variant="outline" 
                     size="sm" 
                     onClick={() => refetch()} 
                     className="ml-2"
                   >
-                    Thử lại
+                    {language === 'en' ? 'Retry' : 'Thử lại'}
                   </Button>
                 </AlertDescription>
               </Alert>
@@ -264,7 +385,9 @@ const QnAListPage: React.FC = () => {
             {/* Results Count */}
             {!isLoading && (
               <div className={`text-sm mb-4 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                {totalResults > 0 ? `Hiển thị ${totalResults} câu hỏi` : 'Không tìm thấy câu hỏi nào'}
+                {totalResults > 0 
+                  ? (language === 'en' ? `Showing ${totalResults} questions` : `Hiển thị ${totalResults} câu hỏi`) 
+                  : (language === 'en' ? 'No questions found' : 'Không tìm thấy câu hỏi nào')}
               </div>
             )}
 
@@ -292,10 +415,10 @@ const QnAListPage: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       {/* Question Link */}
                       <Link 
-                        to={`/tien-ich/hoi-dap/${question.id}`}
+                        to={`/${language}/${language === 'en' ? 'utilities/qna' : 'tien-ich/hoi-dap'}/${question.id}`}
                         className={`font-bold block mb-2 leading-tight transition-colors ${theme === 'dark' ? 'text-dseza-dark-main-text hover:text-dseza-dark-primary' : 'text-dseza-light-main-text hover:text-dseza-light-primary'}`}
                       >
-                        {question.attributes?.title || 'Câu hỏi không có tiêu đề'}
+                        {question.attributes?.title || (language === 'en' ? 'Untitled question' : 'Câu hỏi không có tiêu đề')}
                       </Link>
 
                       {/* Category Badge */}
@@ -312,7 +435,7 @@ const QnAListPage: React.FC = () => {
                         {question.attributes?.field_nguoi_gui && (
                           <div className="flex items-center gap-1">
                             <User className="h-3 w-3" />
-                            <span>Người gửi: {question.attributes.field_nguoi_gui}</span>
+                            <span>{language === 'en' ? 'Sender' : 'Người gửi'}: {question.attributes.field_nguoi_gui}</span>
                           </div>
                         )}
                         {question.attributes?.field_nguoi_gui && question.attributes?.created && (
@@ -321,7 +444,7 @@ const QnAListPage: React.FC = () => {
                         {question.attributes?.created && (
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            <span>Ngày gửi: {formatDate(question.attributes.created)}</span>
+                            <span>{language === 'en' ? 'Submitted' : 'Ngày gửi'}: {formatDate(question.attributes.created)}</span>
                           </div>
                         )}
                       </div>
@@ -334,7 +457,9 @@ const QnAListPage: React.FC = () => {
                               ? (theme === 'dark' ? 'bg-green-900/50 text-green-300' : 'bg-green-100 text-green-800')
                               : (theme === 'dark' ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-800')
                           }`}>
-                            {question.attributes.field_trang_thai === "answered" ? "Đã trả lời" : (question.attributes.field_trang_thai || "Đang xử lý")}
+                            {question.attributes.field_trang_thai === "answered"
+                              ? (language === 'en' ? 'Answered' : 'Đã trả lời')
+                              : (question.attributes.field_trang_thai || (language === 'en' ? 'Processing' : 'Đang xử lý'))}
                           </span>
                         </div>
                       )}
@@ -349,13 +474,13 @@ const QnAListPage: React.FC = () => {
               <div className={`text-center py-12 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                 <HelpCircle className={`h-16 w-16 mx-auto mb-4 ${theme === 'dark' ? 'text-dseza-dark-secondary' : 'text-dseza-light-secondary'}`} />
                 <h3 className={`text-lg font-medium mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                  Không tìm thấy câu hỏi nào
+                  {language === 'en' ? 'No questions found' : 'Không tìm thấy câu hỏi nào'}
                 </h3>
-                <p className="mb-4">Hãy thử thay đổi bộ lọc tìm kiếm hoặc tạo câu hỏi mới</p>
-                <Link to="/tien-ich/hoi-dap/tao-moi">
+                <p className="mb-4">{language === 'en' ? 'Try changing filters or create a new question' : 'Hãy thử thay đổi bộ lọc tìm kiếm hoặc tạo câu hỏi mới'}</p>
+                <Link to={`/${language}/${language === 'en' ? 'utilities/qna/create' : 'tien-ich/hoi-dap/tao-moi'}`}>
                   <Button className={`${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'}`}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Tạo câu hỏi đầu tiên
+                    {language === 'en' ? 'Create the first question' : 'Tạo câu hỏi đầu tiên'}
                   </Button>
                 </Link>
               </div>

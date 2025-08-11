@@ -8,14 +8,53 @@ import NavigationBar from "@/components/hero/NavigationBar";
 import Footer from "@/components/Footer";
 import DocumentSideNav from "@/pages/Document/Layout/DocumentSideNav";
 import { ChevronRight } from "lucide-react";
+import MobileLayout from "@/components/mobile/MobileLayout";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const DocumentTabLayout: React.FC = () => {
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const isMobile = useIsMobile();
 
   // Translated labels
   const homeLabel = language === "en" ? "Home" : "Trang chủ";
   const pageTitle = language === "en" ? "Legal Document Lookup" : "Tra cứu Văn bản Pháp quy";
+
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === "dark" ? "bg-dseza-dark-main-bg" : "bg-dseza-light-main-bg"}`}>
+          <main className="flex-1 px-4 py-4 space-y-4">
+            {/* Breadcrumb - Mobile */}
+            <div className={`${theme === 'dark' ? 'bg-dseza-dark-secondary/30' : 'bg-dseza-light-secondary/30'} rounded-lg px-2 py-1`}>
+              <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <a href="/" className={`${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'} hover:underline`}>
+                  {homeLabel}
+                </a>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} font-medium`}>{pageTitle}</span>
+              </nav>
+            </div>
+
+            {/* Title */}
+            <div className="text-center">
+              <h1 className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} text-xl font-bold`}>{pageTitle}</h1>
+              <div className={`${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'} w-12 h-0.5 mx-auto mt-2 rounded-full`} />
+            </div>
+
+            {/* Side Nav (top) + Content */}
+            <div className="space-y-3">
+              <DocumentSideNav />
+              <div className={`min-h-[400px] rounded-lg border ${theme === 'dark' ? 'bg-dseza-dark-secondary border-dseza-dark-border' : 'bg-dseza-light-secondary border-dseza-light-border'}`}>
+                <Outlet />
+              </div>
+            </div>
+          </main>
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
 
   return (
     <div

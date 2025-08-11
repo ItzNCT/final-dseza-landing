@@ -28,7 +28,7 @@ const BusinessesAndPartners: React.FC = () => {
   const displayedPartners = useMemo(() => {
     if (!partners || partners.length === 0) return [];
     // The minimum number of logos we want to display to make the marquee feel full.
-    const MIN_LOGO_COUNT = 10;
+    const MIN_LOGO_COUNT = 0;
     const repeatCount = Math.ceil(MIN_LOGO_COUNT / partners.length) + 1; // +1 ensures overlap for seamless loop
 
     // Duplicate the partners array "repeatCount" times.

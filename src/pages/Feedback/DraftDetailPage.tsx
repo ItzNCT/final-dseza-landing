@@ -13,6 +13,7 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Import complete header structure
 import TopBar from "@/components/hero/TopBar";
@@ -27,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Separator } from "@/components/ui/separator";
 import CommentSection from "@/components/comments/CommentSection";
+import { useTranslation } from "react-i18next";
 
 // Base URL pattern consistent with other hooks in the project
 const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
@@ -59,10 +61,11 @@ interface DraftDocumentDetail {
 /**
  * Fetch draft document detail from Drupal JSON:API
  */
-async function fetchDraftDocumentDetail(uuid: string): Promise<DraftDocumentDetail | null> {
+async function fetchDraftDocumentDetail(uuid: string, language: 'vi' | 'en'): Promise<DraftDocumentDetail | null> {
   try {
     // Fetch the specific draft document with includes
-    const url = `${DRUPAL_BASE_URL}/jsonapi/node/du_thao_van_ban/${uuid}`
+    const langPrefix = language === 'en' ? '/en' : '';
+    const url = `${DRUPAL_BASE_URL}${langPrefix}/jsonapi/node/du_thao_van_ban/${uuid}`
       + '?include=field_linh_vuc,field_file_dinh_kem,field_file_dinh_kem.field_media_document';
 
     console.log('🔍 Fetching draft document detail from:', url);
@@ -173,11 +176,13 @@ async function fetchDraftDocumentDetail(uuid: string): Promise<DraftDocumentDeta
 const DraftDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const { t } = useTranslation();
 
   // Fetch draft document detail
   const { data: document, isLoading, isError, error } = useQuery({
-    queryKey: ['draftDocumentDetail', id],
-    queryFn: () => fetchDraftDocumentDetail(id!),
+    queryKey: ['draftDocumentDetail', id, language],
+    queryFn: () => fetchDraftDocumentDetail(id!, language),
     enabled: !!id,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes cache time
@@ -216,31 +221,31 @@ const DraftDetailPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${secondaryTextColor}`}>
               <Link 
-                to="/" 
+                to={language === 'en' ? '/en' : '/'} 
                 className={`transition-colors ${primaryHoverColor}`}
               >
-                Trang chủ
+                {t('draft.breadcrumb.home')}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/van-ban" 
+                to={`${language === 'en' ? '/en' : ''}/van-ban`} 
                 className={`transition-colors ${primaryHoverColor}`}
               >
-                Văn bản
+                {t('draft.breadcrumb.documents')}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/van-ban/huong-dan-gop-y" 
+                to={`${language === 'en' ? '/en' : ''}/van-ban/huong-dan-gop-y`} 
                 className={`transition-colors ${primaryHoverColor}`}
               >
-                Hướng dẫn góp ý
+                {t('draft.breadcrumb.guide')}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/van-ban/huong-dan-gop-y/gop-y-du-thao-van-ban" 
+                to={`${language === 'en' ? '/en' : ''}/van-ban/huong-dan-gop-y/gop-y-du-thao-van-ban`} 
                 className={`transition-colors ${primaryHoverColor}`}
               >
-                Góp ý dự thảo văn bản
+                {t('draft.breadcrumb.list')}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${textColor} line-clamp-1`}>
@@ -297,12 +302,12 @@ const DraftDetailPage: React.FC = () => {
                       {document.isOpen ? (
                         <>
                           <Clock className="w-3 h-3 mr-1" />
-                          Đang lấy ý kiến
+                          {t('draft.detail.statusOpen')}
                         </>
                       ) : (
                         <>
                           <AlertTriangle className="w-3 h-3 mr-1" />
-                          Hết thời gian lấy ý kiến
+                          {t('draft.detail.statusClosed')}
                         </>
                       )}
                     </Badge>
@@ -314,19 +319,19 @@ const DraftDetailPage: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className={`flex items-center gap-2 text-sm ${secondaryTextColor}`}>
                       <Calendar className="w-4 h-4" />
-                      <span>Ngày công bố: {formatDate(document.publishedDate)}</span>
+                      <span>{t('draft.detail.published')} {formatDate(document.publishedDate)}</span>
                     </div>
                     
                     {document.feedbackEndDate && (
                       <div className={`flex items-center gap-2 text-sm ${secondaryTextColor}`}>
                         <Clock className="w-4 h-4" />
-                        <span>Hết hạn góp ý: {formatDate(document.feedbackEndDate)}</span>
+                        <span>{t('draft.detail.deadline')} {formatDate(document.feedbackEndDate)}</span>
                       </div>
                     )}
                     
                     <div className={`flex items-center gap-2 text-sm ${secondaryTextColor}`}>
                       <Tag className="w-4 h-4" />
-                      <span>Lĩnh vực: {document.field}</span>
+                      <span>{t('draft.detail.field')} {document.field}</span>
                     </div>
                   </div>
 
@@ -335,7 +340,7 @@ const DraftDetailPage: React.FC = () => {
                     <div className="mt-6">
                       <h3 className={`text-lg font-semibold ${textColor} mb-4 flex items-center gap-2`}>
                         <FileText className="w-5 h-5" />
-                        Tài liệu đính kèm
+                        {t('draft.detail.attachments')}
                       </h3>
                       <div className="grid gap-3">
                         {document.attachedFiles.map((file) => (
@@ -369,7 +374,7 @@ const DraftDetailPage: React.FC = () => {
                                 rel="noopener noreferrer"
                               >
                                 <Download className="w-4 h-4 mr-2" />
-                                Tải xuống
+                                {t('draft.detail.download')}
                                 <ExternalLink className="w-3 h-3 ml-1" />
                               </a>
                             </Button>
@@ -397,21 +402,17 @@ const DraftDetailPage: React.FC = () => {
                 <CardHeader>
                   <CardTitle className={`text-xl font-semibold ${textColor} flex items-center gap-2`}>
                     <MessageCircle className="w-5 h-5" />
-                    Góp ý và bình luận
+                    {t('draft.detail.commentsTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {document.isOpen ? (
                     <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-green-800 text-sm">
-                        Dự thảo này đang trong thời gian lấy ý kiến. Bạn có thể gửi góp ý, bình luận bên dưới.
-                      </p>
+                      <p className="text-green-800 text-sm">{t('draft.detail.openNotice')}</p>
                     </div>
                   ) : (
                     <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                      <p className="text-amber-800 text-sm">
-                        Thời gian lấy ý kiến cho dự thảo này đã kết thúc. Bạn vẫn có thể xem các bình luận đã được gửi.
-                      </p>
+                      <p className="text-amber-800 text-sm">{t('draft.detail.closedNotice')}</p>
                     </div>
                   )}
                   

@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { FileText } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DocumentTab {
   title: string;
@@ -13,6 +14,7 @@ interface DocumentTab {
 const DocumentSideNav: React.FC = () => {
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const isMobile = useIsMobile();
 
   const viBasePath = "/van-ban/van-ban-phap-luat";
   const enBasePath = "/documents/legal-documents";
@@ -72,21 +74,21 @@ const DocumentSideNav: React.FC = () => {
 
   return (
     <div
-      className={`rounded-lg border p-4 ${
+      className={`rounded-lg border ${isMobile ? 'p-3' : 'p-4'} ${
         theme === "dark"
           ? "bg-dseza-dark-secondary border-dseza-dark-border"
           : "bg-dseza-light-secondary border-dseza-light-border"
       }`}
     >
       {/* Navigation Header */}
-      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-current">
+      <div className={`flex items-center gap-2 ${isMobile ? 'mb-3' : 'mb-4'} pb-3 border-b border-current`}>
         <FileText
           className={`h-5 w-5 ${
             theme === "dark" ? "text-dseza-dark-primary" : "text-dseza-light-primary"
           }`}
         />
         <h2
-          className={`font-semibold text-lg ${
+          className={`font-semibold ${isMobile ? 'text-base' : 'text-lg'} ${
             theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text"
           }`}
         >
@@ -95,13 +97,13 @@ const DocumentSideNav: React.FC = () => {
       </div>
 
       {/* Navigation Links */}
-      <nav className="space-y-2">
+      <nav className={isMobile ? "grid grid-cols-1 sm:grid-cols-2 gap-2" : "space-y-2"}>
         {documentTabs.map((tab) => (
           <NavLink
             key={tab.category}
             to={tab.path}
             className={({ isActive }) =>
-              `block w-full text-left px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 ${
+              `block w-full text-left ${isMobile ? 'px-3 py-2' : 'px-4 py-3'} rounded-md text-sm font-medium transition-all duration-200 ${
                 isActive
                   ? theme === "dark"
                     ? "bg-dseza-dark-primary text-dseza-dark-main-text shadow-sm"
@@ -118,19 +120,21 @@ const DocumentSideNav: React.FC = () => {
       </nav>
 
       {/* Additional Info */}
-      <div
-        className={`mt-6 pt-4 border-t ${
-          theme === "dark" ? "border-dseza-dark-border" : "border-dseza-light-border"
-        }`}
-      >
-        <p
-          className={`text-xs ${
-            theme === "dark" ? "text-dseza-dark-secondary-text" : "text-dseza-light-secondary-text"
+      {!isMobile && (
+        <div
+          className={`mt-6 pt-4 border-t ${
+            theme === "dark" ? "border-dseza-dark-border" : "border-dseza-light-border"
           }`}
         >
-          {additionalInfo}
-        </p>
-      </div>
+          <p
+            className={`text-xs ${
+              theme === "dark" ? "text-dseza-dark-secondary-text" : "text-dseza-light-secondary-text"
+            }`}
+          >
+            {additionalInfo}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

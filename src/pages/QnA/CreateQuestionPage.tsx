@@ -20,6 +20,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { submitQuestion, QuestionSubmissionData } from "@/utils/api";
+import { useLanguage } from "@/context/LanguageContext";
+import MobileLayout from "@/components/mobile/MobileLayout";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Interface cho dữ liệu form
 interface QuestionFormData {
@@ -37,6 +40,8 @@ interface QuestionFormData {
  */
 const CreateQuestionPage: React.FC = () => {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const isMobile = useIsMobile();
   
   // Form state management
   const [formData, setFormData] = useState<QuestionFormData>({
@@ -56,8 +61,8 @@ const CreateQuestionPage: React.FC = () => {
   const submitQuestionMutation = useMutation({
     mutationFn: submitQuestion,
     onSuccess: (data) => {
-      toast.success("Gửi câu hỏi thành công!", {
-        description: "Câu hỏi của bạn đã được gửi và đang chờ được duyệt.",
+      toast.success(language === 'en' ? 'Question submitted successfully!' : "Gửi câu hỏi thành công!", {
+        description: language === 'en' ? 'Your question has been submitted and is pending approval.' : "Câu hỏi của bạn đã được gửi và đang chờ được duyệt.",
       });
       // Reset form
       setFormData({
@@ -72,7 +77,7 @@ const CreateQuestionPage: React.FC = () => {
       setErrors({});
     },
     onError: (error: Error) => {
-      toast.error("Gửi câu hỏi thất bại!", {
+      toast.error(language === 'en' ? 'Failed to submit question!' : "Gửi câu hỏi thất bại!", {
         description: error.message,
       });
     },
@@ -126,8 +131,8 @@ const CreateQuestionPage: React.FC = () => {
     e.preventDefault();
     
     if (!validateForm()) {
-      toast.error("Vui lòng kiểm tra lại thông tin!", {
-        description: "Có một số trường bắt buộc chưa được điền đầy đủ.",
+      toast.error(language === 'en' ? 'Please check the information!' : "Vui lòng kiểm tra lại thông tin!", {
+        description: language === 'en' ? 'Some required fields are missing.' : "Có một số trường bắt buộc chưa được điền đầy đủ.",
       });
       return;
     }
@@ -152,6 +157,135 @@ const CreateQuestionPage: React.FC = () => {
     submitQuestionMutation.mutate(apiData);
   };
 
+  // Mobile layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          <main className="flex-1 px-4 py-4 space-y-4">
+            {/* Breadcrumb */}
+            <div className={`${theme === 'dark' ? 'bg-dseza-dark-secondary/30' : 'bg-dseza-light-secondary/30'} rounded-lg px-2 py-1`}>
+              <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <Link to={`/${language}`} className={`${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'} hover:underline`}>
+                  {language === 'en' ? 'Home' : 'Trang chủ'}
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <Link to={`/${language}/${language === 'en' ? 'utilities/qna' : 'tien-ich/hoi-dap'}`} className={`${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'} hover:underline`}>
+                  {language === 'en' ? 'Q&A' : 'Hỏi đáp'}
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} font-medium`}>
+                  {language === 'en' ? 'Create question' : 'Tạo câu hỏi'}
+                </span>
+              </nav>
+            </div>
+
+            {/* Title */}
+            <div className="text-center">
+              <h1 className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} text-xl font-bold`}>
+                {language === 'en' ? 'SEND US YOUR QUESTION' : 'GỬI CÂU HỎI CHO CHÚNG TÔI'}
+              </h1>
+              <div className={`${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'} w-12 h-0.5 mx-auto mt-2 rounded-full`} />
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg' : 'bg-dseza-light-secondary-bg'} p-4 rounded-lg space-y-4`}>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="fullName" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
+                    {language === 'en' ? 'Full name' : 'Họ và tên'}<span className="text-red-500 ml-1">*</span>
+                  </Label>
+                  <Input id="fullName" placeholder={language === 'en' ? 'Enter your full name' : 'Nhập họ và tên của bạn'} value={formData.fullName} onChange={(e) => handleInputChange("fullName", e.target.value)} required className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'} ${errors.fullName ? 'border-red-500' : ''}`} />
+                  {errors.fullName && <p className="text-red-500 text-xs">{errors.fullName}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="address" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
+                    {language === 'en' ? 'Address' : 'Địa chỉ'}
+                  </Label>
+                  <Input id="address" placeholder={language === 'en' ? 'Enter your address' : 'Nhập địa chỉ của bạn'} value={formData.address} onChange={(e) => handleInputChange("address", e.target.value)} className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`} />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="phoneNumber" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
+                    {language === 'en' ? 'Phone number' : 'Số điện thoại'}
+                  </Label>
+                  <Input id="phoneNumber" placeholder={language === 'en' ? 'Enter your phone number' : 'Nhập số điện thoại của bạn'} value={formData.phoneNumber} onChange={(e) => handleInputChange("phoneNumber", e.target.value)} className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`} />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
+                    Email<span className="text-red-500 ml-1">*</span>
+                  </Label>
+                  <Input id="email" type="email" placeholder={language === 'en' ? 'Enter your email' : 'Nhập email của bạn'} value={formData.email} onChange={(e) => handleInputChange("email", e.target.value)} required className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'} ${errors.email ? 'border-red-500' : ''}`} />
+                  {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="category" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
+                    {language === 'en' ? 'Topic' : 'Lĩnh vực'}
+                  </Label>
+                  <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                    <SelectTrigger className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'}`}>
+                      <SelectValue placeholder={language === 'en' ? 'Select topic' : 'Chọn lĩnh vực'} />
+                    </SelectTrigger>
+                    <SelectContent className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'}`}>
+                      <SelectItem value="thu-tuc-hanh-chinh">{language === 'en' ? 'Administrative procedures' : 'Thủ tục hành chính'}</SelectItem>
+                      <SelectItem value="chinh-sach-uu-dai">{language === 'en' ? 'Incentive policies' : 'Chính sách ưu đãi'}</SelectItem>
+                      <SelectItem value="quy-hoach-xay-dung">{language === 'en' ? 'Construction planning' : 'Quy hoạch xây dựng'}</SelectItem>
+                      <SelectItem value="chinh-sach-lao-dong">{language === 'en' ? 'Labor policies' : 'Chính sách lao động'}</SelectItem>
+                      <SelectItem value="giay-phep-kinh-doanh">{language === 'en' ? 'Business license' : 'Giấy phép kinh doanh'}</SelectItem>
+                      <SelectItem value="ho-tro-khoi-nghiep">{language === 'en' ? 'Startup support' : 'Hỗ trợ khởi nghiệp'}</SelectItem>
+                      <SelectItem value="ha-tang-ky-thuat">{language === 'en' ? 'Technical infrastructure' : 'Hạ tầng kỹ thuật'}</SelectItem>
+                      <SelectItem value="khac">{language === 'en' ? 'Other' : 'Khác'}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="title" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
+                    {language === 'en' ? 'Title' : 'Tiêu đề'}<span className="text-red-500 ml-1">*</span>
+                  </Label>
+                  <Input id="title" placeholder={language === 'en' ? 'Enter question title' : 'Nhập tiêu đề câu hỏi'} value={formData.title} onChange={(e) => handleInputChange("title", e.target.value)} required className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'} ${errors.title ? 'border-red-500' : ''}`} />
+                  {errors.title && <p className="text-red-500 text-xs">{errors.title}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="content" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
+                    {language === 'en' ? 'Question content' : 'Nội dung câu hỏi'}<span className="text-red-500 ml-1">*</span>
+                  </Label>
+                  <Textarea id="content" placeholder={language === 'en' ? 'Enter detailed content of your question...' : 'Nhập nội dung chi tiết câu hỏi của bạn...'} value={formData.content} onChange={(e) => handleInputChange("content", e.target.value)} required rows={6} className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'} ${errors.content ? 'border-red-500' : ''}`} />
+                  {errors.content && <p className="text-red-500 text-xs">{errors.content}</p>}
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <Button type="submit" disabled={submitQuestionMutation.isPending} className={`flex items-center gap-2 px-6 ${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary/80 text-dseza-dark-main-bg' : 'bg-dseza-light-primary hover:bg-dseza-light-primary/80 text-white'} ${submitQuestionMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  {submitQuestionMutation.isPending ? (<Loader2 className="h-4 w-4 animate-spin" />) : (<Send className="h-4 w-4" />)}
+                  {submitQuestionMutation.isPending ? (language === 'en' ? 'Sending...' : 'Đang gửi...') : (language === 'en' ? 'Submit question' : 'Gửi câu hỏi')}
+                </Button>
+              </div>
+            </form>
+
+            {/* Notes */}
+            <div className={`${theme === 'dark' ? 'bg-blue-900/20' : 'bg-blue-50'} p-4 rounded-lg`}>
+              <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-blue-300' : 'text-blue-800'}`}>
+                {language === 'en' ? 'Notes when submitting a question:' : 'Lưu ý khi gửi câu hỏi:'}
+              </h3>
+              <ul className={`text-xs space-y-1 ${theme === 'dark' ? 'text-blue-200' : 'text-blue-700'}`}>
+                <li>• {language === 'en' ? 'Please fill in your full name for better support' : 'Vui lòng điền đầy đủ thông tin họ tên để chúng tôi có thể hỗ trợ bạn tốt nhất'}</li>
+                <li>• {language === 'en' ? 'Specify your question content for an accurate answer' : 'Nêu rõ nội dung câu hỏi để nhận được câu trả lời chính xác'}</li>
+                <li>• {language === 'en' ? 'We will respond within 24-48 business hours' : 'Chúng tôi sẽ phản hồi trong vòng 24-48 giờ làm việc'}</li>
+                <li>• {language === 'en' ? 'Frequently asked questions may be published to help the community' : 'Các câu hỏi thường gặp sẽ được công khai để hỗ trợ cộng đồng'}</li>
+              </ul>
+            </div>
+          </main>
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
+
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
       {/* Header - Complete header structure */}
@@ -166,21 +300,21 @@ const CreateQuestionPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
               <Link 
-                to="/" 
+                to={`/${language}`} 
                 className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {language === 'en' ? 'Home' : 'Trang chủ'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/tien-ich/hoi-dap" 
+                to={`/${language}/${language === 'en' ? 'utilities/qna' : 'tien-ich/hoi-dap'}`} 
                 className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Hỏi đáp
+                {language === 'en' ? 'Q&A' : 'Hỏi đáp'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Tạo câu hỏi
+                {language === 'en' ? 'Create question' : 'Tạo câu hỏi'}
               </span>
             </nav>
           </div>
@@ -191,7 +325,7 @@ const CreateQuestionPage: React.FC = () => {
           
           {/* Page Title */}
           <h1 className={`text-3xl font-bold mb-8 text-center ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-            GỬI CÂU HỎI CHO CHÚNG TÔI
+            {language === 'en' ? 'SEND US YOUR QUESTION' : 'GỬI CÂU HỎI CHO CHÚNG TÔI'}
           </h1>
 
           {/* Form */}
@@ -203,11 +337,11 @@ const CreateQuestionPage: React.FC = () => {
               {/* Full Name */}
               <div className="space-y-2">
                 <Label htmlFor="fullName" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Họ và tên<span className="text-red-500 ml-1">*</span>
+                  {language === 'en' ? 'Full name' : 'Họ và tên'}<span className="text-red-500 ml-1">*</span>
                 </Label>
                 <Input
                   id="fullName"
-                  placeholder="Nhập họ và tên của bạn"
+                  placeholder={language === 'en' ? 'Enter your full name' : 'Nhập họ và tên của bạn'}
                   value={formData.fullName}
                   onChange={(e) => handleInputChange("fullName", e.target.value)}
                   required
@@ -221,11 +355,11 @@ const CreateQuestionPage: React.FC = () => {
               {/* Address */}
               <div className="space-y-2">
                 <Label htmlFor="address" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Địa chỉ
+                  {language === 'en' ? 'Address' : 'Địa chỉ'}
                 </Label>
                 <Input
                   id="address"
-                  placeholder="Nhập địa chỉ của bạn"
+                  placeholder={language === 'en' ? 'Enter your address' : 'Nhập địa chỉ của bạn'}
                   value={formData.address}
                   onChange={(e) => handleInputChange("address", e.target.value)}
                   className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
@@ -235,11 +369,11 @@ const CreateQuestionPage: React.FC = () => {
               {/* Phone Number */}
               <div className="space-y-2">
                 <Label htmlFor="phoneNumber" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Số điện thoại
+                  {language === 'en' ? 'Phone number' : 'Số điện thoại'}
                 </Label>
                 <Input
                   id="phoneNumber"
-                  placeholder="Nhập số điện thoại của bạn"
+                  placeholder={language === 'en' ? 'Enter your phone number' : 'Nhập số điện thoại của bạn'}
                   value={formData.phoneNumber}
                   onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
                   className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`}
@@ -254,7 +388,7 @@ const CreateQuestionPage: React.FC = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Nhập email của bạn"
+                  placeholder={language === 'en' ? 'Enter your email' : 'Nhập email của bạn'}
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   required
@@ -268,21 +402,21 @@ const CreateQuestionPage: React.FC = () => {
               {/* Category */}
               <div className="space-y-2">
                 <Label htmlFor="category" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Lĩnh vực
+                  {language === 'en' ? 'Topic' : 'Lĩnh vực'}
                 </Label>
                 <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
                   <SelectTrigger className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'}`}>
-                    <SelectValue placeholder="Chọn lĩnh vực" />
+                    <SelectValue placeholder={language === 'en' ? 'Select topic' : 'Chọn lĩnh vực'} />
                   </SelectTrigger>
                   <SelectContent className={`${theme === 'dark' ? 'bg-dseza-dark-main-bg border-dseza-dark-border text-dseza-dark-main-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text'}`}>
-                    <SelectItem value="thu-tuc-hanh-chinh">Thủ tục hành chính</SelectItem>
-                    <SelectItem value="chinh-sach-uu-dai">Chính sách ưu đãi</SelectItem>
-                    <SelectItem value="quy-hoach-xay-dung">Quy hoạch xây dựng</SelectItem>
-                    <SelectItem value="chinh-sach-lao-dong">Chính sách lao động</SelectItem>
-                    <SelectItem value="giay-phep-kinh-doanh">Giấy phép kinh doanh</SelectItem>
-                    <SelectItem value="ho-tro-khoi-nghiep">Hỗ trợ khởi nghiệp</SelectItem>
-                    <SelectItem value="ha-tang-ky-thuat">Hạ tầng kỹ thuật</SelectItem>
-                    <SelectItem value="khac">Khác</SelectItem>
+                    <SelectItem value="thu-tuc-hanh-chinh">{language === 'en' ? 'Administrative procedures' : 'Thủ tục hành chính'}</SelectItem>
+                    <SelectItem value="chinh-sach-uu-dai">{language === 'en' ? 'Incentive policies' : 'Chính sách ưu đãi'}</SelectItem>
+                    <SelectItem value="quy-hoach-xay-dung">{language === 'en' ? 'Construction planning' : 'Quy hoạch xây dựng'}</SelectItem>
+                    <SelectItem value="chinh-sach-lao-dong">{language === 'en' ? 'Labor policies' : 'Chính sách lao động'}</SelectItem>
+                    <SelectItem value="giay-phep-kinh-doanh">{language === 'en' ? 'Business license' : 'Giấy phép kinh doanh'}</SelectItem>
+                    <SelectItem value="ho-tro-khoi-nghiep">{language === 'en' ? 'Startup support' : 'Hỗ trợ khởi nghiệp'}</SelectItem>
+                    <SelectItem value="ha-tang-ky-thuat">{language === 'en' ? 'Technical infrastructure' : 'Hạ tầng kỹ thuật'}</SelectItem>
+                    <SelectItem value="khac">{language === 'en' ? 'Other' : 'Khác'}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -290,11 +424,11 @@ const CreateQuestionPage: React.FC = () => {
               {/* Title - Spans 2 columns */}
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="title" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Tiêu đề<span className="text-red-500 ml-1">*</span>
+                  {language === 'en' ? 'Title' : 'Tiêu đề'}<span className="text-red-500 ml-1">*</span>
                 </Label>
                 <Input
                   id="title"
-                  placeholder="Nhập tiêu đề câu hỏi"
+                  placeholder={language === 'en' ? 'Enter question title' : 'Nhập tiêu đề câu hỏi'}
                   value={formData.title}
                   onChange={(e) => handleInputChange("title", e.target.value)}
                   required
@@ -308,11 +442,11 @@ const CreateQuestionPage: React.FC = () => {
               {/* Content - Spans 2 columns */}
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="content" className={theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}>
-                  Nội dung câu hỏi<span className="text-red-500 ml-1">*</span>
+                  {language === 'en' ? 'Question content' : 'Nội dung câu hỏi'}<span className="text-red-500 ml-1">*</span>
                 </Label>
                 <Textarea
                   id="content"
-                  placeholder="Nhập nội dung chi tiết câu hỏi của bạn..."
+                  placeholder={language === 'en' ? 'Enter detailed content of your question...' : 'Nhập nội dung chi tiết câu hỏi của bạn...'}
                   value={formData.content}
                   onChange={(e) => handleInputChange("content", e.target.value)}
                   required
@@ -338,7 +472,7 @@ const CreateQuestionPage: React.FC = () => {
                 ) : (
                   <Send className="h-4 w-4" />
                 )}
-                {submitQuestionMutation.isPending ? 'Đang gửi...' : 'Gửi câu hỏi'}
+                {submitQuestionMutation.isPending ? (language === 'en' ? 'Sending...' : 'Đang gửi...') : (language === 'en' ? 'Submit question' : 'Gửi câu hỏi')}
               </Button>
             </div>
 
@@ -347,13 +481,13 @@ const CreateQuestionPage: React.FC = () => {
           {/* Additional Information */}
           <div className={`mt-8 p-4 rounded-lg ${theme === 'dark' ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
             <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-blue-300' : 'text-blue-800'}`}>
-              Lưu ý khi gửi câu hỏi:
+              {language === 'en' ? 'Notes when submitting a question:' : 'Lưu ý khi gửi câu hỏi:'}
             </h3>
             <ul className={`text-sm space-y-1 ${theme === 'dark' ? 'text-blue-200' : 'text-blue-700'}`}>
-              <li>• Vui lòng điền đầy đủ thông tin họ tên để chúng tôi có thể hỗ trợ bạn tốt nhất</li>
-              <li>• Nêu rõ nội dung câu hỏi để nhận được câu trả lời chính xác</li>
-              <li>• Chúng tôi sẽ phản hồi trong vòng 24-48 giờ làm việc</li>
-              <li>• Các câu hỏi thường gặp sẽ được công khai để hỗ trợ cộng đồng</li>
+              <li>• {language === 'en' ? 'Please fill in your full name for better support' : 'Vui lòng điền đầy đủ thông tin họ tên để chúng tôi có thể hỗ trợ bạn tốt nhất'}</li>
+              <li>• {language === 'en' ? 'Specify your question content for an accurate answer' : 'Nêu rõ nội dung câu hỏi để nhận được câu trả lời chính xác'}</li>
+              <li>• {language === 'en' ? 'We will respond within 24-48 business hours' : 'Chúng tôi sẽ phản hồi trong vòng 24-48 giờ làm việc'}</li>
+              <li>• {language === 'en' ? 'Frequently asked questions may be published to help the community' : 'Các câu hỏi thường gặp sẽ được công khai để hỗ trợ cộng đồng'}</li>
             </ul>
           </div>
 
