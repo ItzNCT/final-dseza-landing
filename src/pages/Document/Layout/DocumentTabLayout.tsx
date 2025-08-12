@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import TopBar from "@/components/hero/TopBar";
@@ -10,11 +10,13 @@ import DocumentSideNav from "@/pages/Document/Layout/DocumentSideNav";
 import { ChevronRight } from "lucide-react";
 import MobileLayout from "@/components/mobile/MobileLayout";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLanguageRoutes } from "@/utils/routes";
 
 const DocumentTabLayout: React.FC = () => {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const isMobile = useIsMobile();
+  const { createUrl } = useLanguageRoutes();
 
   // Translated labels
   const homeLabel = language === "en" ? "Home" : "Trang chủ";
@@ -28,9 +30,9 @@ const DocumentTabLayout: React.FC = () => {
             {/* Breadcrumb - Mobile */}
             <div className={`${theme === 'dark' ? 'bg-dseza-dark-secondary/30' : 'bg-dseza-light-secondary/30'} rounded-lg px-2 py-1`}>
               <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                <a href="/" className={`${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'} hover:underline`}>
+                <Link to={createUrl('')} className={`${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'} hover:underline`}>
                   {homeLabel}
-                </a>
+                </Link>
                 <ChevronRight className="h-2.5 w-2.5" />
                 <span className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} font-medium`}>{pageTitle}</span>
               </nav>
@@ -79,14 +81,14 @@ const DocumentTabLayout: React.FC = () => {
               theme === "dark" ? "text-dseza-dark-secondary-text" : "text-dseza-light-secondary-text"
             }`}
           >
-            <a
-              href="/"
+            <Link
+              to={createUrl('')}
               className={`transition-colors ${
                 theme === "dark" ? "hover:text-dseza-dark-primary" : "hover:text-dseza-light-primary"
               }`}
             >
               {homeLabel}
-            </a>
+            </Link>
             <ChevronRight className="h-4 w-4" />
             <span
               className={`font-medium ${

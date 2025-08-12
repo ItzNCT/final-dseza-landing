@@ -495,84 +495,48 @@ async function fetchArticleByPath(pathAlias: string, language: 'vi' | 'en' = 'vi
     // Ensure path starts with /
     const normalizedPath = pathAlias.startsWith('/') ? pathAlias : `/${pathAlias}`;
     
-    // Try different approaches to find the article
-    // Skip the problematic filter[path][alias] approach and go directly to client-side filtering
-    console.log('🔄 Skipping problematic filter approach, using client-side filtering...');
-    
-    // Approach 1: Fetch all articles and filter client-side (most reliable)
-    const fallbackUrl = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/bai-viet?include=${basicInclude}`;
-    console.log('📡 Fetching all articles for client-side filtering:', fallbackUrl);
-    
-    const response = await fetch(fallbackUrl, {
-      method: 'GET',
-      headers: {
-        ...jsonApiHeaders,
-        'Accept-Language': language,
-        'Content-Language': language,
-      },
-    });
+    // ────────────────────────────────────────────────────────────────────────
+    // 1) Try server-side filtering first via JSON:API filter[path][alias]
+    // ────────────────────────────────────────────────────────────────────────
+    try {
+      const serverFilterUrl = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/bai-viet?filter[path][alias]=${encodeURIComponent(normalizedPath)}&include=${basicInclude}`;
+      console.log('📡 Trying server-side filter by path alias:', serverFilterUrl);
 
-    console.log('📊 Response status:', response.status, response.statusText);
+      const serverResponse = await fetch(serverFilterUrl, {
+        method: 'GET',
+        headers: {
+          ...jsonApiHeaders,
+          'Accept-Language': language,
+          'Content-Language': language,
+        },
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Failed to fetch articles for filtering:', errorText);
-      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-    }
+      console.log('📊 Server filter response:', serverResponse.status, serverResponse.statusText);
 
-    const data = await response.json();
-    console.log('✅ Fetched all articles, filtering by path alias...');
-    
-    // Filter articles by path alias client-side
-    const matchedArticle = data.data.find((article: any) => 
-      article.attributes.path?.alias === normalizedPath
-    );
-    
-    if (matchedArticle) {
-      console.log('✅ Found matching article by client-side filtering:', matchedArticle);
-      const articleData = { data: matchedArticle, included: data.included };
-      
-      // Enrich with media if needed
-      if (articleData?.data?.relationships?.field_noi_dung_bai_viet?.data?.length > 0) {
-        await enrichParagraphsWithMedia(articleData, language);
-      }
-      
-      return articleData;
-    } else {
-      console.log('❌ No article found with path alias after client-side filtering');
-      console.log('📋 Available path aliases:', data.data.map((a: any) => a.attributes.path?.alias).filter(Boolean));
-      
-      // Try to extract potential UUID from path (if path ends with hash-like suffix)
-      const pathParts = normalizedPath.split('-');
-      const lastPart = pathParts[pathParts.length - 1];
-      
-      if (lastPart && lastPart.length >= 6) {
-        console.log('🔍 Trying to find article by title or URL suffix:', lastPart);
-        
-        // Try to find by title containing the path elements or by similar path
-        const titleMatch = data.data.find((article: any) => {
-          const title = article.attributes.title?.toLowerCase() || '';
-          const pathSlug = normalizedPath.toLowerCase().replace(/[^a-z0-9\-]/g, '');
-          return title.includes(lastPart) || 
-                 article.attributes.path?.alias?.includes(lastPart) ||
-                 pathSlug.includes(title.replace(/[^a-z0-9\-]/g, '').substring(0, 20));
-        });
-        
-        if (titleMatch) {
-          console.log('✅ Found article by title/content matching:', titleMatch);
-          const articleData = { data: titleMatch, included: data.included };
+      if (serverResponse.ok) {
+        const serverData = await serverResponse.json();
+        if (serverData?.data?.length > 0) {
+          const matched = serverData.data[0];
+          const articleData = { data: matched, included: serverData.included };
           
-          // Enrich with media if needed
           if (articleData?.data?.relationships?.field_noi_dung_bai_viet?.data?.length > 0) {
             await enrichParagraphsWithMedia(articleData, language);
           }
           
+          console.log('✅ Found article via server-side filter');
           return articleData;
         }
+        console.log('ℹ️ Server-side filter returned no results, falling back to client-side filtering');
+      } else {
+        const errorText = await serverResponse.text();
+        console.warn('⚠️ Server-side filter request failed, will fallback. Error:', errorText);
       }
-      
-      throw new Error(`No article found with path alias: ${pathAlias}`);
+    } catch (serverFilterError) {
+      console.warn('⚠️ Server-side filter attempt threw error, will fallback:', serverFilterError);
     }
+
+    // If server-side filter returned no result, return not found instead of fetching all
+    throw new Error(`No article found with path alias: ${pathAlias}`);
   } catch (error) {
     console.error('❌ fetchArticleByPath error:', error);
     throw new Error(`Failed to fetch article by path: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -1078,9 +1042,22 @@ async function fetchDocuments({ queryKey }: { queryKey: readonly unknown[] }): P
       queryParams.append('filter[field_loai_van_ban.name]', filters.documentType);
     }
     
-    // DISABLE SERVER-SIDE CATEGORY FILTERING - use client-side filtering instead
-    // Server-side filtering có vấn đề với Drupal JSON API syntax
-    // Category filtering sẽ được xử lý hoàn toàn ở client-side
+    // Category filtering by taxonomy (if provided): expect a taxonomy term UUID or name
+    if (filters.category) {
+      // Prefer filtering by term id (UUID) when UI provides it
+      // If UI passes a slug mapping to an id, it should resolve before calling this function
+      // Here we try name-based fallback if looks non-uuid
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(filters.category);
+      if (isUuid) {
+        // Relationship id filter
+        queryParams.append('filter[cat-id][condition][path]', 'field_cac_loai_van_ban.id');
+        queryParams.append('filter[cat-id][condition][value]', filters.category);
+      } else {
+        // Name fallback
+        queryParams.append('filter[cat-name][condition][path]', 'field_cac_loai_van_ban.name');
+        queryParams.append('filter[cat-name][condition][value]', filters.category);
+      }
+    }
     
     if (filters.startDate) {
       queryParams.append('filter[field_ngay_ban_hanh][value]', filters.startDate);
@@ -1170,61 +1147,17 @@ export const useDocuments = (filters: DocumentFilters = {}) => {
     error,
     isSuccess,
     refetch,
-    // Additional convenience properties with client-side filtering fallback
-    documents: data?.data ? filterDocumentsClientSide(data.data, filters) : [],
-    totalResults: data?.meta?.count || (data?.data ? filterDocumentsClientSide(data.data, filters).length : 0),
-    hasDocuments: !!(data?.data ? filterDocumentsClientSide(data.data, filters).length : 0),
+    // Use server-side filtered results directly
+    documents: data?.data || [],
+    totalResults: data?.meta?.count || (data?.data?.length || 0),
+    hasDocuments: !!(data?.data?.length),
   };
 };
 
 /**
  * Client-side filtering fallback in case server-side filtering fails
  */
-function filterDocumentsClientSide(documents: any[], filters: DocumentFilters): any[] {
-  if (!filters.category) {
-    console.log('🔧 No category filter, returning all documents');
-    return documents;
-  }
-  
-  console.log('🔧 Client-side filtering for category:', filters.category);
-  
-  const categoryMapping: { [key: string]: string } = {
-    // Vietnamese slugs (updated)
-    'quy-dinh-trung-uong': '13',
-    'quy-dinh-dia-phuong': '14',
-    'chi-dao-dieu-hanh': '15',
-    'cai-cach-hanh-chinh': '16',
-    // Legacy Vietnamese slugs for backward compatibility
-    'phap-quy-trung-uong': '13',
-    'phap-quy-dia-phuong': '14',
-    'cchc': '16',
-    // English slugs
-    'central-legal-regulations': '13',
-    'local-legal-regulations': '14',
-    'directive-management-documents': '15',
-    'administrative-reform-documents': '16'
-  };
-  
-  const expectedCategoryId = categoryMapping[filters.category];
-  console.log('🎯 Expected category ID:', expectedCategoryId, 'for category:', filters.category);
-  
-  if (!expectedCategoryId) {
-    console.warn('❌ No mapping found for category:', filters.category);
-    return documents;
-  }
-  
-  const filtered = documents.filter((doc: any) => {
-    const docCategoryId = doc.relationships?.field_cac_loai_van_ban?.data?.meta?.drupal_internal__target_id?.toString();
-    const matches = docCategoryId === expectedCategoryId;
-    
-    console.log(`📋 Document ${doc.attributes?.field_so_ky_hieu}: category ${docCategoryId}, expected ${expectedCategoryId}, match: ${matches}`);
-    
-    return matches;
-  });
-  
-  console.log(`✅ Client-side filtering result: ${documents.length} → ${filtered.length} documents`);
-  return filtered;
-}
+// Removed client-side category filtering to avoid heavy payloads; use server-side filters instead.
 
 // Export types for external use
 export type { DocumentFilters };

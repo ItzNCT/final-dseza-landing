@@ -80,8 +80,8 @@ const URL_MAPPING = {
     // Documents section
     'legal-documents': 'van-ban-phap-luat',
     // LƯU Ý: Đã chuẩn hóa các slug dưới đây để nhất quán
-    'central-legal-regulations': 'van-ban-phap-ly-trung-uong',
-    'local-legal-regulations': 'van-ban-phap-ly-dia-phuong',
+    'central-legal-regulations': 'van-ban-phap-quy-trung-uong',
+    'local-legal-regulations': 'van-ban-phap-quy-dia-phuong',
     'directive-management-documents': 'van-ban-chi-dao-dieu-hanh',
     'administrative-reform-documents': 'van-ban-cai-cach-hanh-chinh',
     'guidelines-feedback': 'huong-dan-gop-y',

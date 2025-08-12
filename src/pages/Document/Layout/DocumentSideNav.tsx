@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useLanguageRoutes } from "@/utils/routes";
 import { FileText } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -14,30 +15,32 @@ interface DocumentTab {
 const DocumentSideNav: React.FC = () => {
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const { createUrl } = useLanguageRoutes();
   const isMobile = useIsMobile();
 
-  const viBasePath = "/van-ban/van-ban-phap-luat";
-  const enBasePath = "/documents/legal-documents";
+  // Build language-aware base paths using routing helpers
+  const viBasePath = createUrl("van-ban/van-ban-phap-luat");
+  const enBasePath = createUrl("documents/legal-documents");
 
   const viTabs: DocumentTab[] = [
     {
       title: "Văn bản pháp quy trung ương",
-      path: `${viBasePath}/quy-dinh-trung-uong`,
+      path: `${viBasePath}/van-ban-phap-quy-trung-uong`,
       category: "quy_dinh_trung_uong",
     },
     {
       title: "Văn bản pháp quy địa phương",
-      path: `${viBasePath}/quy-dinh-dia-phuong`,
+      path: `${viBasePath}/van-ban-phap-quy-dia-phuong`,
       category: "quy_dinh_dia_phuong",
     },
     {
       title: "Văn bản chỉ đạo điều hành",
-      path: `${viBasePath}/chi-dao-dieu-hanh`,
+      path: `${viBasePath}/van-ban-chi-dao-dieu-hanh`,
       category: "chi_dao_dieu_hanh",
     },
     {
       title: "Văn bản CCHC",
-      path: `${viBasePath}/cai-cach-hanh-chinh`,
+      path: `${viBasePath}/van-ban-cai-cach-hanh-chinh`,
       category: "cai_cach_hanh_chinh",
     },
   ];

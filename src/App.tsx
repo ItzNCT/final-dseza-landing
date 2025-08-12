@@ -11,8 +11,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { AccessibilityProvider } from "@/context/AccessibilityContext";
 import Index from "./pages/Index";
-import ArticleRouter from "@/pages/Article/ArticleRouter";
-import DynamicArticleHandler from "@/pages/Article/DynamicArticleHandler";
+import ArticleDetailPage from "@/pages/Article/ArticleDetailPage";
 import ArticleListPage from "@/pages/News/ArticleListPage";
 import DocumentSearchPage from "@/pages/Document/DocumentSearchPage";
 import DocumentTabLayout from "@/pages/Document/Layout/DocumentTabLayout";
@@ -90,12 +89,11 @@ const App: React.FC = () => (
                       <Route path="/:lang" element={<LanguageLayout />}>
                         {/* Main routes */}
                         <Route index element={<Index />} />
-                        <Route path={`${articleRoutes.vi}/:identifier`} element={<ArticleRouter />} />
-                        <Route path={`${articleRoutes.en}/:identifier`} element={<ArticleRouter />} />
-                        
-                        {/* SEO-friendly article routes */}
-                        <Route path="bai-viet/*" element={<DynamicArticleHandler />} />
-                        <Route path="article/*" element={<DynamicArticleHandler />} />
+                        <Route path={`${articleRoutes.vi}/:identifier`} element={<ArticleDetailPage />} />
+                        <Route path={`${articleRoutes.en}/:identifier`} element={<ArticleDetailPage />} />
+                        {/* SEO-friendly article routes now directly handled by ArticleDetailPage */}
+                        <Route path="bai-viet/*" element={<ArticleDetailPage />} />
+                        <Route path="article/*" element={<ArticleDetailPage />} />
                         
                         {/* Redirect old search paths */}
                         <Route path="van-ban/tim-kiem" element={<Navigate to="../van-ban" replace />} />
@@ -250,8 +248,8 @@ const App: React.FC = () => (
                         
                         {/* Language Test Component - Development only */}
     
-                        {/* SEO-friendly URLs (Drupal path aliases) - This should be before 404 */}
-                        <Route path="*" element={<DynamicArticleHandler />} />
+                        {/* SEO-friendly URLs (Drupal path aliases) - handled by ArticleDetailPage */}
+                        <Route path="*" element={<ArticleDetailPage />} />
                         
                         {/* 404 - This should be the last route */}
                         {/* <Route path="*" element={<NotFound />} /> */}

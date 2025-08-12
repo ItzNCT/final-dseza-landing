@@ -86,14 +86,51 @@ const DocumentSearchPage: React.FC = () => {
   // DEBUG: Log filters being passed to useDocuments  
   console.log('🎯 Filters passed to useDocuments:', filters);
 
+  // Map route slugs to taxonomy term names used in Drupal (by language)
+  const getCategoryMapping = React.useCallback((slug?: string) => {
+    if (!slug) return { termName: '', displayLabel: language === 'en' ? 'Legal Document Lookup' : 'Tra cứu văn bản' };
+
+    // Vietnamese slugs from DocumentSideNav
+    const viSlugToName: Record<string, string> = {
+      // Current VI slugs per utils/routes.ts
+      'van-ban-phap-quy-trung-uong': 'Văn bản pháp quy trung ương',
+      'van-ban-phap-quy-dia-phuong': 'Văn bản pháp quy địa phương',
+      'van-ban-chi-dao-dieu-hanh': 'Văn bản chỉ đạo điều hành',
+      'van-ban-cai-cach-hanh-chinh': 'Văn bản CCHC',
+      // Backward-compatible/legacy VI slugs
+      'quy-dinh-trung-uong': 'Văn bản pháp quy trung ương',
+      'quy-dinh-dia-phuong': 'Văn bản pháp quy địa phương',
+      'chi-dao-dieu-hanh': 'Văn bản chỉ đạo điều hành',
+      'cai-cach-hanh-chinh': 'Văn bản CCHC',
+      'phap-quy-trung-uong': 'Văn bản pháp quy trung ương',
+      'phap-quy-dia-phuong': 'Văn bản pháp quy địa phương',
+      'cchc': 'Văn bản CCHC',
+    };
+
+    // English slugs from DocumentSideNav
+    const enSlugToName: Record<string, string> = {
+      'central-legal-regulations': 'Central Legal Regulations',
+      'local-legal-regulations': 'Local Legal Regulations',
+      'directive-management-documents': 'Directive and Management Documents',
+      'administrative-reform-documents': 'Administrative Reform Documents',
+    };
+
+    const isEnglish = language === 'en';
+    const map = isEnglish ? enSlugToName : viSlugToName;
+    const termName = map[slug] || '';
+    const displayLabel = termName || (isEnglish ? 'Legal Document Lookup' : 'Tra cứu văn bản');
+    return { termName, displayLabel };
+  }, [language]);
+
   // Update filters when category changes from URL
   React.useEffect(() => {
+    const { termName } = getCategoryMapping(subcategory);
     setFilters(prev => ({
       ...prev,
-      category: subcategory || "",
-      page: 1 // Reset to first page when category changes
+      category: termName,
+      page: 1,
     }));
-  }, [subcategory]);
+  }, [subcategory, language, getCategoryMapping]);
 
   // Update language in filters when language context changes
   React.useEffect(() => {
@@ -587,21 +624,8 @@ const DocumentSearchPage: React.FC = () => {
     </div>
   );
 
-  // Get category display name
-  const getCategoryDisplayName = () => {
-    switch (subcategory) {
-      case 'phap-quy-trung-uong':
-        return 'Văn bản pháp quy trung ương';
-      case 'phap-quy-dia-phuong':
-        return 'Văn bản pháp quy địa phương';
-      case 'chi-dao-dieu-hanh':
-        return 'Văn bản chỉ đạo điều hành';
-      case 'cchc':
-        return 'Văn bản CCHC';
-      default:
-        return 'Tra cứu văn bản';
-    }
-  };
+  // Category display label derived from slug and language
+  const categoryDisplayLabel = React.useMemo(() => getCategoryMapping(subcategory).displayLabel, [getCategoryMapping, subcategory]);
 
   // Mobile standalone page when used inside DocumentTabLayout mobile content
   if (isMobile) {
@@ -612,7 +636,7 @@ const DocumentSearchPage: React.FC = () => {
           <h2 className={`text-lg font-semibold ${
             theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
           }`}>
-            {getCategoryDisplayName()}
+            {categoryDisplayLabel}
           </h2>
         </div>
 
@@ -706,7 +730,7 @@ const DocumentSearchPage: React.FC = () => {
           <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold ${
             theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
           }`}>
-            {getCategoryDisplayName()}
+            {categoryDisplayLabel}
           </h2>
         </div>
 

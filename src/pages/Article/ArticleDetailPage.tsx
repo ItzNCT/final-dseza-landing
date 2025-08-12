@@ -4,14 +4,14 @@ import {
   Download, ExternalLink, ZoomIn, Printer, Star, AlertTriangle, 
   CheckCircle, AlertCircle, FileDown, Link2, Monitor, RefreshCcw, ClipboardList
 } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { useArticle, useArticleViewCount } from "@/api/hooks";
-import { ArticleDetailPageContext } from "./DynamicArticleHandler";
+import { useArticleViewCount, fetchAllArticlesDebugInfo } from "@/api/hooks";
+import { getArticleUrl } from "@/utils/seo";
 import { extractImageUrl } from "@/utils/drupal";
 import { processRichTextContent, extractFirstImageFromRichText } from "@/utils/richTextProcessor";
 import TopBar from "@/components/hero/TopBar";
@@ -102,6 +102,202 @@ const sanitizeHTML = (html: string | null | undefined): string => {
 };
 
 /**
+ * Helper functions and smart fetch hook migrated from ArticleRouter
+ */
+const extractUuidFromIdentifier = (identifier: string): string | null => {
+  const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+  const match = identifier.match(uuidPattern);
+  return match ? match[0] : null;
+};
+
+const isDirectUuid = (identifier: string): boolean => {
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidPattern.test(identifier);
+};
+
+const extractHashFromIdentifier = (identifier: string): string | null => {
+  const hashPattern = /[a-f0-9]{6,}$/i;
+  const match = identifier.match(hashPattern);
+  return match ? match[0] : null;
+};
+
+const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') => {
+  const [fetchState, setFetchState] = React.useState<{
+    data: any;
+    isLoading: boolean;
+    isError: boolean;
+    error: any;
+    strategy: string;
+    redirectUrl?: string;
+  }>({
+    data: null,
+    isLoading: true,
+    isError: false,
+    error: null,
+    strategy: '',
+    redirectUrl: undefined
+  });
+
+  React.useEffect(() => {
+    let isCancelled = false;
+
+    const findArticle = async () => {
+      try {
+        setFetchState(prev => ({ ...prev, isLoading: true, isError: false }));
+
+        // Strategy 1: Direct UUID fetch
+        if (isDirectUuid(identifier)) {
+          try {
+            const response = await fetch(`${import.meta.env.VITE_DRUPAL_JSON_API_BASE_URL || 'https://dseza-backend.lndo.site'}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${identifier}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`, {
+              headers: {
+                'Accept': 'application/vnd.api+json',
+                'Content-Type': 'application/vnd.api+json',
+                'Accept-Language': language,
+                'Content-Language': language,
+              }
+            });
+
+            if (response.ok && !isCancelled) {
+              const data = await response.json();
+              setFetchState({
+                data: { data: data.data, included: data.included },
+                isLoading: false,
+                isError: false,
+                error: null,
+                strategy: 'direct-uuid'
+              });
+              return;
+            }
+          } catch (error) {
+            // continue to next strategy
+          }
+        }
+
+        // Strategy 2: Extract UUID from complex identifier
+        const potentialUuid = extractUuidFromIdentifier(identifier);
+        if (potentialUuid && potentialUuid !== identifier) {
+          try {
+            const response = await fetch(`${import.meta.env.VITE_DRUPAL_JSON_API_BASE_URL || 'https://dseza-backend.lndo.site'}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${potentialUuid}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`, {
+              headers: {
+                'Accept': 'application/vnd.api+json',
+                'Content-Type': 'application/vnd.api+json',
+                'Accept-Language': language,
+                'Content-Language': language,
+              }
+            });
+
+            if (response.ok && !isCancelled) {
+              const data = await response.json();
+              const canonicalUrl = getArticleUrl(language, data.data);
+              setFetchState({
+                data: { data: data.data, included: data.included },
+                isLoading: false,
+                isError: false,
+                error: null,
+                strategy: 'embedded-uuid',
+                redirectUrl: canonicalUrl
+              });
+              return;
+            }
+          } catch (error) {
+            // continue to next strategy
+          }
+        }
+
+        // Strategy 3: Smart matching
+        const allArticles = await fetchAllArticlesDebugInfo(language);
+        if (isCancelled) return;
+
+        let matchedArticle: any = null;
+
+        // 3A: hash
+        const hash = extractHashFromIdentifier(identifier);
+        if (hash) {
+          matchedArticle = allArticles.find(article => 
+            article.pathAlias?.includes(hash) ||
+            article.uuid?.includes(hash) ||
+            article.title?.toLowerCase().includes(hash.toLowerCase())
+          );
+        }
+
+        // 3B: path alias
+        if (!matchedArticle) {
+          const pathAlias = identifier.startsWith('/') ? identifier : `/${identifier}`;
+          matchedArticle = allArticles.find(article => article.pathAlias === pathAlias);
+        }
+
+        // 3C: title similarity
+        if (!matchedArticle) {
+          const searchTerms = identifier.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .split('-')
+            .filter(term => term.length > 3);
+          matchedArticle = allArticles.find(article => {
+            const title = article.title?.toLowerCase() || '';
+            return searchTerms.some(term => title.includes(term));
+          });
+        }
+
+        if (matchedArticle) {
+          try {
+            const response = await fetch(`${import.meta.env.VITE_DRUPAL_JSON_API_BASE_URL || 'https://dseza-backend.lndo.site'}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${matchedArticle.uuid}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`, {
+              headers: {
+                'Accept': 'application/vnd.api+json',
+                'Content-Type': 'application/vnd.api+json',
+                'Accept-Language': language,
+                'Content-Language': language,
+              }
+            });
+
+            if (response.ok && !isCancelled) {
+              const data = await response.json();
+              const canonicalUrl = getArticleUrl(language, data.data);
+              setFetchState({
+                data: { data: data.data, included: data.included },
+                isLoading: false,
+                isError: false,
+                error: null,
+                strategy: 'smart-match',
+                redirectUrl: canonicalUrl
+              });
+              return;
+            }
+          } catch (error) {
+            // fallthrough
+          }
+        }
+
+        // Failed
+        if (!isCancelled) {
+          setFetchState({
+            data: null,
+            isLoading: false,
+            isError: true,
+            error: new Error(`No article found with identifier: ${identifier}`),
+            strategy: 'failed'
+          });
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setFetchState({
+            data: null,
+            isLoading: false,
+            isError: true,
+            error,
+            strategy: 'error'
+          });
+        }
+      }
+    };
+
+    findArticle();
+    return () => { isCancelled = true; };
+  }, [identifier, language]);
+
+  return fetchState;
+};
+
+/**
  * ArticleDetailPage component for displaying detailed article content with multi-language support
  */
 const ArticleDetailPage: React.FC = () => {
@@ -110,25 +306,13 @@ const ArticleDetailPage: React.FC = () => {
   const { language } = useLanguage();
   const { t } = useTranslation();
   const isMobile = useIsMobile();
-  const { uuid } = useParams<{ uuid: string }>();
-  
-  // Check if we have pre-fetched data from DynamicArticleHandler
-  const contextData = React.useContext(ArticleDetailPageContext);
-  const shouldUsePrefetchedData = contextData.overrideData && contextData.overrideUuid;
-  const effectiveUuid = shouldUsePrefetchedData ? contextData.overrideUuid! : (uuid || '');
-  
-  // Use language-aware article detail hook (skip if we have pre-fetched data)
-  const { data: fetchedData, isLoading, isError, error } = useArticle(
-    shouldUsePrefetchedData ? '' : effectiveUuid,
-    language
-  );
-  
-  // Use pre-fetched data if available, otherwise use fetched data
-  const data = shouldUsePrefetchedData ? contextData.overrideData : fetchedData;
-  const finalIsLoading = shouldUsePrefetchedData ? false : isLoading;
-  const finalIsError = shouldUsePrefetchedData ? false : isError;
-  
-  console.log('📊 ArticleDetailPage - Using pre-fetched:', shouldUsePrefetchedData, 'UUID:', effectiveUuid);
+  const params = useParams();
+  const identifier = (params.identifier as string) || (params['*'] as string) || '';
+  const langParam = params.lang as string | undefined;
+  const effectiveLang = (langParam === 'vi' || langParam === 'en') ? langParam : (language as 'vi' | 'en');
+
+  // Smart router fetch
+  const { data, isLoading, isError, error, strategy, redirectUrl } = useSmartArticleRouterFetch(identifier || '', effectiveLang);
   
   // Get node ID from article data for view count
   const nodeId = data?.data?.attributes?.drupal_internal__nid?.toString() || '';
@@ -264,8 +448,21 @@ const ArticleDetailPage: React.FC = () => {
 
 
 
-  // Debug logging
-  // console.log('ArticleDetailPage Debug:', { uuid: effectiveUuid, nodeId, viewCount, finalIsLoading, finalIsError, error, data, shouldUsePrefetchedData });
+  // Canonical redirect handling
+  if (!isLoading && !isError && data?.data) {
+    if (redirectUrl) {
+      const currentPath = window.location.pathname;
+      if (currentPath !== redirectUrl) {
+        return <Navigate replace to={redirectUrl} />;
+      }
+    } else {
+      const canonicalUrl = getArticleUrl(effectiveLang, data.data);
+      const currentPath = window.location.pathname;
+      if (currentPath !== canonicalUrl) {
+        return <Navigate replace to={canonicalUrl} />;
+      }
+    }
+  }
 
   const handleShare = (platform: string) => {
     const url = window.location.href;
@@ -932,7 +1129,7 @@ const ArticleDetailPage: React.FC = () => {
     });
   };
 
-  if (finalIsLoading) {
+  if (isLoading) {
     // Mobile Loading State
     if (isMobile) {
       return (
@@ -1019,7 +1216,7 @@ const ArticleDetailPage: React.FC = () => {
     );
   }
 
-  if (finalIsError) {
+  if (isError) {
     // Mobile Error State
     if (isMobile) {
       return (
@@ -1109,7 +1306,7 @@ const ArticleDetailPage: React.FC = () => {
                 
                 {/* Compact debug info for mobile */}
                 <div className={`text-xs p-3 rounded border ${theme === 'dark' ? 'text-dseza-dark-secondary-text border-dseza-dark-border bg-dseza-dark-secondary-bg/50' : 'text-dseza-light-secondary-text border-dseza-light-border bg-dseza-light-secondary-bg/30'}`}>
-                  <p className="font-medium mb-1">UUID: {uuid}</p>
+                  <p className="font-medium mb-1">Identifier: {identifier}</p>
                   <p>Thử: 
                     <a href="/vi/bai-viet/1" className={`mx-1 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>1</a>
                     <a href="/vi/bai-viet/2" className={`mx-1 ${theme === 'dark' ? 'text-dseza-dark-primary' : 'text-dseza-light-primary'}`}>2</a>
@@ -1144,9 +1341,9 @@ const ArticleDetailPage: React.FC = () => {
                   ? "The article you are looking for does not exist or has been deleted."
                   : "Bài viết bạn tìm kiếm không tồn tại hoặc đã bị xóa."}
               </p>
-              {/* Debug: Show current UUID */}
+              {/* Debug: Show current identifier */}
               <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
-                Article UUID: {uuid}
+                Article identifier: {identifier}
               </p>
               <div className="space-y-4">
                 <Button 
@@ -1160,7 +1357,7 @@ const ArticleDetailPage: React.FC = () => {
                 <div className={`text-sm border p-4 rounded-lg ${theme === 'dark' ? 'text-dseza-dark-secondary-text border-dseza-dark-border bg-dseza-dark-secondary-bg/50' : 'text-dseza-light-secondary-text border-dseza-light-border bg-dseza-light-secondary-bg/50'}`}>
                   <p className="font-semibold mb-2">Debug Information:</p>
                   <p>Base URL: https://dseza-backend.lndo.site</p>
-                  <p>Full URL: https://dseza-backend.lndo.site/jsonapi/node/bai-viet/{uuid}</p>
+                   <p>Full URL: https://dseza-backend.lndo.site/jsonapi/node/bai-viet/[id]</p>
                   <p className="mt-2">Bạn có thể kiểm tra API trực tiếp tại:</p>
                   <div className="mt-2 space-y-1">
                     <a 
@@ -1173,13 +1370,13 @@ const ArticleDetailPage: React.FC = () => {
                       Danh sách tất cả bài viết
                     </a>
                     <a 
-                      href={`https://dseza-backend.lndo.site/jsonapi/node/bai-viet/${uuid}?include=field_anh_dai_dien.field_media_image`}
+                       href={`https://dseza-backend.lndo.site/jsonapi/node/bai-viet/[id]?include=field_anh_dai_dien.field_media_image`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
                     >
                       <ZoomIn className="h-4 w-4" />
-                      Chi tiết bài viết UUID: {uuid}
+                      Chi tiết bài viết
                     </a>
                   </div>
                 </div>
@@ -1477,7 +1674,7 @@ const ArticleDetailPage: React.FC = () => {
 
               {/* Comments Section - Mobile optimized */}
               <div className={`pt-6 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
-                <CommentSection articleId={uuid || ''} />
+             <CommentSection articleId={data?.data?.id || ''} />
               </div>
             </article>
           </main>
@@ -1877,7 +2074,7 @@ const ArticleDetailPage: React.FC = () => {
             </div>
 
             {/* Comments Section */}
-            <CommentSection articleId={uuid || ''} />
+            <CommentSection articleId={data?.data?.id || ''} />
           </article>
         </div>
       </main>

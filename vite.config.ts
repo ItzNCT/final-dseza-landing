@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
   // Cho phép override bằng biến môi trường VITE_API_TARGET
   const env = loadEnv(mode, process.cwd(), '');
   const API_TARGET = env.VITE_API_TARGET || DEFAULT_API_TARGET;
+  const isProduction = mode === 'production';
 
   return {
     // ──────────────────────────────────────────────────────────────────────────
@@ -71,6 +72,13 @@ export default defineConfig(({ mode }) => {
     // ──────────────────────────────────────────────────────────────────────────
     define: {
       __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+    },
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Minification/transform: loại bỏ console & debugger ở production
+    // ──────────────────────────────────────────────────────────────────────────
+    esbuild: {
+      drop: isProduction ? ['console', 'debugger'] : [],
     },
   };
 });

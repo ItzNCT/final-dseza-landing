@@ -18,13 +18,6 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, Loader2 } from 'lucide-react'
 
-// Drupal OAuth configuration
-const OAUTH_CONFIG = {
-  client_id: import.meta.env.VITE_OAUTH_CLIENT_ID || 'RJRNPG0NjCCCqXPqDFyXEBG3mQNeNVsGNFMBiXuyw8Q',
-  client_secret: import.meta.env.VITE_OAUTH_CLIENT_SECRET || 'MySup3rSecret!',
-  grant_type: 'password'
-  // Removed scope as it's not needed for OAuth password grant
-}
 
 const LoginPage: React.FC = () => {
   const { theme } = useTheme()
