@@ -27,11 +27,9 @@ const BusinessesAndPartners: React.FC = () => {
   // to ensure the carousel is always filled and scrolls seamlessly.
   const displayedPartners = useMemo(() => {
     if (!partners || partners.length === 0) return [];
-    // The minimum number of logos we want to display to make the marquee feel full.
-    const MIN_LOGO_COUNT = 0;
-    const repeatCount = Math.ceil(MIN_LOGO_COUNT / partners.length) + 1; // +1 ensures overlap for seamless loop
+    // Ensure the scrolling track is long enough before repeating.
+    const repeatCount = partners.length < 10 ? 4 : 3;
 
-    // Duplicate the partners array "repeatCount" times.
     const duplicated: typeof partners = [] as any;
     for (let i = 0; i < repeatCount; i += 1) {
       duplicated.push(...partners);
@@ -84,9 +82,9 @@ const BusinessesAndPartners: React.FC = () => {
 
         {/* Data State - Continuous scrolling logo carousel */}
         {hasPartners && !isLoading && !isError && (
-          <div className="relative w-full overflow-hidden">
+          <div className="relative w-full overflow-hidden group">
             <div
-              className="flex animate-[scroll_60s_linear_infinite] hover:pause"
+              className="flex animate-[scroll_20s_linear_infinite] group-hover:[animation-play-state:paused]"
               style={{ animationDirection: 'reverse' }}
             >
               {displayedPartners.map((partner, index) => (
@@ -104,6 +102,27 @@ const BusinessesAndPartners: React.FC = () => {
                     className="h-24 md:h-32 w-auto object-contain"
                     onError={(e) => {
                       // Fallback to placeholder if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/media/placeholder.svg';
+                    }}
+                  />
+                </a>
+              ))}
+
+              {displayedPartners.map((partner, index) => (
+                <a
+                  key={`partner-dup-${index}-${partner.id}`}
+                  href={partner.partnerUrl || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 mx-8 transition-all duration-300 filter grayscale hover:grayscale-0 hover:scale-105"
+                  title={partner.name}
+                >
+                  <img
+                    src={partner.logoUrl || '/media/placeholder.svg'}
+                    alt={partner.name}
+                    className="h-24 md:h-32 w-auto object-contain"
+                    onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = '/media/placeholder.svg';
                     }}

@@ -124,7 +124,7 @@ const MobileHeader: React.FC = () => {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   
   const { theme } = useTheme();
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   
   // Navigation handler
@@ -168,7 +168,7 @@ const MobileHeader: React.FC = () => {
 
   // Update date/time every minute
   useEffect(() => {
-    const timerId = setInterval(() => setCurrentDateTime(new Date()), 60000);
+    const timerId = setInterval(() => setCurrentDateTime(new Date()), 1000);
     return () => clearInterval(timerId);
   }, []);
 
@@ -464,7 +464,7 @@ const MobileHeader: React.FC = () => {
 
 // Language Switcher Component
 const LanguageSwitcher = () => {
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const { theme } = useTheme();
   const { switchLanguageUrl } = useLanguageRoutes();
   const location = useLocation();
@@ -482,9 +482,10 @@ const LanguageSwitcher = () => {
   
   const handleLanguageSwitch = (targetLang: "vi" | "en") => {
     if (language !== targetLang) {
-      const newUrl = switchLanguageUrl(targetLang, location.pathname);
-      navigate(newUrl);
+      setLanguage(targetLang);
     }
+    const newUrl = switchLanguageUrl(targetLang, location.pathname);
+    window.location.replace(newUrl);
   };
   
   return (

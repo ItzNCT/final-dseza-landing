@@ -50,8 +50,7 @@ import KhuCongNghiepHoaNinh from "./pages/Functionalzone/KhuCongNghiepHoaNinh";
 import InvestmentGuidePage from "./pages/Brochure/InvestmentGuidePage";
 import InvestmentPolicyPage from "./pages/Brochure/InvestmentPolicyPage";
 import BrochurePage from "./pages/Brochure/BrochurePage";
-import InvestmentEnvironmentPage from "./pages/News/InvestmentEnvironmentPage";
-import InvestorGuidelinesPage from "./pages/News/InvestorGuidelinesPage";
+// Removed InvestmentEnvironmentPage and InvestorGuidelinesPage; handled by ArticleListPage
 import DraftFeedbackPage from "./pages/Feedback/DraftFeedbackPage";
 import DraftDetailPage from "./pages/Feedback/DraftDetailPage";
 import VanBanHuongDanPage from "./pages/Feedback/VanBanHuongDanPage";
@@ -61,6 +60,7 @@ import MobileLayout from "./components/mobile/MobileLayout";
 import AccessibilityPanel from "./components/AccessibilityPanel";
 import LanguageLayout from "./components/LanguageLayout";
 import RootRedirect from "./components/RootRedirect";
+import SiteMapPage from "./pages/SiteMap/SiteMapPage";
 
 // Article route translations
 const articleRoutes = { vi: 'bai-viet', en: 'article' };
@@ -151,15 +151,15 @@ const App: React.FC = () => (
                         
                         {/* News routes - Vietnamese */}
                         <Route path="tin-tuc/lich-cong-tac" element={<WorkSchedulePage />} />
-                        <Route path="tin-tuc/moi-truong-dau-tu" element={<InvestmentEnvironmentPage />} />
-                        <Route path="tin-tuc/danh-cho-nha-dau-tu" element={<InvestorGuidelinesPage />} />
+                        <Route path="tin-tuc/moi-truong-dau-tu" element={<ArticleListPage />} />
+                        <Route path="tin-tuc/danh-cho-nha-dau-tu" element={<ArticleListPage />} />
                         <Route path="tin-tuc/:category/:subcategory" element={<ArticleListPage />} />
                         <Route path="tin-tuc/:category" element={<ArticleListPage />} />
                         
                         {/* News routes - English */}
                         <Route path="news/work-schedule" element={<WorkSchedulePage />} />
-                        <Route path="news/investment-environment" element={<InvestmentEnvironmentPage />} />
-                        <Route path="news/for-investors" element={<InvestorGuidelinesPage />} />
+                        <Route path="news/investment-environment" element={<ArticleListPage />} />
+                        <Route path="news/for-investors" element={<ArticleListPage />} />
                         <Route path="news/:category/:subcategory" element={<ArticleListPage />} />
                         <Route path="news/:category" element={<ArticleListPage />} />
                         
@@ -182,6 +182,10 @@ const App: React.FC = () => (
                         <Route path="utilities/qa" element={<QnAListPage />} />
                         <Route path="utilities/frequently-asked-questions" element={<FaqPage />} />
                         <Route path="faq" element={<FaqPage />} />
+                        
+                        {/* Site map routes */}
+                        <Route path="so-do-site" element={<SiteMapPage />} />
+                        <Route path="site-map" element={<SiteMapPage />} />
                         
                         {/* Contact and auth routes */}
                         <Route path="lien-he" element={<ContactPage />} />

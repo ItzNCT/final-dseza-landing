@@ -1,6 +1,6 @@
 // src/components/hero/TopBar.tsx
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTranslation, formatDate } from "@/utils/translations";
@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 
 const TopBar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
-  const { language } = useLanguage();
-  const { switchLanguageUrl } = useLanguageRoutes();
+  const { language, setLanguage } = useLanguage();
+  const { switchLanguageUrl, createUrl } = useLanguageRoutes();
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -20,8 +20,12 @@ const TopBar: React.FC = () => {
 
   // Handle language switching with URL navigation
   const handleLanguageSwitch = (targetLang: "vi" | "en") => {
+    if (language !== targetLang) {
+      setLanguage(targetLang);
+    }
     const newUrl = switchLanguageUrl(targetLang, location.pathname);
-    navigate(newUrl);
+    // Force full page reload for immediate language switch and canonical sync
+    window.location.replace(newUrl);
   };
 
   useEffect(() => {
@@ -71,10 +75,8 @@ const TopBar: React.FC = () => {
         {/* Sơ đồ site, Ngôn ngữ, Theme */}
         <div className="flex items-center">
           {/* Sơ đồ site */}
-          <a
-            href="https://dseza.danang.gov.vn/so-do-site"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to={createUrl(language === "vi" ? "/so-do-site" : "/site-map")}
             className={cn(
               "flex items-center transition-colors duration-300 mr-6 text-sm",
               isScrolled ? scrolledTextColor : initialTextColor
@@ -82,7 +84,7 @@ const TopBar: React.FC = () => {
           >
             <Map className="w-4 h-4 mr-1" />
             <span>{t('sitemap')}</span>
-          </a>
+          </Link>
 
           {/* Ngôn ngữ */}
           <div className="flex items-center mx-4">

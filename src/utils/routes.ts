@@ -103,7 +103,9 @@ const URL_MAPPING = {
     'privacy': 'rieng-tu',
     'cookies': 'cookies',
     'accessibility': 'tro-giup',
-    'feedback': 'phan-hoi'
+    'feedback': 'phan-hoi',
+
+    'site-map': 'so-do-site',
   } as Record<string, string>,
   
   // Vietnamese to English mapping (reverse of above)
@@ -196,23 +198,30 @@ export const useLanguageRoutes = () => {
   const switchLanguageUrl = (targetLang: "vi" | "en", currentPath: string): string => {
     // Extract current language from path
     const currentLang = extractLanguageFromPath(currentPath);
-    
+
+    // If no language prefix, add target language and normalize slug toward target language
     if (!currentLang) {
-      // No language prefix found, add target language prefix
-      return `/${targetLang}${currentPath}`;
+      const pathWithoutLang = currentPath.startsWith('/') ? currentPath : `/${currentPath}`;
+      const oppositeLang: "vi" | "en" = targetLang === 'vi' ? 'en' : 'vi';
+      const normalized = translatePath(pathWithoutLang, oppositeLang, targetLang);
+      return `/${targetLang}${normalized}`;
     }
-    
-    if (currentLang === targetLang) {
-      // Already in target language
-      return currentPath;
-    }
-    
+
     // Extract path without language prefix
     const pathWithoutLang = extractPathWithoutLanguage(currentPath);
-    
-    // Translate path from current language to target language
-    const translatedPath = translatePath(pathWithoutLang, currentLang, targetLang);
-    
+    const oppositeLang: "vi" | "en" = targetLang === 'vi' ? 'en' : 'vi';
+
+    let translatedPath: string;
+
+    if (currentLang === targetLang) {
+      // Prefix is already correct, but slug might still be in the opposite language.
+      // Translate from opposite language to target to normalize slug segments.
+      translatedPath = translatePath(pathWithoutLang, oppositeLang, targetLang);
+    } else {
+      // Standard case: translate from current language to target language
+      translatedPath = translatePath(pathWithoutLang, currentLang, targetLang);
+    }
+
     // Combine target language prefix with translated path
     return `/${targetLang}${translatedPath}`;
   };

@@ -4,7 +4,7 @@ import {
   Download, ExternalLink, ZoomIn, Printer, Star, AlertTriangle, 
   CheckCircle, AlertCircle, FileDown, Link2, Monitor, RefreshCcw, ClipboardList
 } from "lucide-react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useLocation, useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import MobileLayout from "@/components/mobile/MobileLayout";
 import CommentSection from "@/components/comments/CommentSection";
 import { useTranslation } from "react-i18next";
+import { useLanguageRoutes } from "@/utils/routes";
 
 /**
  * Secure DOMPurify configuration for XSS protection
@@ -308,8 +309,19 @@ const ArticleDetailPage: React.FC = () => {
   const isMobile = useIsMobile();
   const params = useParams();
   const identifier = (params.identifier as string) || (params['*'] as string) || '';
-  const langParam = params.lang as string | undefined;
-  const effectiveLang = (langParam === 'vi' || langParam === 'en') ? langParam : (language as 'vi' | 'en');
+  const effectiveLang = language as 'vi' | 'en';
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { switchLanguageUrl } = useLanguageRoutes();
+
+  // Keep URL in sync with language context to avoid double-clicks
+  React.useEffect(() => {
+    const newUrl = switchLanguageUrl(effectiveLang, location.pathname);
+    if (newUrl !== location.pathname) {
+      navigate(newUrl, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveLang, location.pathname]);
 
   // Smart router fetch
   const { data, isLoading, isError, error, strategy, redirectUrl } = useSmartArticleRouterFetch(identifier || '', effectiveLang);
@@ -317,6 +329,28 @@ const ArticleDetailPage: React.FC = () => {
   // Get node ID from article data for view count
   const nodeId = data?.data?.attributes?.drupal_internal__nid?.toString() || '';
   const { viewCount, isLoading: viewCountLoading } = useArticleViewCount(nodeId);
+
+  // Client-side soft increment: add +1 per article per TTL to displayed count
+  const [extraView, setExtraView] = React.useState(0);
+  React.useEffect(() => {
+    if (!nodeId) return;
+    try {
+      const key = `dseza:view:${nodeId}`;
+      const now = Date.now();
+      const ttlMs = 30 * 60 * 1000; // 30 minutes TTL
+      const raw = localStorage.getItem(key);
+      const last = raw ? parseInt(raw, 10) : 0;
+      if (!last || Number.isNaN(last) || now - last > ttlMs) {
+        localStorage.setItem(key, String(now));
+        setExtraView(1);
+      } else {
+        setExtraView(0);
+      }
+    } catch (_) {
+      setExtraView(0);
+    }
+  }, [nodeId]);
+  const computedViewCount = Math.max(0, (viewCount || 0) + (extraView || 0));
 
 
 
@@ -1515,8 +1549,8 @@ const ArticleDetailPage: React.FC = () => {
                         <span className="inline-block w-8 h-4 bg-gray-300 rounded animate-pulse"></span>
                       ) : (
                         language === 'en' 
-                          ? `${viewCount.toLocaleString('en-US')} views`
-                          : `${viewCount.toLocaleString('vi-VN')} lượt xem`
+                          ? `${computedViewCount.toLocaleString('en-US')} views`
+                          : `${computedViewCount.toLocaleString('vi-VN')} lượt xem`
                       )}
                     </span>
                   </div>
@@ -1769,7 +1803,7 @@ const ArticleDetailPage: React.FC = () => {
                     {viewCountLoading ? (
                       <span className="inline-block w-8 h-4 bg-gray-300 rounded animate-pulse"></span>
                     ) : (
-                      viewCount.toLocaleString(language === 'en' ? 'en-US' : 'vi-VN')
+                      computedViewCount.toLocaleString(language === 'en' ? 'en-US' : 'vi-VN')
                     )}
                   </span>
                 </div>
