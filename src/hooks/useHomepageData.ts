@@ -150,12 +150,13 @@ async function fetchMainMenuData(): Promise<MainMenuData> {
       `
     };
 
-    const response = await fetch('http://dseza.lndo.site/graphql', {
+    const response = await fetch(`${DRUPAL_BASE_URL || ''}/graphql`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(graphqlQuery),
     });
 

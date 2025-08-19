@@ -3,8 +3,8 @@ import { GraphQLClient } from 'graphql-request';
 // Lấy địa chỉ API từ biến môi trường với fallback
 // Trong development mode sử dụng relative URL để tận dụng Vite proxy
 const getEndpoint = (language?: string) => {
-  const baseEndpoint = import.meta.env.VITE_GRAPHQL_ENDPOINT || 
-    (import.meta.env.DEV ? '/graphql' : 'https://dseza-backend.lndo.site/graphql');
+  const baseEndpoint = import.meta.env.VITE_GRAPHQL_ENDPOINT ||
+    (import.meta.env.DEV ? '/graphql' : '');
   
   // Nếu có language code, thêm vào URL
   if (language) {
@@ -16,11 +16,15 @@ const getEndpoint = (language?: string) => {
 };
 
 // Tạo một đối tượng client mặc định (không có language)
-export const apiClient = new GraphQLClient(getEndpoint());
+export const apiClient = new GraphQLClient(getEndpoint(), {
+  credentials: 'include',
+});
 
 // Tạo function để tạo client với language cụ thể
 export const createLanguageClient = (language: string) => {
-  return new GraphQLClient(getEndpoint(language));
+  return new GraphQLClient(getEndpoint(language), {
+    credentials: 'include',
+  });
 };
 
 // Tạo function để tạo client với language header thay vì URL
@@ -30,12 +34,15 @@ export const createLanguageClientWithHeader = (language: string) => {
       'Accept-Language': language,
       'Content-Language': language,
     },
+    credentials: 'include',
   });
   return client;
 };
 
 // Tạo sẵn client cho tiếng Anh
-export const enApiClient = new GraphQLClient(getEndpoint('en'));
+export const enApiClient = new GraphQLClient(getEndpoint('en'), {
+  credentials: 'include',
+});
 
 // Client cho tiếng Anh với header approach
 export const enApiClientWithHeader = createLanguageClientWithHeader('en');

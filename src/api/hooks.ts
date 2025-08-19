@@ -1811,11 +1811,6 @@ async function submitChangePasswordForm(formData: ChangePasswordFormData, token?
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
-
-    // Add authentication token if provided
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
     
     const response = await fetch(url, {
       method: 'POST',
@@ -1858,11 +1853,7 @@ export const useChangePassword = () => {
     data,
     reset,
   } = useMutation({
-    mutationFn: (formData: ChangePasswordFormData) => {
-      // Get token from localStorage if available
-      const token = localStorage.getItem('authToken');
-      return submitChangePasswordForm(formData, token);
-    },
+    mutationFn: (formData: ChangePasswordFormData) => submitChangePasswordForm(formData),
     retry: 1, // Retry once on failure
     retryDelay: 1000, // Wait 1 second before retry
   });

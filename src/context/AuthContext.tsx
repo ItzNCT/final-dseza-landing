@@ -42,69 +42,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // useEffect chạy khi component mount để kiểm tra token đã lưu trong localStorage
   useEffect(() => {
-    const initializeAuth = () => {
-      try {
-        // Lấy token từ localStorage
-        const savedToken = localStorage.getItem('authToken');
-        // Lấy thông tin user từ localStorage
-        const savedUser = localStorage.getItem('userData');
-
-        if (savedToken && savedUser) {
-          // Parse thông tin user từ JSON string
-          const parsedUser: User = JSON.parse(savedUser);
-          
-          // Cập nhật state với thông tin đã lưu
-          setToken(savedToken);
-          setUser(parsedUser);
-        }
-      } catch (error) {
-        // Nếu có lỗi khi parse dữ liệu, xóa dữ liệu không hợp lệ
-        console.error('Error parsing saved auth data:', error);
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userData');
-      } finally {
-        // Kết thúc quá trình loading
-        setIsLoading(false);
-      }
-    };
-
-    initializeAuth();
+    // Cookie-based auth: rely on HttpOnly cookies set by server.
+    // On app init, simply mark loading as complete. Optionally, fetch current user from a session endpoint.
+    setIsLoading(false);
   }, []);
 
   // Hàm xử lý đăng nhập
   const login = (authToken: string, userData: User) => {
-    try {
-      // Lưu token vào localStorage
-      localStorage.setItem('authToken', authToken);
-      // Lưu thông tin user vào localStorage (convert thành JSON string)
-      localStorage.setItem('userData', JSON.stringify(userData));
-      
-      // Cập nhật state
-      setToken(authToken);
-      setUser(userData);
-      
-      console.log('User logged in successfully:', userData.name);
-    } catch (error) {
-      console.error('Error saving auth data:', error);
-    }
+    // Do not persist tokens in browser storage. Server should set HttpOnly cookie.
+    setToken(authToken);
+    setUser(userData);
+    console.log('User logged in successfully:', userData.name);
   };
 
   // Hàm xử lý đăng xuất
   const logout = () => {
-    try {
-      // Xóa token khỏi localStorage
-      localStorage.removeItem('authToken');
-      // Xóa thông tin user khỏi localStorage
-      localStorage.removeItem('userData');
-      
-      // Reset state về null
-      setToken(null);
-      setUser(null);
-      
-      console.log('User logged out successfully');
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
+    // Server should clear session cookie; frontend clears in-memory state.
+    setToken(null);
+    setUser(null);
+    console.log('User logged out successfully');
   };
 
   // Giá trị được cung cấp cho các component con thông qua context
