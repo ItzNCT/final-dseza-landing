@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '@/context/ThemeContext'
+import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
 import { useTranslation } from '@/utils/translations'
 import { useChangePassword } from '@/api/hooks'
@@ -26,6 +27,7 @@ const ProfilePage: React.FC = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { language } = useLanguage()
 
   // Password change form state
   const [currentPassword, setCurrentPassword] = useState<string>('')
@@ -47,9 +49,9 @@ const ProfilePage: React.FC = () => {
   // Redirect if user is not logged in
   useEffect(() => {
     if (!user) {
-      navigate('/dang-nhap')
+      navigate(`/${language}/dang-nhap`)
     }
-  }, [user, navigate])
+  }, [user, navigate, language])
 
   // Handle change password success/error
   useEffect(() => {

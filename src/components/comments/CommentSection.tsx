@@ -9,6 +9,8 @@ import { MessageCircle, Send, Reply, Clock, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useTheme } from '@/context/ThemeContext';
+import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 
 /**
  * Interface for comment data structure
@@ -28,8 +30,8 @@ interface Comment {
  * Interface for comment form data
  */
 interface CommentFormData {
-  author: string;
-  email: string;
+  author?: string;
+  email?: string;
   content: string;
   parentId?: string;
 }
@@ -53,20 +55,37 @@ const jsonApiHeaders = {
  * @param articleId - The ID/UUID of the article to fetch comments for
  * @returns Promise containing the comments data
  */
-async function fetchComments(articleId: string): Promise<Comment[]> {
+async function fetchComments(
+  entityUuid: string,
+  options?: { bundle?: string; commentFieldName?: string; lang?: string }
+): Promise<Comment[]> {
   try {
-    // First get the article to find its internal ID since UUID filtering often fails
+    // Resolve internal ID by loading the node first (UUID filtering often fails on comment collection)
+    const bundle = options?.bundle || 'bai-viet';
+    const commentFieldName = options?.commentFieldName || 'field_binh_luan';
 
-    const articleResponse = await fetch(`${JSON_API_BASE_URL}/jsonapi/node/bai-viet/${articleId}`, {
-      headers: jsonApiHeaders,
-    });
+    const langPrefix = options?.lang ? `/${options.lang}` : '';
+    const prefixesToTry = Array.from(new Set([langPrefix, '']));
+
+    let nodeResponse: Response | null = null;
+    for (const p of prefixesToTry) {
+      try {
+        const resp = await fetch(`${JSON_API_BASE_URL}${p}/jsonapi/node/${bundle}/${entityUuid}`, {
+          headers: jsonApiHeaders,
+        });
+        if (resp.ok) {
+          nodeResponse = resp;
+          break;
+        }
+      } catch {}
+    }
     
-    if (!articleResponse.ok) {
+    if (!nodeResponse) {
       return [];
     }
     
-    const articleData = await articleResponse.json();
-    const internalId = articleData.data?.attributes?.drupal_internal__nid;
+    const nodeData = await nodeResponse.json();
+    const internalId = nodeData.data?.attributes?.drupal_internal__nid;
     
     if (!internalId) {
       return [];
@@ -75,6 +94,15 @@ async function fetchComments(articleId: string): Promise<Comment[]> {
     // Try multiple approaches to fetch comments
     // Based on Drupal JSON:API error: must use proper field specifiers
     const approaches = [
+      // Approach 0: Filter directly by parent node UUID via relationship id
+      () => {
+        const queryParams = new URLSearchParams();
+        queryParams.append('filter[entity_id.id]', entityUuid);
+        queryParams.append('filter[status]', '1');
+        queryParams.append('include', 'uid');
+        queryParams.append('sort', 'created');
+        return `/jsonapi/comment/comment?${queryParams.toString()}`;
+      },
       // Approach 1: Filter by entity_id with meta.drupal_internal__target_id specifier
       () => {
         const queryParams = new URLSearchParams();
@@ -83,7 +111,7 @@ async function fetchComments(articleId: string): Promise<Comment[]> {
         queryParams.append('filter[status]', '1');
         queryParams.append('include', 'uid');
         queryParams.append('sort', 'created');
-        return `${JSON_API_BASE_URL}/jsonapi/comment/comment?${queryParams.toString()}`;
+        return `/jsonapi/comment/comment?${queryParams.toString()}`;
       },
       
       // Approach 2: Filter by entity_id.id specifier
@@ -93,17 +121,17 @@ async function fetchComments(articleId: string): Promise<Comment[]> {
         queryParams.append('filter[entity_type]', 'node');
         queryParams.append('filter[status]', '1');
         queryParams.append('sort', 'created');
-        return `${JSON_API_BASE_URL}/jsonapi/comment/comment?${queryParams.toString()}`;
+        return `/jsonapi/comment/comment?${queryParams.toString()}`;
       },
       
       // Approach 3: Try with field_name and proper entity_id filter
       () => {
         const queryParams = new URLSearchParams();
         queryParams.append('filter[entity_id.meta.drupal_internal__target_id]', internalId.toString());
-        queryParams.append('filter[field_name]', 'field_binh_luan');
+        queryParams.append('filter[field_name]', commentFieldName);
         queryParams.append('filter[status]', '1');
         queryParams.append('sort', 'created');
-        return `${JSON_API_BASE_URL}/jsonapi/comment/comment?${queryParams.toString()}`;
+        return `/jsonapi/comment/comment?${queryParams.toString()}`;
       },
       
       // Approach 4: Simplified with just proper entity_id filter
@@ -111,35 +139,37 @@ async function fetchComments(articleId: string): Promise<Comment[]> {
         const queryParams = new URLSearchParams();
         queryParams.append('filter[entity_id.meta.drupal_internal__target_id]', internalId.toString());
         queryParams.append('sort', 'created');
-        return `${JSON_API_BASE_URL}/jsonapi/comment/comment?${queryParams.toString()}`;
+        return `/jsonapi/comment/comment?${queryParams.toString()}`;
       }
     ];
     
         for (let i = 0; i < approaches.length; i++) {
       try {
-        const url = approaches[i]();
+        const path = approaches[i]();
+        let response: Response | null = null;
+        for (const p of prefixesToTry) {
+          try {
+            const resp = await fetch(`${JSON_API_BASE_URL}${p}${path}`, {
+              method: 'GET',
+              headers: jsonApiHeaders,
+            });
+            if (resp.ok) {
+              response = resp;
+              break;
+            }
+          } catch {}
+        }
         
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: jsonApiHeaders,
-        });
-        
-        if (response.ok) {
+        if (response && response.ok) {
           const data = await response.json();
           
           if (data.data && Array.isArray(data.data)) {
-            // Filter comments for this specific article (in case filtering didn't work perfectly)
+            // Filter comments for this specific article using relationship UUID
             const filteredComments = data.data.filter((comment: any) => {
-              const commentEntityId = comment.attributes?.entity_id;
-              const commentFieldName = comment.attributes?.field_name;
-              
-              // Check entity_id matches and field_name is field_binh_luan
-              const entityIdMatch = commentEntityId === internalId || 
-                                  commentEntityId === parseInt(internalId) ||
-                                  commentEntityId === internalId.toString();
-              
-              const fieldNameMatch = !commentFieldName || commentFieldName === 'field_binh_luan';
-              
+              const relEntityUuid = comment.relationships?.entity_id?.data?.id;
+              const commentFieldNameAttr = comment.attributes?.field_name;
+              const entityIdMatch = relEntityUuid === entityUuid;
+              const fieldNameMatch = !commentFieldNameAttr || commentFieldNameAttr === commentFieldName;
               return entityIdMatch && fieldNameMatch;
             });
             
@@ -180,8 +210,11 @@ function transformDrupalComments(commentData: any[], included: any[] = []): Comm
     
     // Extract comment content
     let content = '';
-    if (item.attributes.comment_body?.[0]?.value) {
-      content = item.attributes.comment_body[0].value;
+    const bodyAttr = item.attributes.comment_body;
+    if (bodyAttr && typeof bodyAttr === 'object' && bodyAttr.value) {
+      content = bodyAttr.value;
+    } else if (Array.isArray(bodyAttr) && bodyAttr[0]?.value) {
+      content = bodyAttr[0].value;
     } else if (item.attributes.subject) {
       content = item.attributes.subject;
     }
@@ -192,7 +225,7 @@ function transformDrupalComments(commentData: any[], included: any[] = []): Comm
       authorEmail: item.attributes.mail || undefined,
       content: content,
       date: item.attributes.created,
-      parentId: item.attributes.pid ? item.attributes.pid.toString() : undefined,
+      parentId: item.relationships?.pid?.data?.id || undefined,
     };
   });
 }
@@ -236,19 +269,37 @@ function getMockComments(articleId: string): Comment[] {
  * @param articleId - The article ID to post comment to
  * @returns Promise containing the API response
  */
-async function submitComment(commentData: CommentFormData, articleId: string): Promise<any> {
+async function submitComment(
+  commentData: CommentFormData,
+  entityUuid: string,
+  options?: { bundle?: string; commentFieldName?: string; lang?: string }
+): Promise<any> {
   try {
-    // First, get the article to find its internal ID
-    const articleResponse = await fetch(`${JSON_API_BASE_URL}/jsonapi/node/bai-viet/${articleId}`, {
-      headers: jsonApiHeaders,
-    });
+    const bundle = options?.bundle || 'bai-viet';
+    const commentFieldName = options?.commentFieldName || 'field_binh_luan';
+    const langPrefix = options?.lang ? `/${options.lang}` : '';
+    const prefixesToTry = Array.from(new Set([langPrefix, '']));
+
+    // First, load the node to find its internal ID
+    let nodeResponse: Response | null = null;
+    for (const p of prefixesToTry) {
+      try {
+        const resp = await fetch(`${JSON_API_BASE_URL}${p}/jsonapi/node/${bundle}/${entityUuid}`, {
+          headers: jsonApiHeaders,
+        });
+        if (resp.ok) {
+          nodeResponse = resp;
+          break;
+        }
+      } catch {}
+    }
     
-    if (!articleResponse.ok) {
+    if (!nodeResponse) {
       throw new Error('Không thể tìm thấy bài viết để gửi bình luận');
     }
     
-    const articleData = await articleResponse.json();
-    const internalId = articleData.data?.attributes?.drupal_internal__nid;
+    const nodeData = await nodeResponse.json();
+    const internalId = nodeData.data?.attributes?.drupal_internal__nid;
     
     if (!internalId) {
       throw new Error('Không thể xác định ID bài viết');
@@ -260,34 +311,28 @@ async function submitComment(commentData: CommentFormData, articleId: string): P
         type: 'comment--comment',
         attributes: {
           entity_type: 'node',
-          field_name: 'field_binh_luan',
-          comment_type: 'comment',
+          field_name: commentFieldName,
           subject: commentData.content.substring(0, 50) + (commentData.content.length > 50 ? '...' : ''),
-          comment_body: [
-            {
-              value: commentData.content,
-              format: 'basic_html'
-            }
-          ],
-          name: commentData.author,
-          mail: commentData.email || '',
-          status: 0 // Default to unpublished for moderation
+          comment_body: {
+            value: commentData.content,
+            format: 'plain_text'
+          },
+          // Only send name/mail when user is anonymous to avoid username collision validation.
+          ...(commentData.author ? { name: commentData.author } : {}),
+          ...(commentData.email ? { mail: commentData.email } : {}),
         },
         relationships: {
           entity_id: {
             data: {
-              type: 'node--bai-viet',
-              id: articleId,
-              meta: {
-                drupal_internal__target_id: internalId
-              }
+              type: `node--${bundle}`,
+              id: entityUuid
             }
           }
         }
       }
     };
     
-    // Add parent comment reference if this is a reply
+    // Add parent comment reference if this is a reply (expects parent UUID)
     if (commentData.parentId) {
       commentPayload.data.relationships.pid = {
         data: {
@@ -297,25 +342,48 @@ async function submitComment(commentData: CommentFormData, articleId: string): P
       };
     }
     
-    const response = await fetch(`${JSON_API_BASE_URL}/jsonapi/comment/comment`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/vnd.api+json',
-        'Accept': 'application/vnd.api+json',
-      },
-      body: JSON.stringify(commentPayload),
-    });
+    // Get CSRF token
+    let csrfToken = '';
+    try {
+      const tokenResponse = await fetch(`${JSON_API_BASE_URL}/session/token`, { credentials: 'include' });
+      if (tokenResponse.ok) {
+        csrfToken = await tokenResponse.text();
+      }
+    } catch {}
+
+    let postResponse: Response | null = null;
+    try {
+      const resp = await fetch(`${JSON_API_BASE_URL}/jsonapi/comment/comment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/vnd.api+json',
+          'Accept': 'application/vnd.api+json',
+          ...(options?.lang ? { 'Accept-Language': options.lang } : {}),
+          ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+        },
+        credentials: 'include',
+        body: JSON.stringify(commentPayload),
+      });
+      if (resp.ok) {
+        postResponse = resp;
+      }
+    } catch {}
     
-    if (!response.ok) {
-      // If API fails, still show success but use simulation
-      return simulateCommentSubmission(commentData);
+    if (!postResponse || !postResponse.ok) {
+      let errorMessage = 'Gửi bình luận thất bại.';
+      try {
+        const errJson = await postResponse?.json();
+        if (errJson?.errors?.length) {
+          errorMessage = errJson.errors.map((e: any) => e?.detail || e?.title).join('; ');
+        }
+      } catch {}
+      throw new Error(errorMessage);
     }
-    
-    const responseData = await response.json();
+
+    const responseData = await postResponse.json();
     return { status: 'success', data: responseData.data };
   } catch (error) {
-    // Fallback to simulation 
-    return simulateCommentSubmission(commentData);
+    throw error;
   }
 }
 
@@ -348,7 +416,10 @@ function simulateCommentSubmission(commentData: CommentFormData): Promise<any> {
  * @param articleId - The ID/UUID of the article to fetch comments for
  * @returns {Object} Object containing comments data and loading states
  */
-export const useComments = (articleId: string) => {
+export const useComments = (
+  entityUuid: string,
+  options?: { bundle?: string; commentFieldName?: string; lang?: string }
+) => {
   const {
     data,
     isLoading,
@@ -356,13 +427,18 @@ export const useComments = (articleId: string) => {
     error,
     isSuccess,
     refetch,
+    isFetching,
   } = useQuery({
-    queryKey: ['comments', articleId],
-    queryFn: () => fetchComments(articleId),
-    enabled: !!articleId,
-    staleTime: 2 * 60 * 1000, // 2 minutes - comments can be cached briefly
-    gcTime: 5 * 60 * 1000, // 5 minutes cache time
+    queryKey: ['comments', entityUuid, options?.bundle || 'bai-viet', options?.commentFieldName || 'field_binh_luan', options?.lang || 'vi'],
+    queryFn: () => fetchComments(entityUuid, { ...options }),
+    enabled: !!entityUuid,
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000,
     retry: 1,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
+    refetchInterval: 15000,
   });
 
   return {
@@ -374,13 +450,17 @@ export const useComments = (articleId: string) => {
     refetch,
     comments: data || [],
     hasComments: !!data?.length,
+    isFetching,
   };
 };
 
 /**
  * Custom hook to submit new comments
  */
-export const useSubmitComment = (articleId: string) => {
+export const useSubmitComment = (
+  entityUuid: string,
+  options?: { bundle?: string; commentFieldName?: string; lang?: string }
+) => {
   const queryClient = useQueryClient();
   
   const {
@@ -392,12 +472,11 @@ export const useSubmitComment = (articleId: string) => {
     data,
     reset,
   } = useMutation({
-    mutationFn: (commentData: CommentFormData) => submitComment(commentData, articleId),
+    mutationFn: (commentData: CommentFormData) => submitComment(commentData, entityUuid, options),
     onSuccess: () => {
-      // Refetch comments after successful submission
-      queryClient.invalidateQueries({ queryKey: ['comments', articleId] });
+      queryClient.invalidateQueries({ queryKey: ['comments', entityUuid, options?.bundle || 'bai-viet', options?.commentFieldName || 'field_binh_luan', options?.lang || 'vi'] });
     },
-    retry: 1,
+    retry: 0,
   });
 
   return {
@@ -513,33 +592,49 @@ const CommentForm: React.FC<CommentFormProps> = ({
   replyToId,
   onCancelReply 
 }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     author: '',
     email: '',
     content: ''
   });
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.author.trim() || !formData.content.trim()) {
+    if (!formData.content.trim()) {
       return;
     }
 
-    onSubmit({
-      ...formData,
-      parentId: replyToId
-    });
+    // If logged-in, backend will use current user. Do not send name/email to avoid conflicts.
+    if (!user && !formData.author.trim()) {
+      return;
+    }
 
-    // Reset form after submission
-    setFormData({ author: '', email: '', content: '' });
-    if (onCancelReply) onCancelReply();
+    setSubmitError(null);
+    try {
+      await onSubmit({
+        ...(user ? { content: formData.content } : formData),
+        parentId: replyToId
+      } as any);
+      // Reset form after submission
+      setFormData({ author: '', email: '', content: '' });
+      if (onCancelReply) onCancelReply();
+    } catch (err: any) {
+      setSubmitError(err?.message || 'Không thể gửi bình luận');
+    }
   };
 
   return (
     <Card className="mt-6">
       <CardContent className="p-4">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {submitError && (
+            <div className="text-sm text-red-600 dark:text-red-400">
+              {submitError}
+            </div>
+          )}
           {replyToId && (
             <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
               <Reply className="h-4 w-4" />
@@ -558,36 +653,38 @@ const CommentForm: React.FC<CommentFormProps> = ({
             </div>
           )}
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="author" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Họ tên *
-              </label>
-              <input
-                id="author"
-                type="text"
-                required
-                value={formData.author}
-                onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-                placeholder="Nhập họ tên của bạn"
-              />
+          {!user && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="author" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Họ tên *
+                </label>
+                <input
+                  id="author"
+                  type="text"
+                  required
+                  value={formData.author}
+                  onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                  placeholder="Nhập họ tên của bạn"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Email (tùy chọn)
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                  placeholder="email@example.com"
+                />
+              </div>
             </div>
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email (tùy chọn)
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-                placeholder="email@example.com"
-              />
-            </div>
-          </div>
+          )}
           
           <div>
             <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -604,7 +701,7 @@ const CommentForm: React.FC<CommentFormProps> = ({
           </div>
           
           <div className="flex justify-end">
-            <Button type="submit" disabled={isPending || !formData.author.trim() || !formData.content.trim()}>
+            <Button type="submit" disabled={isPending || (!user && !formData.author.trim()) || !formData.content.trim()}>
               {isPending ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -628,15 +725,22 @@ const CommentForm: React.FC<CommentFormProps> = ({
  * Main CommentSection component
  */
 interface CommentSectionProps {
-  articleId: string;
+  // Backward compatibility
+  articleId?: string;
+  // Preferred
+  entityId?: string; // UUID of the node
+  bundle?: string; // e.g. 'bai-viet' | 'question'
+  commentFieldName?: string; // e.g. 'field_binh_luan'
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ articleId }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ articleId, entityId, bundle = 'bai-viet', commentFieldName = 'field_binh_luan' }) => {
   const [replyToId, setReplyToId] = useState<string | undefined>();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const targetUuid = entityId || articleId;
   
-  const { comments, isLoading, isError, error } = useComments(articleId);
-  const { mutate: submitComment, isPending: isSubmitting, isSuccess } = useSubmitComment(articleId);
+  const { comments, isLoading, isError, error } = useComments(targetUuid!, { bundle, commentFieldName, lang: language });
+  const { mutate: submitComment, isPending: isSubmitting, isSuccess } = useSubmitComment(targetUuid!, { bundle, commentFieldName, lang: language });
 
   const handleReply = (parentId: string) => {
     setReplyToId(parentId);
@@ -651,9 +755,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ articleId }) => {
     setReplyToId(undefined);
   };
 
-  const handleSubmitComment = (data: CommentFormData) => {
-    submitComment(data);
-  };
+  const handleSubmitComment = (data: CommentFormData) => new Promise((resolve, reject) => {
+    submitComment(data, {
+      onSuccess: () => resolve(null),
+      onError: (err) => reject(err),
+    } as any);
+  });
 
   // Show success message briefly
   React.useEffect(() => {
@@ -664,6 +771,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ articleId }) => {
       return () => clearTimeout(timer);
     }
   }, [isSuccess]);
+
+  if (!targetUuid) {
+    return null;
+  }
 
   if (isError) {
     return (

@@ -19,6 +19,7 @@ import { useMultilingualMenu } from '@/api/hooks';
 import type { MenuLinkWithSubtree } from '@/api/hooks';
 import { extractPathWithoutLanguage, createLanguageUrl, useLanguageRoutes } from '@/utils/routes';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from "@/context/AuthContext";
 
 // Type for mobile menu item (mapped from API data)
 type MobileMenuItem = {
@@ -126,6 +127,7 @@ const MobileHeader: React.FC = () => {
   const { theme } = useTheme();
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   
   // Navigation handler
   const handleNavigation = (url: string) => {
@@ -436,18 +438,41 @@ const MobileHeader: React.FC = () => {
                     <ThemeToggle />
                   </div>
                   
-                  {/* Login Button */}
+                  {/* Auth actions */}
                   <div className="mt-4">
-                    <Button
-                      className={cn(
-                        "w-full py-2.5 px-5 font-inter font-medium text-base rounded-md",
-                        getPrimaryBgColor(),
-                        getPrimaryHoverBgColor(),
-                        theme === "dark" ? "text-dseza-dark-main-bg" : "text-white"
-                      )}
-                    >
-                      Đăng nhập
-                    </Button>
+                    {user ? (
+                      <div className="flex items-center justify-between">
+                        <span className={cn("font-inter text-sm", getTextColor())}>
+                          Chào, <span className="font-medium">{user.name}</span>
+                        </span>
+                        <Button
+                          onClick={() => {
+                            logout();
+                            navigate(`/${language}`);
+                          }}
+                          className={cn(
+                            "py-2 px-4 font-inter text-sm rounded-md",
+                            getPrimaryBgColor(),
+                            getPrimaryHoverBgColor(),
+                            theme === "dark" ? "text-dseza-dark-main-bg" : "text-white"
+                          )}
+                        >
+                          Đăng xuất
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() => navigate(`/${language}/dang-nhap`)}
+                        className={cn(
+                          "w-full py-2.5 px-5 font-inter font-medium text-base rounded-md",
+                          getPrimaryBgColor(),
+                          getPrimaryHoverBgColor(),
+                          theme === "dark" ? "text-dseza-dark-main-bg" : "text-white"
+                        )}
+                      >
+                        Đăng nhập
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>

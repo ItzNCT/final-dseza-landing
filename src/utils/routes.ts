@@ -92,9 +92,10 @@ const URL_MAPPING = {
     // Administrative reform
     
     // Utilities section
-    'qa': 'hoi-dap',
+    'qna': 'hoi-dap',
     'frequently-asked-questions': 'cau-hoi-thuong-gap',
     'enterprise-connection': 'ket-noi-doanh-nghiep',
+    'create': 'tao-moi',
     
     // Additional common paths
     'home': 'trang-chu',

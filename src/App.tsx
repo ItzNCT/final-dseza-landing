@@ -22,6 +22,7 @@ import CreateQuestionPage from "@/pages/QnA/CreateQuestionPage";
 import QnADetailPage from "@/pages/QnA/QnADetailPage";
 import ContactPage from "@/pages/Contact/ContactPage";
 import LoginPage from "@/pages/Auth/LoginPage";
+import CallbackPage from "@/pages/Auth/CallbackPage";
 import RegisterPage from "@/pages/Auth/RegisterPage";
 import ProfilePage from "@/pages/Auth/ProfilePage";
 import DocumentListPage from "@/pages/Enterprise/DocumentListPage";
@@ -82,6 +83,8 @@ const App: React.FC = () => (
                 <BrowserRouter>
                   <MobileLayout>
                     <Routes>
+                      {/* Global callback route for OIDC */}
+                      <Route path="/auth/callback" element={<CallbackPage />} />
                       {/* Root redirect - handles URLs without language prefix */}
                       <Route path="/" element={<RootRedirect />} />
                       
@@ -192,6 +195,7 @@ const App: React.FC = () => (
                         <Route path="contact" element={<ContactPage />} />
                         
                         <Route path="dang-nhap" element={<LoginPage />} />
+                        <Route path="auth/callback" element={<CallbackPage />} />
                         <Route path="dang-ky" element={<RegisterPage />} />
                         <Route path="ho-so" element={<ProfilePage />} />
                         

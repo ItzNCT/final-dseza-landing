@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 
 // Interface định nghĩa thông tin người dùng
 export interface User {
@@ -21,6 +21,8 @@ export interface AuthContextType {
   login: (token: string, userData: User) => void;
   // Hàm đăng xuất
   logout: () => void;
+  // Đồng bộ thông tin người dùng từ backend dựa trên session cookie
+  syncUser: () => Promise<void>;
 }
 
 // Tạo AuthContext với giá trị mặc định là undefined
@@ -40,12 +42,50 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // State quản lý trạng thái loading
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // useEffect chạy khi component mount để kiểm tra token đã lưu trong localStorage
-  useEffect(() => {
-    // Cookie-based auth: rely on HttpOnly cookies set by server.
-    // On app init, simply mark loading as complete. Optionally, fetch current user from a session endpoint.
-    setIsLoading(false);
+  // API base (use full backend origin so cookies are sent to the correct domain)
+  const API_BASE: string = (
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_TARGET)
+    || 'https://dseza-backend.lndo.site'
+  );
+
+  // Hàm đồng bộ người dùng từ backend
+  const syncUser = useCallback(async () => {
+    try {
+      const url = `${API_BASE}/api/auth/me`;
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        setUser(null);
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      if (data?.authenticated) {
+        const mappedUser: User = {
+          id: String(data.uid ?? ''),
+          name: data.name ?? '',
+          email: data.mail ?? '',
+          role: Array.isArray(data.roles) && data.roles.length ? data.roles[0] : undefined,
+        };
+        setUser(mappedUser);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      setUser(null);
+      console.error('Failed to fetch user', error);
+      throw error;
+    }
   }, []);
+
+  // Tự động đồng bộ khi app tải lần đầu
+  useEffect(() => {
+    syncUser().finally(() => setIsLoading(false));
+  }, [syncUser]);
 
   // Hàm xử lý đăng nhập
   const login = (authToken: string, userData: User) => {
@@ -70,6 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     login,
     logout,
+    syncUser,
   };
 
   return (

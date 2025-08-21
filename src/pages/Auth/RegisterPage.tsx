@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '@/context/ThemeContext'
+import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
 import { useTranslation } from '@/utils/translations'
 import { useRegisterUser } from '@/api/hooks'
@@ -26,6 +27,7 @@ const RegisterPage: React.FC = () => {
   const { login } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { language } = useLanguage()
 
   // Form state management
   const [fullName, setFullName] = useState<string>('')
@@ -65,10 +67,10 @@ const RegisterPage: React.FC = () => {
         }
 
         login(registrationData.access_token, userInfo)
-        navigate('/')
+        navigate(`/${language}`)
       } else {
         // Redirect to login page if no auto-login
-        navigate('/dang-nhap', { 
+        navigate(`/${language}/dang-nhap`, { 
           state: { 
             message: 'Đăng ký thành công! Vui lòng đăng nhập.',
             email: email 
@@ -352,7 +354,7 @@ const RegisterPage: React.FC = () => {
           <p className={cn("text-sm", secondaryTextColor)}>
             {t('auth.register.hasAccount') || 'Đã có tài khoản?'}{' '}
             <Link
-              to="/dang-nhap"
+              to={`/${language}/dang-nhap`}
               className={cn("hover:underline font-medium transition-colors", linkColor)}
             >
               {t('auth.register.loginLink') || 'Đăng nhập'}

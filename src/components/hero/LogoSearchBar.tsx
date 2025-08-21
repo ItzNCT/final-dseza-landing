@@ -2,6 +2,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { Search, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button";
 
 const LogoSearchBar: React.FC = () => {
   const { theme } = useTheme();
+  const { language } = useLanguage();
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -79,7 +81,7 @@ const LogoSearchBar: React.FC = () => {
             // User is logged in - show user name, profile link, and logout button
             <>
               <Link 
-                to="/ho-so" 
+                to={`/${language}/ho-so`} 
                 className={cn(
                   "text-sm transition-colors duration-300",
                   textColor, 
@@ -106,7 +108,7 @@ const LogoSearchBar: React.FC = () => {
           ) : (
             // User is not logged in - show login link
             <Link 
-              to="/dang-nhap" 
+              to={`/${language}/dang-nhap`} 
               className={cn(
                 "transition-colors duration-300 font-medium",
                 textColor, 

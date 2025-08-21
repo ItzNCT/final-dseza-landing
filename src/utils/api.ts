@@ -26,6 +26,7 @@ export interface QuestionSubmissionData {
   noiDung: string;
   dienThoai?: string;
   congTy?: string;
+  category?: string;
 }
 
 /**

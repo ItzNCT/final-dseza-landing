@@ -154,6 +154,10 @@ const CreateQuestionPage: React.FC = () => {
       apiData.congTy = formData.address.trim(); // Using address as company field
     }
 
+    if (formData.category.trim()) {
+      apiData.category = formData.category.trim();
+    }
+
     submitQuestionMutation.mutate(apiData);
   };
 
