@@ -22,7 +22,8 @@ export interface AuthContextType {
   // Hàm đăng xuất
   logout: () => void;
   // Đồng bộ thông tin người dùng từ backend dựa trên session cookie
-  syncUser: () => Promise<void>;
+  // Trả về true nếu đã xác thực, false nếu không
+  syncUser: () => Promise<boolean>;
 }
 
 // Tạo AuthContext với giá trị mặc định là undefined
@@ -51,7 +52,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Hàm đồng bộ người dùng từ backend
   const syncUser = useCallback(async () => {
     try {
-      const url = `${API_BASE}/api/auth/me`;
+      const url = new URL('/api/auth/me', API_BASE).toString();
       const response = await fetch(url, {
         method: 'GET',
         credentials: 'include',
@@ -72,8 +73,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           role: Array.isArray(data.roles) && data.roles.length ? data.roles[0] : undefined,
         };
         setUser(mappedUser);
+        return true;
       } else {
         setUser(null);
+        return false;
       }
     } catch (error) {
       setUser(null);
@@ -84,6 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Tự động đồng bộ khi app tải lần đầu
   useEffect(() => {
+    // Bỏ qua giá trị trả về; chỉ dùng để cập nhật state và hạ cờ loading
     syncUser().finally(() => setIsLoading(false));
   }, [syncUser]);
 
@@ -96,11 +100,62 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Hàm xử lý đăng xuất
-  const logout = () => {
-    // Server should clear session cookie; frontend clears in-memory state.
-    setToken(null);
-    setUser(null);
-    console.log('User logged out successfully');
+  const logout = async () => {
+    try {
+      // Call backend to clear HttpOnly cookies and server session
+      const url = new URL('/api/auth/logout', API_BASE).toString();
+      await fetch(url, { method: 'POST', credentials: 'include' }).catch(() => {});
+    } finally {
+      // Clear in-memory auth state
+      setToken(null);
+      setUser(null);
+
+      // Best-effort: clear non-HttpOnly cookies for this origin
+      try {
+        const cookieNames = document.cookie.split(';').map(c => c.split('=')[0]?.trim()).filter(Boolean);
+        const topLevelDomain = (() => {
+          const parts = location.hostname.split('.');
+          if (parts.length >= 2) return '.' + parts.slice(-2).join('.');
+          return undefined;
+        })();
+        for (const name of cookieNames) {
+          // current host
+          document.cookie = `${name}=; Max-Age=0; path=/`;
+          // top-level domain (for shared cookies like .lndo.site or .danang.gov.vn)
+          if (topLevelDomain) {
+            document.cookie = `${name}=; Max-Age=0; path=/; domain=${topLevelDomain}`;
+          }
+        }
+      } catch {}
+
+      // Clear Web Cache Storage and Storage APIs
+      try {
+        if ('caches' in window) {
+          const names = await caches.keys();
+          await Promise.all(names.map(n => caches.delete(n)));
+        }
+      } catch {}
+      try { sessionStorage.clear(); } catch {}
+      try { localStorage.clear(); } catch {}
+
+      // Redirect after logout (default to language homepage). Can be overridden by env.
+      try {
+        const path = window.location.pathname;
+        const langFromPath = /^\/(en|vi)(\/|$)/.exec(path)?.[1] || 'vi';
+        const redirectPref = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_LOGOUT_REDIRECT) || 'root';
+
+        if (typeof redirectPref === 'string' && redirectPref.startsWith('http')) {
+          window.location.replace(redirectPref);
+        } else if (redirectPref === 'login') {
+          window.location.replace(`/${langFromPath}/auth/login`);
+        } else {
+          // 'root' or anything else -> send to language root
+          window.location.replace(`/${langFromPath}`);
+        }
+      } catch {
+        window.location.replace('/vi');
+      }
+    }
   };
 
   // Giá trị được cung cấp cho các component con thông qua context

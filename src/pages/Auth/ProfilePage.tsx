@@ -187,7 +187,7 @@ const ProfilePage: React.FC = () => {
           className={cn("flex items-center gap-2", linkColor)}
         >
           <ArrowLeft className="h-4 w-4" />
-          Về trang chủ
+          {t('profile.backToHome') || 'Back to home'}
         </Button>
       </div>
 
@@ -207,7 +207,7 @@ const ProfilePage: React.FC = () => {
           {/* User Information Section */}
           <div className="space-y-4">
             <h3 className={cn("text-lg font-semibold", textColor)}>
-              Thông tin cá nhân
+              {t('profile.personalInfo') || 'Personal information'}
             </h3>
             
             {/* Name Field */}
@@ -277,7 +277,7 @@ const ProfilePage: React.FC = () => {
           <div className="space-y-4">
             <h3 className={cn("text-lg font-semibold flex items-center gap-2", textColor)}>
               <Key className="h-5 w-5" />
-              Đổi mật khẩu
+              {t('profile.changePassword') || 'Change password'}
             </h3>
             
             <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -297,7 +297,7 @@ const ProfilePage: React.FC = () => {
                 <Input
                   id="currentPassword"
                   type="password"
-                  placeholder="Nhập mật khẩu hiện tại"
+                  placeholder={t('profile.currentPasswordPlaceholder') || 'Enter current password'}
                   value={currentPassword}
                   onChange={(e) => {
                     setCurrentPassword(e.target.value)
@@ -325,7 +325,7 @@ const ProfilePage: React.FC = () => {
                 <Input
                   id="newPassword"
                   type="password"
-                  placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
+                  placeholder={t('profile.newPasswordPlaceholder') || 'Enter new password (min 6 characters)'}
                   value={newPassword}
                   onChange={(e) => {
                     setNewPassword(e.target.value)
@@ -353,7 +353,7 @@ const ProfilePage: React.FC = () => {
                 <Input
                   id="confirmNewPassword"
                   type="password"
-                  placeholder="Nhập lại mật khẩu mới"
+                  placeholder={t('profile.confirmNewPasswordPlaceholder') || 'Re-enter new password'}
                   value={confirmNewPassword}
                   onChange={(e) => {
                     setConfirmNewPassword(e.target.value)
@@ -386,7 +386,7 @@ const ProfilePage: React.FC = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Đang cập nhật...
+                    {t('profile.updating') || 'Updating...'}
                   </>
                 ) : (
                   <>
@@ -410,7 +410,7 @@ const ProfilePage: React.FC = () => {
                 "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
               )}
             >
-              Đăng xuất
+              {t('auth.logout')}
             </Button>
           </div>
         </CardContent>
@@ -419,10 +419,10 @@ const ProfilePage: React.FC = () => {
       {/* Helper text */}
       <div className={cn("mt-4 text-xs text-center max-w-md", secondaryTextColor)}>
         <p>
-          🔒 <strong>Bảo mật:</strong> Thông tin tài khoản được bảo vệ an toàn
+          🔒 <strong>{t('profile.securityNoteTitle') || 'Security:'}</strong> {t('profile.securityNoteText') || 'Your account information is protected.'}
         </p>
         <p className="mt-1">
-          Đổi mật khẩu thường xuyên để đảm bảo an toàn tài khoản
+          {t('profile.securityTip') || 'Change your password regularly to keep your account safe.'}
         </p>
       </div>
     </div>

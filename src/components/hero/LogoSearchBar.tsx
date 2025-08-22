@@ -88,7 +88,7 @@ const LogoSearchBar: React.FC = () => {
                   hoverColor
                 )}
               >
-                Chào, <span className="font-medium">{user.name}</span>
+                {t('auth.hello')},{" "}<span className="font-medium">{user.name}</span>
               </Link>
               <Button
                 onClick={handleLogout}
@@ -102,7 +102,7 @@ const LogoSearchBar: React.FC = () => {
                 )}
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Đăng xuất
+                {t('auth.logout')}
               </Button>
             </>
           ) : (

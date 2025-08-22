@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import DOMPurify from "dompurify";
 import { Link } from "react-router-dom";
 import { 
   MapPin, 
@@ -408,7 +409,7 @@ const ContactPage: React.FC = () => {
                           {department.description && (
                             <div 
                               className={`text-sm mb-3 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}
-                              dangerouslySetInnerHTML={{ __html: department.description }} 
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(department.description) }} 
                             />
                           )}
                           
@@ -774,7 +775,7 @@ const ContactPage: React.FC = () => {
                           <AccordionContent>
                             {department.description && (
                               <div className={`mb-4 pb-4 border-b ${theme === 'dark' ? 'text-dseza-dark-secondary-text border-dseza-dark-border' : 'text-dseza-light-secondary-text border-dseza-light-border'}`}>
-                                <div dangerouslySetInnerHTML={{ __html: department.description }} />
+                                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(department.description) }} />
                               </div>
                             )}
                             

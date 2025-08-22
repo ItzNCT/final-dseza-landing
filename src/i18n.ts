@@ -177,7 +177,23 @@ const viTranslation = {
       "submitButton": "Đăng ký",
       "hasAccount": "Đã có tài khoản?",
       "loginLink": "Đăng nhập"
-    }
+    },
+    "logout": "Đăng xuất",
+    "hello": "Chào"
+  },
+  "profile": {
+    "title": "Thông tin Tài khoản",
+    "description": "Quản lý thông tin cá nhân và bảo mật tài khoản",
+    "name": "Tên người dùng",
+    "email": "Địa chỉ Email",
+    "role": "Vai trò",
+    "currentPassword": "Mật khẩu hiện tại",
+    "currentPasswordPlaceholder": "Nhập mật khẩu hiện tại",
+    "newPassword": "Mật khẩu mới",
+    "newPasswordPlaceholder": "Nhập mật khẩu mới (ít nhất 6 ký tự)",
+    "confirmNewPassword": "Xác nhận mật khẩu mới",
+    "confirmNewPasswordPlaceholder": "Nhập lại mật khẩu mới",
+    "saveChanges": "Lưu thay đổi"
   },
   "languageSwitcher": {
     "vietnamese": "Tiếng Việt",
@@ -852,7 +868,23 @@ const enTranslation = {
       "submitButton": "Register",
       "hasAccount": "Already have an account?",
       "loginLink": "Login"
-    }
+    },
+    "logout": "Logout",
+    "hello": "Hello"
+  },
+  "profile": {
+    "title": "Account Information",
+    "description": "Manage personal information and account security",
+    "name": "Username",
+    "email": "Email Address",
+    "role": "Role",
+    "currentPassword": "Current password",
+    "currentPasswordPlaceholder": "Enter current password",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "Enter new password (min 6 characters)",
+    "confirmNewPassword": "Confirm new password",
+    "confirmNewPasswordPlaceholder": "Re-enter new password",
+    "saveChanges": "Save changes"
   },
   "languageSwitcher": {
     "vietnamese": "Vietnamese",

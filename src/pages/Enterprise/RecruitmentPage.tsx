@@ -1,4 +1,5 @@
 import React from "react";
+import DOMPurify from "dompurify";
 import { Calendar, DollarSign, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useJobs } from "../../hooks/useJobs";
@@ -100,11 +101,11 @@ const RecruitmentPage: React.FC = () => {
                       </div>
 
                       {job.description && (
-                        <div className={`mt-2 text-xs ${secondaryTextClass}`} dangerouslySetInnerHTML={{ __html: job.description }} />
+                        <div className={`mt-2 text-xs ${secondaryTextClass}`} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(job.description) }} />
                       )}
 
                       {job.requirements && (
-                        <div className={`mt-2 text-xs ${secondaryTextClass}`} dangerouslySetInnerHTML={{ __html: job.requirements }} />
+                        <div className={`mt-2 text-xs ${secondaryTextClass}`} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(job.requirements) }} />
                       )}
 
                       <div className={`mt-3 p-2 rounded ${isDark ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'} ${borderClass} border`}>
@@ -260,7 +261,7 @@ const RecruitmentPage: React.FC = () => {
                             </h3>
                             <div 
                               className={`prose prose-sm max-w-none mb-6 ${secondaryTextClass}`}
-                              dangerouslySetInnerHTML={{ __html: job.description }} 
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(job.description) }} 
                             />
                           </>
                         )}
@@ -272,7 +273,7 @@ const RecruitmentPage: React.FC = () => {
                             </h3>
                             <div 
                               className={`prose prose-sm max-w-none ${secondaryTextClass}`}
-                              dangerouslySetInnerHTML={{ __html: job.requirements }} 
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(job.requirements) }} 
                             />
                           </>
                         )}

@@ -1,4 +1,5 @@
 import React from "react";
+import DOMPurify from "dompurify";
 import { Link } from "react-router-dom";
 import { 
   ChevronRight,
@@ -129,7 +130,7 @@ const FaqPage: React.FC = () => {
                             </div>
                           </AccordionTrigger>
                           <AccordionContent className={`${textColor} ml-9`}>
-                            <div className={`prose prose-sm max-w-none ${theme === 'dark' ? 'prose-invert' : ''} leading-relaxed`} dangerouslySetInnerHTML={{ __html: faq.answer }} />
+                            <div className={`prose prose-sm max-w-none ${theme === 'dark' ? 'prose-invert' : ''} leading-relaxed`} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(faq.answer) }} />
                           </AccordionContent>
                         </AccordionItem>
                       ))}
@@ -263,7 +264,7 @@ const FaqPage: React.FC = () => {
                               className={`prose prose-sm max-w-none ${
                                 theme === 'dark' ? 'prose-invert' : ''
                               } leading-relaxed`}
-                              dangerouslySetInnerHTML={{ __html: faq.answer }}
+                              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(faq.answer) }}
                             />
                           </AccordionContent>
                         </AccordionItem>

@@ -1,4 +1,5 @@
 import React from "react";
+import DOMPurify from "dompurify";
 import { Link, useParams } from "react-router-dom";
 import { 
   ChevronRight, 
@@ -196,7 +197,7 @@ const QnADetailPage: React.FC = () => {
                     <CardContent>
                       <div className={`${textColor} mb-4`}>
                         <h3 className="font-semibold mb-2">{language === 'en' ? 'Question content:' : 'Nội dung câu hỏi:'}</h3>
-                        <div className={`prose prose-sm max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`} dangerouslySetInnerHTML={{ __html: question.attributes?.field_noi_dung_cau_hoi?.processed || question.attributes?.field_noi_dung_cau_hoi?.value || 'Không có nội dung' }} />
+                        <div className={`prose prose-sm max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.attributes?.field_noi_dung_cau_hoi?.processed || question.attributes?.field_noi_dung_cau_hoi?.value || 'Không có nội dung') }} />
                       </div>
                     </CardContent>
                   </Card>
@@ -212,7 +213,7 @@ const QnADetailPage: React.FC = () => {
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <div className={`prose prose-sm max-w-none ${theme === 'dark' ? 'prose-invert' : ''} leading-relaxed ${textColor}`} dangerouslySetInnerHTML={{ __html: question.attributes.field_noi_dung_tra_loi.processed || question.attributes.field_noi_dung_tra_loi.value || question.attributes.field_noi_dung_tra_loi }} />
+                        <div className={`prose prose-sm max-w-none ${theme === 'dark' ? 'prose-invert' : ''} leading-relaxed ${textColor}`} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.attributes.field_noi_dung_tra_loi.processed || question.attributes.field_noi_dung_tra_loi.value || question.attributes.field_noi_dung_tra_loi) }} />
                       </CardContent>
                     </Card>
                   )}
@@ -350,9 +351,11 @@ const QnADetailPage: React.FC = () => {
                         theme === 'dark' ? 'prose-invert' : ''
                       } leading-relaxed`}
                       dangerouslySetInnerHTML={{ 
-                        __html: question.attributes?.field_noi_dung_cau_hoi?.processed || 
-                                question.attributes?.field_noi_dung_cau_hoi?.value || 
-                                'Không có nội dung'
+                        __html: DOMPurify.sanitize(
+                          question.attributes?.field_noi_dung_cau_hoi?.processed || 
+                          question.attributes?.field_noi_dung_cau_hoi?.value || 
+                          'Không có nội dung'
+                        )
                       }}
                     />
                   </div>
@@ -424,9 +427,11 @@ const QnADetailPage: React.FC = () => {
                         theme === 'dark' ? 'prose-invert' : ''
                       } leading-relaxed ${textColor}`}
                       dangerouslySetInnerHTML={{ 
-                        __html: question.attributes.field_noi_dung_tra_loi.processed || 
-                                question.attributes.field_noi_dung_tra_loi.value || 
-                                question.attributes.field_noi_dung_tra_loi
+                        __html: DOMPurify.sanitize(
+                          question.attributes.field_noi_dung_tra_loi.processed || 
+                          question.attributes.field_noi_dung_tra_loi.value || 
+                          question.attributes.field_noi_dung_tra_loi
+                        )
                       }}
                     />
                     

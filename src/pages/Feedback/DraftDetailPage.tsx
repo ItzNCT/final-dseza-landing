@@ -1,4 +1,5 @@
 import React from "react";
+import DOMPurify from "dompurify";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -390,7 +391,7 @@ const DraftDetailPage: React.FC = () => {
                       <Separator className="mb-6" />
                       <div 
                         className={`prose prose-lg max-w-none ${theme === 'dark' ? 'prose-invert' : ''} ${textColor}`}
-                        dangerouslySetInnerHTML={{ __html: document.content }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(document.content) }}
                       />
                     </div>
                   )}

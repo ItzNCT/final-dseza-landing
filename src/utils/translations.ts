@@ -272,6 +272,31 @@ const viTranslations: TranslationObject = {
       hasAccount: "Đã có tài khoản?",
       loginLink: "Đăng nhập",
     },
+    logout: "Đăng xuất",
+    hello: "Chào",
+  },
+
+  // Profile Page
+  profile: {
+    title: "Thông tin Tài khoản",
+    description: "Quản lý thông tin cá nhân và bảo mật tài khoản",
+    name: "Tên người dùng",
+    email: "Địa chỉ Email",
+    role: "Vai trò",
+    currentPassword: "Mật khẩu hiện tại",
+    currentPasswordPlaceholder: "Nhập mật khẩu hiện tại",
+    newPassword: "Mật khẩu mới",
+    newPasswordPlaceholder: "Nhập mật khẩu mới (ít nhất 6 ký tự)",
+    confirmNewPassword: "Xác nhận mật khẩu mới",
+    confirmNewPasswordPlaceholder: "Nhập lại mật khẩu mới",
+    saveChanges: "Lưu thay đổi",
+    personalInfo: "Thông tin cá nhân",
+    changePassword: "Đổi mật khẩu",
+    updating: "Đang cập nhật...",
+    backToHome: "Về trang chủ",
+    securityNoteTitle: "Bảo mật:",
+    securityNoteText: "Thông tin tài khoản được bảo vệ an toàn",
+    securityTip: "Đổi mật khẩu thường xuyên để đảm bảo an toàn tài khoản",
   },
 
   // Language Switcher & Theme Toggle
@@ -618,6 +643,31 @@ const enTranslations: TranslationObject = {
       hasAccount: "Already have an account?",
       loginLink: "Login",
     },
+    logout: "Logout",
+    hello: "Hello",
+  },
+
+  // Profile Page
+  profile: {
+    title: "Account Information",
+    description: "Manage personal information and account security",
+    name: "Username",
+    email: "Email Address",
+    role: "Role",
+    currentPassword: "Current password",
+    currentPasswordPlaceholder: "Enter current password",
+    newPassword: "New password",
+    newPasswordPlaceholder: "Enter new password (min 6 characters)",
+    confirmNewPassword: "Confirm new password",
+    confirmNewPasswordPlaceholder: "Re-enter new password",
+    saveChanges: "Save changes",
+    personalInfo: "Personal information",
+    changePassword: "Change password",
+    updating: "Updating...",
+    backToHome: "Back to home",
+    securityNoteTitle: "Security:",
+    securityNoteText: "Your account information is protected.",
+    securityTip: "Change your password regularly to keep your account safe.",
   },
 
   // Language Switcher & Theme Toggle

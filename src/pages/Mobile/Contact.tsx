@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import DOMPurify from "dompurify";
 import { 
   MapPin, 
   Phone, 
@@ -375,7 +376,7 @@ const ContactMobilePage: React.FC = () => {
                         {department.description && (
                           <div 
                             className={`text-sm mb-3 ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}
-                            dangerouslySetInnerHTML={{ __html: department.description }} 
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(department.description) }} 
                           />
                         )}
                         

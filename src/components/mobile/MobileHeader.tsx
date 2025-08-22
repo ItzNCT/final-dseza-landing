@@ -14,7 +14,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate } from "@/utils/translations";
+import { formatDate, useTranslation } from "@/utils/translations";
 import { useMultilingualMenu } from '@/api/hooks';
 import type { MenuLinkWithSubtree } from '@/api/hooks';
 import { extractPathWithoutLanguage, createLanguageUrl, useLanguageRoutes } from '@/utils/routes';
@@ -128,6 +128,7 @@ const MobileHeader: React.FC = () => {
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   
   // Navigation handler
   const handleNavigation = (url: string) => {
@@ -443,7 +444,7 @@ const MobileHeader: React.FC = () => {
                     {user ? (
                       <div className="flex items-center justify-between">
                         <span className={cn("font-inter text-sm", getTextColor())}>
-                          Chào, <span className="font-medium">{user.name}</span>
+                          {t('auth.hello')}, <span className="font-medium">{user.name}</span>
                         </span>
                         <Button
                           onClick={() => {
@@ -457,7 +458,7 @@ const MobileHeader: React.FC = () => {
                             theme === "dark" ? "text-dseza-dark-main-bg" : "text-white"
                           )}
                         >
-                          Đăng xuất
+                          {t('auth.logout')}
                         </Button>
                       </div>
                     ) : (

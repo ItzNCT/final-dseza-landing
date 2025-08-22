@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import DOMPurify from "dompurify";
 import { Link } from "react-router-dom";
 import { Search, Calendar, Clock, MapPin, Users, ChevronRight, FileText } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
@@ -518,7 +519,7 @@ const WorkSchedulePage: React.FC = () => {
                             {item.content && (
                               <div 
                                 className={`text-sm leading-relaxed mb-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
-                                dangerouslySetInnerHTML={{ __html: item.content }}
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.content) }}
                               />
                             )}
 
@@ -773,7 +774,7 @@ const WorkSchedulePage: React.FC = () => {
                             {item.content ? (
                               <div 
                                 className={`font-medium leading-relaxed ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
-                                dangerouslySetInnerHTML={{ __html: item.content }}
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.content) }}
                               />
                             ) : (
                               <span></span>
