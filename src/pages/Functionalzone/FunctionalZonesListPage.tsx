@@ -54,18 +54,18 @@ const FunctionalZonesListPage: React.FC = () => {
                   to="/"
                   className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                 >
-                  Trang chủ
+                  {t('common.home') || 'Trang chủ'}
                 </Link>
                 <ChevronRight className="h-2.5 w-2.5" />
                 <Link
                   to="/gioi-thieu"
                   className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                 >
-                  Giới thiệu
+                  {t('nav.intro') || 'Giới thiệu'}
                 </Link>
                 <ChevronRight className="h-2.5 w-2.5" />
                 <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                  Các Khu chức năng
+                  {t('functionalZones.listTitle') || 'Các Khu chức năng'}
                 </span>
               </nav>
             </div>
@@ -74,10 +74,10 @@ const FunctionalZonesListPage: React.FC = () => {
               {/* Article Header - Mobile optimized */}
               <header className="space-y-3">
                 <h1 className={`font-montserrat text-xl font-bold leading-tight ${textColor}`}>
-                  Các Khu chức năng
+                  {t('functionalZones.listTitle') || 'Các Khu chức năng'}
                 </h1>
                 <p className={`text-sm ${secondaryTextColor}`}>
-                  Khám phá các khu công nghệ cao, khu công nghiệp và khu chức năng đặc biệt tại Đà Nẵng
+                  {t('functionalZones.listSubtitle') || 'Khám phá các khu công nghệ cao, khu công nghiệp và khu chức năng đặc biệt tại Đà Nẵng'}
                 </p>
               </header>
 
@@ -244,22 +244,22 @@ const FunctionalZonesListPage: React.FC = () => {
                             <div className="flex flex-wrap gap-1 mt-2">
                               {zone.occupancyRate >= 90 && (
                                 <Badge variant="default" className="bg-red-500 hover:bg-red-600 text-white text-xs px-1.5 py-0.5">
-                                  Gần đầy
+                                  {t('functionalZones.badges.nearFull') || 'Gần đầy'}
                                 </Badge>
                               )}
                               {zone.occupancyRate >= 70 && zone.occupancyRate < 90 && (
                                 <Badge variant="default" className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-1.5 py-0.5">
-                                  Tỉ lệ cao
+                                  {t('functionalZones.badges.highRate') || 'Tỉ lệ cao'}
                                 </Badge>
                               )}
                               {zone.occupancyRate >= 40 && zone.occupancyRate < 70 && (
                                 <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-1.5 py-0.5">
-                                  Trung bình
+                                  {t('functionalZones.badges.medium') || 'Trung bình'}
                                 </Badge>
                               )}
                               {zone.occupancyRate < 40 && zone.occupancyRate > 0 && (
                                 <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white text-xs px-1.5 py-0.5">
-                                  Còn trống
+                                  {t('functionalZones.badges.available') || 'Còn trống'}
                                 </Badge>
                               )}
                               {zone.enterprises >= 50 && (
@@ -267,7 +267,7 @@ const FunctionalZonesListPage: React.FC = () => {
                                   "border-current text-xs px-1.5 py-0.5",
                                   theme === "dark" ? "text-dseza-dark-secondary-accent border-dseza-dark-secondary-accent" : "text-dseza-light-secondary-accent border-dseza-light-secondary-accent"
                                 )}>
-                                  Quy mô lớn
+                                  {t('functionalZones.badges.largeScale') || 'Quy mô lớn'}
                                 </Badge>
                               )}
                             </div>
@@ -313,18 +313,18 @@ const FunctionalZonesListPage: React.FC = () => {
                 to="/" 
                 className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {t('common.home') || 'Trang chủ'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
                 to="/gioi-thieu" 
                 className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Giới thiệu
+                {t('nav.intro') || 'Giới thiệu'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${textColor}`}>
-                Các Khu chức năng
+                {t('functionalZones.listTitle') || 'Các Khu chức năng'}
               </span>
             </nav>
           </div>
@@ -336,10 +336,10 @@ const FunctionalZonesListPage: React.FC = () => {
             {/* Article Header */}
             <header className="mb-8">
               <h1 className={`text-3xl md:text-4xl font-bold mb-4 leading-tight ${textColor}`}>
-                Các Khu chức năng
+                {t('functionalZones.listTitle') || 'Các Khu chức năng'}
               </h1>
               <p className={`text-lg ${secondaryTextColor}`}>
-                Khám phá các khu công nghệ cao, khu công nghiệp và khu chức năng đặc biệt tại Đà Nẵng
+                {t('functionalZones.listSubtitle') || 'Khám phá các khu công nghệ cao, khu công nghiệp và khu chức năng đặc biệt tại Đà Nẵng'}
               </p>
             </header>
 
@@ -481,7 +481,7 @@ const FunctionalZonesListPage: React.FC = () => {
                                   </div>
                                   <div>
                                     <div className={cn("text-sm", secondaryTextColor)}>
-                                      Doanh nghiệp
+                                      {t('functionalZones.enterprises') || 'Doanh nghiệp'}
                                     </div>
                                     <div className={cn("text-lg font-semibold", textColor)}>
                                       {zone.enterprises}
@@ -503,7 +503,7 @@ const FunctionalZonesListPage: React.FC = () => {
                                   </div>
                                   <div>
                                     <div className={cn("text-sm", secondaryTextColor)}>
-                                      Diện tích
+                                      {t('functionalZones.area') || 'Diện tích'}
                                     </div>
                                     <div className={cn("text-lg font-semibold", textColor)}>
                                       {zone.area}
@@ -525,7 +525,7 @@ const FunctionalZonesListPage: React.FC = () => {
                                   </div>
                                   <div>
                                     <div className={cn("text-sm", secondaryTextColor)}>
-                                      Tỉ lệ lấp đầy
+                                      {t('functionalZones.occupancyRate') || 'Tỉ lệ lấp đầy'}
                                     </div>
                                     <div className={cn("text-lg font-semibold", textColor)}>
                                       {zone.occupancyRate}%
@@ -539,22 +539,22 @@ const FunctionalZonesListPage: React.FC = () => {
                             <div className="flex flex-wrap gap-2">
                               {zone.occupancyRate >= 90 && (
                                 <Badge variant="default" className="bg-red-500 hover:bg-red-600 text-white">
-                                  Gần đầy
+                                  {t('functionalZones.badges.nearFull') || 'Gần đầy'}
                                 </Badge>
                               )}
                               {zone.occupancyRate >= 70 && zone.occupancyRate < 90 && (
                                 <Badge variant="default" className="bg-orange-500 hover:bg-orange-600 text-white">
-                                  Tỉ lệ cao
+                                  {t('functionalZones.badges.highRate') || 'Tỉ lệ cao'}
                                 </Badge>
                               )}
                               {zone.occupancyRate >= 40 && zone.occupancyRate < 70 && (
                                 <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600 text-white">
-                                  Trung bình
+                                  {t('functionalZones.badges.medium') || 'Trung bình'}
                                 </Badge>
                               )}
                               {zone.occupancyRate < 40 && zone.occupancyRate > 0 && (
                                 <Badge variant="default" className="bg-green-500 hover:bg-green-600 text-white">
-                                  Còn trống
+                                  {t('functionalZones.badges.available') || 'Còn trống'}
                                 </Badge>
                               )}
                               {zone.enterprises >= 50 && (
@@ -562,7 +562,7 @@ const FunctionalZonesListPage: React.FC = () => {
                                   "border-current",
                                   theme === "dark" ? "text-dseza-dark-secondary-accent border-dseza-dark-secondary-accent" : "text-dseza-light-secondary-accent border-dseza-light-secondary-accent"
                                 )}>
-                                  Quy mô lớn
+                                  {t('functionalZones.badges.largeScale') || 'Quy mô lớn'}
                                 </Badge>
                               )}
                             </div>

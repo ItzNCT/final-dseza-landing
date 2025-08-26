@@ -78,9 +78,18 @@ const viTranslation = {
     "enterprises": "Doanh nghiệp",
     "occupancyRate": "Tỉ lệ lấp đầy",
     "area": "Diện tích",
-    "dataSource": "Dữ liệu được cập nhật từ hệ thống",
+    "dataSource": "Dữ liệu được cập nhật từ hệ thống DSEZA",
     "noDataTitle": "Chưa có dữ liệu",
-    "noZones": "Chưa có thông tin về các khu chức năng."
+    "noZones": "Chưa có thông tin về các khu chức năng.",
+    "listTitle": "Các Khu chức năng",
+    "listSubtitle": "Khám phá các khu công nghệ cao, khu công nghiệp và khu chức năng đặc biệt tại Đà Nẵng",
+    "badges": {
+      "nearFull": "Gần đầy",
+      "highRate": "Tỉ lệ cao",
+      "medium": "Trung bình",
+      "available": "Còn trống",
+      "largeScale": "Quy mô lớn"
+    }
   },
   "quickAccess": {
     "onlinePublicService": "Dịch vụ công trực tuyến",
@@ -769,9 +778,18 @@ const enTranslation = {
     "enterprises": "Enterprises",
     "occupancyRate": "Occupancy Rate",
     "area": "Area",
-    "dataSource": "Data updated from the system",
+    "dataSource": "Data updated from the DSEZA system",
     "noDataTitle": "No data available",
-    "noZones": "No information about functional zones available."
+    "noZones": "No information about functional zones available.",
+    "listTitle": "Functional Zones",
+    "listSubtitle": "Explore high-tech parks, industrial zones, and special functional areas in Da Nang",
+    "badges": {
+      "nearFull": "Nearly full",
+      "highRate": "High rate",
+      "medium": "Medium",
+      "available": "Available",
+      "largeScale": "Large scale"
+    }
   },
   "quickAccess": {
     "onlinePublicService": "Online Public Services",
