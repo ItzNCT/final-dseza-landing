@@ -62,7 +62,7 @@ const MobileFunctionalZonesCarousel: React.FC = () => {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const { t } = useTranslation();
-  const { data: functionalZonesData, isLoading, isError, error } = useFunctionalZones();
+  const { data: functionalZonesData, isLoading, isError, error } = useFunctionalZones(language);
 
   // Fallback zones data if API fails - using local images
   const fallbackZonesData: ZoneData[] = [

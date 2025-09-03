@@ -1089,7 +1089,7 @@ async function fetchDocuments({ queryKey }: { queryKey: readonly unknown[] }): P
 
     const url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/legal_document?${queryParams.toString()}`;
     
-    const response = await fetch(url, {
+    let response = await fetch(url, {
       method: 'GET',
       headers: {
         ...jsonApiHeaders,
@@ -1097,14 +1097,32 @@ async function fetchDocuments({ queryKey }: { queryKey: readonly unknown[] }): P
         'Content-Language': language,
       },
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    
+    // If English returns empty or error, fallback to Vietnamese data to avoid empty UI
+    let data;
+    if (response.ok) {
+      data = await response.json();
     }
 
-    const data = await response.json();
-    
+    const noResults = !response.ok || !data?.data || (Array.isArray(data.data) && data.data.length === 0);
+    if (language === 'en' && noResults) {
+      const viUrl = `${JSON_API_BASE_URL}/vi/jsonapi/node/legal_document?${queryParams.toString()}`;
+      const viResponse = await fetch(viUrl, {
+        method: 'GET',
+        headers: {
+          ...jsonApiHeaders,
+          'Accept-Language': 'vi',
+          'Content-Language': 'vi',
+        },
+      });
+      if (viResponse.ok) {
+        data = await viResponse.json();
+      } else if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+    }
+
     return data;
   } catch (error) {
     throw new Error(`Failed to fetch documents: ${error instanceof Error ? error.message : 'Unknown error'}`);

@@ -21,16 +21,19 @@ export interface FunctionalZone {
   occupancy: number;
 }
 
-// Hàm fetch dữ liệu từ JSON:API
-const fetchFunctionalZones = async (): Promise<FunctionalZone[]> => {
-  const endpoint = `${JSON_API_BASE_URL}/jsonapi/node/functional_zone`
+// Hàm fetch dữ liệu từ JSON:API theo ngôn ngữ
+const fetchFunctionalZones = async (language: 'vi' | 'en' = 'vi'): Promise<FunctionalZone[]> => {
+  const languagePrefix = language === 'en' ? '/en' : '/vi';
+  const endpoint = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/functional_zone`
     + '?include=field_image_large.field_media_image,field_image_thumbnail.field_media_image'
     + '&filter[status]=1'; // Only published content
-  
+
   const response = await fetch(endpoint, {
     headers: {
       'Accept': 'application/vnd.api+json',
       'Content-Type': 'application/vnd.api+json',
+      'Accept-Language': language,
+      'Content-Language': language,
     },
   });
   
@@ -39,7 +42,7 @@ const fetchFunctionalZones = async (): Promise<FunctionalZone[]> => {
   }
   
   const data = await response.json();
-  console.log('🏭 Functional zones data:', data);
+  console.log('🏭 Functional zones data:', { language, data });
   
   // Xử lý dữ liệu và map theo yêu cầu
   return data.data?.map((item: any) => {
@@ -78,10 +81,10 @@ const fetchFunctionalZones = async (): Promise<FunctionalZone[]> => {
 };
 
 // Custom hook sử dụng useQuery
-export const useFunctionalZones = () => {
+export const useFunctionalZones = (language: 'vi' | 'en' = 'vi') => {
   return useQuery({
-    queryKey: ['functional-zones'],
-    queryFn: fetchFunctionalZones,
+    queryKey: ['functional-zones', language],
+    queryFn: () => fetchFunctionalZones(language),
     staleTime: 5 * 60 * 1000, // 5 phút
     gcTime: 10 * 60 * 1000, // 10 phút (garbage collection time)
   });

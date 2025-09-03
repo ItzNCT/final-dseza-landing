@@ -230,7 +230,7 @@ const App: React.FC = () => (
                         {/* Vietnamese Functional Zone Specific Routes */}
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghe-cao-da-nang" element={<KhuCongNgheCaoDaNang />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-thuong-mai-tu-do-da-nang" element={<KhuThuongMaiTuDoDaNang />} />
-                        <Route path="gioi-thieu/cac-khu-chuc-nang/khu-tap-trung-cong-nghe-thong-tin" element={<KhuCNTTTapTrung />} />
+                        <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cntt-tap-trung" element={<KhuCNTTTapTrung />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-khanh" element={<KhuCongNghiepHoaKhanh />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-hoa-khanh-mo-rong" element={<KhuCongNghiepHoaKhanhMoRong />} />
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghiep-da-nang" element={<KhuCongNghiepDaNang />} />

@@ -534,20 +534,7 @@ const DocumentViewerPage: React.FC = () => {
                 {language === 'en' ? 'Home' : 'Trang chủ'}
               </Link>
               <ChevronRight className="h-4 w-4" />
-              <Link 
-                to={breadcrumbLinks.business} 
-                className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
-              >
-                {breadcrumbLinks.businessLabel}
-              </Link>
-              <ChevronRight className="h-4 w-4" />
-              <Link 
-                to={breadcrumbLinks.documents} 
-                className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
-              >
-                {breadcrumbLinks.documentsLabel}
-              </Link>
-              <ChevronRight className="h-4 w-4" />
+              
               <span className={`font-medium ${textClass}`}>
                 {documentData.title}
               </span>

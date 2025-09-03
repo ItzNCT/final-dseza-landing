@@ -32,7 +32,7 @@ const FunctionalZonesListPage: React.FC = () => {
   const isMobile = useIsMobile();
   const { language } = useLanguage();
   const { t } = useTranslation();
-  const { data: functionalZones, isLoading, isError, error } = useFunctionalZones();
+  const { data: functionalZones, isLoading, isError, error } = useFunctionalZones(language);
 
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
   const secondaryTextColor = theme === "dark" ? "text-dseza-dark-secondary-text" : "text-dseza-light-secondary-text";
@@ -55,13 +55,6 @@ const FunctionalZonesListPage: React.FC = () => {
                   className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                 >
                   {t('common.home') || 'Trang chủ'}
-                </Link>
-                <ChevronRight className="h-2.5 w-2.5" />
-                <Link
-                  to="/gioi-thieu"
-                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
-                >
-                  {t('nav.intro') || 'Giới thiệu'}
                 </Link>
                 <ChevronRight className="h-2.5 w-2.5" />
                 <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
@@ -314,13 +307,6 @@ const FunctionalZonesListPage: React.FC = () => {
                 className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
                 {t('common.home') || 'Trang chủ'}
-              </Link>
-              <ChevronRight className="h-4 w-4" />
-              <Link 
-                to="/gioi-thieu" 
-                className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
-              >
-                {t('nav.intro') || 'Giới thiệu'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${textColor}`}>

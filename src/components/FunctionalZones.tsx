@@ -82,7 +82,7 @@ const FunctionalZones: React.FC = () => {
   const [selectedZone, setSelectedZone] = useState<number>(1);
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { data: functionalZonesData, isLoading, isError, error } = useFunctionalZones();
+  const { data: functionalZonesData, isLoading, isError, error } = useFunctionalZones(language);
   
   // Theme-specific styles
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";

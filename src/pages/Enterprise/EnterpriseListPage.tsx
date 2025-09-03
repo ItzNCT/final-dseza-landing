@@ -714,36 +714,7 @@ const EnterpriseListPage: React.FC = () => {
                 {language === 'en' ? 'Home' : 'Trang chủ'}
               </Link>
               <ChevronRight className="h-4 w-4" />
-              <Link 
-                to={language === 'en' 
-                  ? (window.location.pathname.includes('/enterprises/') ? "/enterprises" : "/business") 
-                  : "/doanh-nghiep"} 
-                className={`transition-colors hover:underline ${
-                  theme === 'dark' 
-                    ? 'hover:text-dseza-dark-primary' 
-                    : 'hover:text-dseza-light-primary'
-                }`}
-              >
-                {language === 'en' 
-                  ? (window.location.pathname.includes('/enterprises/') ? 'Enterprises' : 'Business')
-                  : 'Doanh nghiệp'}
-              </Link>
-              <ChevronRight className="h-4 w-4" />
-              <Link 
-                to={language === 'en' 
-                  ? (window.location.pathname.includes('/enterprises/') 
-                      ? "/enterprises/enterprise-information" 
-                      : "/business/enterprise-information") 
-                  : "/doanh-nghiep/thong-tin-doanh-nghiep"} 
-                className={`transition-colors hover:underline ${
-                  theme === 'dark' 
-                    ? 'hover:text-dseza-dark-primary' 
-                    : 'hover:text-dseza-light-primary'
-                }`}
-              >
-                {language === 'en' ? 'Enterprise Information' : 'Thông tin doanh nghiệp'}
-              </Link>
-              <ChevronRight className="h-4 w-4" />
+              
               <span className={`font-medium ${
                 theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'
               }`}>

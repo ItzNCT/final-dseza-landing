@@ -381,20 +381,7 @@ const DocumentListPage: React.FC = () => {
                             : "Hãy thử tải lại trang hoặc liên hệ với quản trị viên.")
                     }
                   </p>
-                  {!isError && documents && documents.length === 0 && (
-                    <div className="mt-6">
-                      <Link
-                        to={breadcrumbLinks.documents}
-                        className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          isDark 
-                            ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary hover:bg-dseza-dark-primary/30' 
-                            : 'bg-dseza-light-primary/20 text-dseza-light-primary hover:bg-dseza-light-primary/30'
-                        }`}
-                      >
-                        ← {language === 'en' ? 'View other categories' : 'Xem các danh mục khác'}
-                      </Link>
-                    </div>
-                  )}
+                  {/* Removed: View other categories link */}
                 </div>
               </TableCell>
             </TableRow>
@@ -419,13 +406,7 @@ const DocumentListPage: React.FC = () => {
                   {language === 'en' ? 'Home' : 'Trang chủ'}
                 </Link>
                 <ChevronRight className="h-2.5 w-2.5" />
-                <Link 
-                  to={breadcrumbLinks.enterprise}
-                  className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
-                >
-                  {breadcrumbLinks.enterpriseLabel || (language === 'en' ? 'Business' : 'Doanh nghiệp')}
-                </Link>
-                <ChevronRight className="h-2.5 w-2.5" />
+                
                 <span className={`font-medium ${textClass}`}>
                   {formatTitle(categoryParam, language)}
                 </span>
@@ -517,20 +498,7 @@ const DocumentListPage: React.FC = () => {
                 {language === 'en' ? 'Home' : 'Trang chủ'}
               </Link>
               <ChevronRight className="h-4 w-4" />
-              <Link 
-                to={breadcrumbLinks.enterprise} 
-                className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
-              >
-                {breadcrumbLinks.enterpriseLabel}
-              </Link>
-              <ChevronRight className="h-4 w-4" />
-              <Link 
-                to={breadcrumbLinks.documents} 
-                className={`transition-colors hover:underline ${isDark ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
-              >
-                {breadcrumbLinks.documentsLabel}
-              </Link>
-              <ChevronRight className="h-4 w-4" />
+              
               <span className={`font-medium ${textClass}`}>
                 {formatTitle(categoryParam, language)}
               </span>
@@ -655,20 +623,7 @@ const DocumentListPage: React.FC = () => {
                             : "Hãy thử tải lại trang hoặc liên hệ với quản trị viên.")
                     }
                   </p>
-                  {!isError && documents && documents.length === 0 && (
-                    <div className="mt-6">
-                      <Link
-                        to={breadcrumbLinks.documents}
-                        className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          isDark 
-                            ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary hover:bg-dseza-dark-primary/30' 
-                            : 'bg-dseza-light-primary/20 text-dseza-light-primary hover:bg-dseza-light-primary/30'
-                        }`}
-                      >
-                        ← {language === 'en' ? 'View other categories' : 'Xem các danh mục khác'}
-                      </Link>
-                    </div>
-                  )}
+                  {/* Removed: View other categories link */}
                 </div>
               </div>
             </div>
@@ -692,19 +647,7 @@ const DocumentListPage: React.FC = () => {
             </div>
           )}
 
-          {/* Back to Enterprise Button */}
-          <div className="mt-16 text-center">
-            <Link 
-              to={breadcrumbLinks.documents}
-              className={`inline-flex items-center px-6 py-3 rounded-lg border-2 font-medium transition-all duration-300 hover:-translate-y-1 ${
-                isDark 
-                  ? 'border-dseza-dark-primary text-dseza-dark-primary hover:bg-dseza-dark-primary hover:text-dseza-dark-main-text' 
-                  : 'border-dseza-light-primary text-dseza-light-primary hover:bg-dseza-light-primary hover:text-white'
-              }`}
-            >
-              ← {language === 'en' ? `Back to ${breadcrumbLinks.documentsLabel}` : `Quay lại ${breadcrumbLinks.documentsLabel}`}
-            </Link>
-          </div>
+          {/* Removed: Back to documents button */}
         </div>
       </main>
 

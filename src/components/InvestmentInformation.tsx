@@ -29,11 +29,11 @@ const InvestmentInformation: React.FC = () => {
   const investmentEnvironmentCategory = language === 'en' ? 'Investment Environment' : 'Môi trường đầu tư';
 
   const forInvestorsData = investmentCards?.filter(card => 
-    card.category === 'Dành cho nhà đầu tư'
+    card.category === forInvestorsCategory
   ) || [];
   
   const investmentEnvironmentData = investmentCards?.filter(card => 
-    card.category === 'Môi trường đầu tư'
+    card.category === investmentEnvironmentCategory
   ) || [];
   
   const currentCards = activeTab === "investors" ? forInvestorsData : investmentEnvironmentData;

@@ -90,9 +90,8 @@ const DocumentSearchPage: React.FC = () => {
   const getCategoryMapping = React.useCallback((slug?: string) => {
     if (!slug) return { termName: '', displayLabel: language === 'en' ? 'Legal Document Lookup' : 'Tra cứu văn bản' };
 
-    // Vietnamese slugs from DocumentSideNav
+    // Vietnamese slugs from DocumentSideNav → Vietnamese taxonomy term names (backend terms)
     const viSlugToName: Record<string, string> = {
-      // Current VI slugs per utils/routes.ts
       'van-ban-phap-quy-trung-uong': 'Văn bản pháp quy trung ương',
       'van-ban-phap-quy-dia-phuong': 'Văn bản pháp quy địa phương',
       'van-ban-chi-dao-dieu-hanh': 'Văn bản chỉ đạo điều hành',
@@ -108,17 +107,24 @@ const DocumentSearchPage: React.FC = () => {
     };
 
     // English slugs from DocumentSideNav
-    const enSlugToName: Record<string, string> = {
+    const enSlugToDisplay: Record<string, string> = {
       'central-legal-regulations': 'Central Legal Regulations',
       'local-legal-regulations': 'Local Legal Regulations',
       'directive-management-documents': 'Directive and Management Documents',
       'administrative-reform-documents': 'Administrative Reform Documents',
     };
 
+    // When UI is English, we still need to filter using Vietnamese taxonomy names on backend
+    const enSlugToViName: Record<string, string> = {
+      'central-legal-regulations': 'Văn bản pháp quy trung ương',
+      'local-legal-regulations': 'Văn bản pháp quy địa phương',
+      'directive-management-documents': 'Văn bản chỉ đạo điều hành',
+      'administrative-reform-documents': 'Văn bản CCHC',
+    };
+
     const isEnglish = language === 'en';
-    const map = isEnglish ? enSlugToName : viSlugToName;
-    const termName = map[slug] || '';
-    const displayLabel = termName || (isEnglish ? 'Legal Document Lookup' : 'Tra cứu văn bản');
+    const termName = isEnglish ? (enSlugToViName[slug] || '') : (viSlugToName[slug] || '');
+    const displayLabel = isEnglish ? (enSlugToDisplay[slug] || 'Legal Document Lookup') : (viSlugToName[slug] || 'Tra cứu văn bản');
     return { termName, displayLabel };
   }, [language]);
 
@@ -648,7 +654,7 @@ const DocumentSearchPage: React.FC = () => {
         }`}>
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="documentNumber" className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>Số/Ký hiệu</Label>
+              <Label htmlFor="documentNumber" className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>{t('Số/Ký hiệu','Document No.')}</Label>
               <Input id="documentNumber" placeholder={t('Nhập số/ký hiệu văn bản','Enter document number')} value={filters.documentNumber || ""} onChange={(e) => handleInputChange("documentNumber", e.target.value)} className={`${theme === 'dark' ? 'bg-dseza-dark-secondary border-dseza-dark-border text-dseza-dark-main-text placeholder:text-dseza-dark-secondary-text' : 'bg-dseza-light-main-bg border-dseza-light-border text-dseza-light-main-text placeholder:text-dseza-light-secondary-text'}`} />
             </div>
             <div className="space-y-2">
@@ -668,7 +674,13 @@ const DocumentSearchPage: React.FC = () => {
         <div className="space-y-4">
           {/* Count */}
           <div className={`${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'} text-sm`}>
-            {isLoading ? <Skeleton className="h-4 w-48" /> : `Hiển thị ${startResult}-${endResult} của ${totalResults} kết quả`}
+            {isLoading ? (
+              <Skeleton className="h-4 w-48" />
+            ) : (
+              language === 'en'
+                ? `Showing ${startResult}-${endResult} of ${totalResults} results`
+                : `Hiển thị ${startResult}-${endResult} của ${totalResults} kết quả`
+            )}
           </div>
 
           {/* Data */}
@@ -700,7 +712,9 @@ const DocumentSearchPage: React.FC = () => {
             </div>
           ) : (
             <div className={`rounded-lg ${theme === 'dark' ? 'bg-dseza-dark-secondary' : 'bg-dseza-light-secondary'} border ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'} p-8 text-center`}>
-              <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>Không tìm thấy kết quả</p>
+              <p className={`text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                {language === 'en' ? 'No results found' : 'Không tìm thấy kết quả'}
+              </p>
             </div>
           )}
 
@@ -747,7 +761,7 @@ const DocumentSearchPage: React.FC = () => {
                 htmlFor="documentNumber"
                 className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}
               >
-                Số/Ký hiệu
+                {t('Số/Ký hiệu','Document No.')}
               </Label>
               <Input
                 id="documentNumber"
@@ -811,7 +825,9 @@ const DocumentSearchPage: React.FC = () => {
               {isLoading ? (
                 <Skeleton className="h-4 w-48" />
               ) : (
-                `Hiển thị ${startResult}-${endResult} của ${totalResults} kết quả`
+                language === 'en'
+                  ? `Showing ${startResult}-${endResult} of ${totalResults} results`
+                  : `Hiển thị ${startResult}-${endResult} của ${totalResults} kết quả`
               )}
             </div>
           </div>
@@ -938,8 +954,8 @@ const DocumentSearchPage: React.FC = () => {
                         <div className={`${
                           theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                         }`}>
-                          <p className="text-lg font-semibold mb-2">Không tìm thấy kết quả</p>
-                          <p className="text-sm">Vui lòng thử lại với từ khóa khác</p>
+                          <p className="text-lg font-semibold mb-2">{language === 'en' ? 'No results found' : 'Không tìm thấy kết quả'}</p>
+                          <p className="text-sm">{language === 'en' ? 'Please try different keywords' : 'Vui lòng thử lại với từ khóa khác'}</p>
                         </div>
                       </TableCell>
                     </TableRow>

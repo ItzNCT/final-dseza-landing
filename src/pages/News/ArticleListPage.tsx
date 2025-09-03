@@ -37,7 +37,16 @@ const formatTitle = (slug: string, categoriesData?: any[], language: 'vi' | 'en'
       vi: 'Hoạt động Ban quản lý',
       en: 'Management Board Activities'
     },
+    // Tin tức khác (ensure both vi/en slugs map correctly)
+    'tin-tuc-khac': {
+      vi: 'Tin khác',
+      en: 'Other News'
+    },
     'tin-khac': {
+      vi: 'Tin khác',
+      en: 'Other News'
+    },
+    'other-news': {
       vi: 'Tin khác',
       en: 'Other News'
     },
@@ -56,6 +65,15 @@ const formatTitle = (slug: string, categoriesData?: any[], language: 'vi' | 'en'
     'thong-bao': {
       vi: 'Thông báo',
       en: 'Announcements'
+    },
+    // Press Information
+    'thong-tin-bao-chi': {
+      vi: 'Thông tin báo chí',
+      en: 'Press Information'
+    },
+    'press-information': {
+      vi: 'Thông tin báo chí',
+      en: 'Press Information'
     },
     'hoat-dong': {
       vi: 'Hoạt động',
@@ -665,7 +683,7 @@ const ArticleListPage = () => {
                 to="/" 
                 className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {language === 'en' ? 'Home' : 'Trang chủ'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               
@@ -677,11 +695,11 @@ const ArticleListPage = () => {
                     to={`/${translatePath('news', language)}/${translatePath('event', language)}`}
                     className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                   >
-                    Tin tức & Sự kiện
+                    {language === 'en' ? 'News & Events' : 'Tin tức & Sự kiện'}
                   </Link>
                   <ChevronRight className="h-4 w-4" />
                   <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                    {formatTitle(subcategory, categoriesData)}
+                    {formatTitle(subcategory, categoriesData, language)}
                   </span>
                 </>
               ) : (
@@ -691,7 +709,7 @@ const ArticleListPage = () => {
                     to={"#"}
                     className="hidden"
                   >
-                    Tin tức
+                    {language === 'en' ? 'News' : 'Tin tức'}
                   </Link>
                   {category && (
                     <>
@@ -699,7 +717,7 @@ const ArticleListPage = () => {
                         to={`/${translatePath('news', language)}/${category}`} 
                         className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
                       >
-                        {formatTitle(category, categoriesData)}
+                        {formatTitle(category, categoriesData, language)}
                       </Link>
                     </>
                   )}
@@ -707,7 +725,7 @@ const ArticleListPage = () => {
                     <>
                       <ChevronRight className="h-4 w-4" />
                       <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                        {formatTitle(subcategory, categoriesData)}
+                        {formatTitle(subcategory, categoriesData, language)}
                       </span>
                     </>
                   )}
