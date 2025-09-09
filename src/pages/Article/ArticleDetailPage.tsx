@@ -27,6 +27,7 @@ import MobileLayout from "@/components/mobile/MobileLayout";
 import CommentSection from "@/components/comments/CommentSection";
 import { useTranslation } from "react-i18next";
 import { useLanguageRoutes } from "@/utils/routes";
+import { getApiBaseUrl } from "@/utils/api";
 
 /**
  * Secure DOMPurify configuration for XSS protection
@@ -102,6 +103,34 @@ const sanitizeHTML = (html: string | null | undefined): string => {
   return typeof sanitized === 'string' ? sanitized : '';
 };
 
+// Track article view to backend stats service via POST with JSON body
+const trackArticleView = async (nodeId: number, uuid?: string) => {
+  try {
+    // Prefer DRUPAL base URL; fallback to API target helper
+    const apiUrlBase = import.meta.env.VITE_DRUPAL_BASE_URL || getApiBaseUrl() || '';
+    const nid = Number.parseInt(String(nodeId), 10);
+    const url = `${apiUrlBase}/api/stats/track-view`;
+    console.log('[TrackView] POST', { url, nid, uuid });
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ nid, id: nid, uuid }),
+    });
+    console.log('[TrackView] Response status:', res.status);
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      console.warn('[TrackView] Non-OK response:', res.status, txt);
+    } else {
+      console.log(`View tracked for node ID: ${nid}`);
+    }
+  } catch (error) {
+    console.warn('Failed to track view:', error);
+  }
+};
+
 /**
  * Helper functions and smart fetch hook migrated from ArticleRouter
  */
@@ -144,10 +173,12 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
 
     const findArticle = async () => {
       try {
+        console.log(`[Smart Fetch] Bắt đầu tìm kiếm với identifier: "${identifier}" | language: ${language}`);
         setFetchState(prev => ({ ...prev, isLoading: true, isError: false }));
 
         // Strategy 1: Direct UUID fetch
         if (isDirectUuid(identifier)) {
+          console.log('[Smart Fetch] Thử chiến lược 1: Direct UUID');
           try {
             const response = await fetch(`${import.meta.env.VITE_DRUPAL_JSON_API_BASE_URL || 'https://dseza-backend.lndo.site'}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${identifier}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`, {
               headers: {
@@ -159,6 +190,7 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
             });
 
             if (response.ok && !isCancelled) {
+              console.log('%c[Smart Fetch] Chiến lược 1 THÀNH CÔNG', 'color: green');
               const data = await response.json();
               setFetchState({
                 data: { data: data.data, included: data.included },
@@ -169,14 +201,16 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
               });
               return;
             }
+            console.warn(`[Smart Fetch] Chiến lược 1 THẤT BẠI - Status: ${response.status}`);
           } catch (error) {
-            // continue to next strategy
+            console.warn('[Smart Fetch] Chiến lược 1 gặp lỗi:', error);
           }
         }
 
         // Strategy 2: Extract UUID from complex identifier
         const potentialUuid = extractUuidFromIdentifier(identifier);
         if (potentialUuid && potentialUuid !== identifier) {
+          console.log('[Smart Fetch] Thử chiến lược 2: Embedded UUID');
           try {
             const response = await fetch(`${import.meta.env.VITE_DRUPAL_JSON_API_BASE_URL || 'https://dseza-backend.lndo.site'}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${potentialUuid}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`, {
               headers: {
@@ -188,6 +222,7 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
             });
 
             if (response.ok && !isCancelled) {
+              console.log('%c[Smart Fetch] Chiến lược 2 THÀNH CÔNG', 'color: green');
               const data = await response.json();
               const canonicalUrl = getArticleUrl(language, data.data);
               setFetchState({
@@ -200,13 +235,16 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
               });
               return;
             }
+            console.warn(`[Smart Fetch] Chiến lược 2 THẤT BẠI - Status: ${response.status}`);
           } catch (error) {
-            // continue to next strategy
+            console.warn('[Smart Fetch] Chiến lược 2 gặp lỗi:', error);
           }
         }
 
         // Strategy 3: Smart matching
+        console.log('[Smart Fetch] Thử chiến lược 3: Smart Matching');
         const allArticles = await fetchAllArticlesDebugInfo(language);
+        console.log(`[Smart Fetch] Tổng số bài viết lấy được: ${Array.isArray(allArticles) ? allArticles.length : 0}`);
         if (isCancelled) return;
 
         let matchedArticle: any = null;
@@ -214,21 +252,26 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
         // 3A: hash
         const hash = extractHashFromIdentifier(identifier);
         if (hash) {
+          console.log('[Smart Fetch] Thử khớp theo hash trong path/uuid/title');
           matchedArticle = allArticles.find(article => 
             article.pathAlias?.includes(hash) ||
             article.uuid?.includes(hash) ||
             article.title?.toLowerCase().includes(hash.toLowerCase())
           );
+          if (matchedArticle) console.log('[Smart Fetch] Khớp theo hash thành công:', matchedArticle.uuid);
         }
 
         // 3B: path alias
         if (!matchedArticle) {
+          console.log('[Smart Fetch] Thử khớp theo path alias đầy đủ');
           const pathAlias = identifier.startsWith('/') ? identifier : `/${identifier}`;
           matchedArticle = allArticles.find(article => article.pathAlias === pathAlias);
+          if (matchedArticle) console.log('[Smart Fetch] Khớp theo path alias thành công:', matchedArticle.uuid);
         }
 
         // 3C: title similarity
         if (!matchedArticle) {
+          console.log('[Smart Fetch] Thử khớp theo tiêu đề gần đúng');
           const searchTerms = identifier.toLowerCase()
             .replace(/[^a-z0-9\s-]/g, '')
             .split('-')
@@ -237,11 +280,15 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
             const title = article.title?.toLowerCase() || '';
             return searchTerms.some(term => title.includes(term));
           });
+          if (matchedArticle) console.log('[Smart Fetch] Khớp theo tiêu đề thành công:', matchedArticle.uuid);
         }
 
         if (matchedArticle) {
+          console.log(`[Smart Fetch] Đã tìm thấy bài viết khớp: ${matchedArticle.uuid}. Đang fetch...`);
           try {
-            const response = await fetch(`${import.meta.env.VITE_DRUPAL_JSON_API_BASE_URL || 'https://dseza-backend.lndo.site'}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${matchedArticle.uuid}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`, {
+            const finalApiUrl = `${import.meta.env.VITE_DRUPAL_JSON_API_BASE_URL || 'https://dseza-backend.lndo.site'}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${matchedArticle.uuid}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`;
+            console.log("[Smart Fetch] URL cuối cùng sẽ gọi là:", finalApiUrl);
+            const response = await fetch(finalApiUrl, {
               headers: {
                 'Accept': 'application/vnd.api+json',
                 'Content-Type': 'application/vnd.api+json',
@@ -251,6 +298,7 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
             });
 
             if (response.ok && !isCancelled) {
+              console.log('%c[Smart Fetch] Chiến lược 3 THÀNH CÔNG', 'color: green');
               const data = await response.json();
               const canonicalUrl = getArticleUrl(language, data.data);
               setFetchState({
@@ -263,13 +311,15 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
               });
               return;
             }
+            console.warn(`[Smart Fetch] Chiến lược 3 THẤT BẠI - Status: ${response.status}`);
           } catch (error) {
-            // fallthrough
+            console.warn('[Smart Fetch] Chiến lược 3 gặp lỗi:', error);
           }
         }
 
         // Failed
         if (!isCancelled) {
+          console.error('[Smart Fetch] TẤT CẢ chiến lược đều thất bại.');
           setFetchState({
             data: null,
             isLoading: false,
@@ -280,6 +330,7 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
         }
       } catch (error) {
         if (!isCancelled) {
+          console.error('[Smart Fetch] Gặp lỗi nghiêm trọng:', error);
           setFetchState({
             data: null,
             isLoading: false,
@@ -327,30 +378,12 @@ const ArticleDetailPage: React.FC = () => {
   const { data, isLoading, isError, error, strategy, redirectUrl } = useSmartArticleRouterFetch(identifier || '', effectiveLang);
   
   // Get node ID from article data for view count
+  console.log("Full data object from API:", data);
   const nodeId = data?.data?.attributes?.drupal_internal__nid?.toString() || '';
   const { viewCount, isLoading: viewCountLoading } = useArticleViewCount(nodeId);
 
-  // Client-side soft increment: add +1 per article per TTL to displayed count
-  const [extraView, setExtraView] = React.useState(0);
-  React.useEffect(() => {
-    if (!nodeId) return;
-    try {
-      const key = `dseza:view:${nodeId}`;
-      const now = Date.now();
-      const ttlMs = 30 * 60 * 1000; // 30 minutes TTL
-      const raw = localStorage.getItem(key);
-      const last = raw ? parseInt(raw, 10) : 0;
-      if (!last || Number.isNaN(last) || now - last > ttlMs) {
-        localStorage.setItem(key, String(now));
-        setExtraView(1);
-      } else {
-        setExtraView(0);
-      }
-    } catch (_) {
-      setExtraView(0);
-    }
-  }, [nodeId]);
-  const computedViewCount = Math.max(0, (viewCount || 0) + (extraView || 0));
+  // Display the server-reported view count directly (no TTL client increment)
+  const computedViewCount = Math.max(0, viewCount || 0);
 
 
 
@@ -480,23 +513,61 @@ const ArticleDetailPage: React.FC = () => {
     };
   }, [theme]);
 
+  // Track view without TTL gating
+  React.useEffect(() => {
+    // === DEBUGGING START ===
+    console.log("useEffect for tracking view triggered.");
+    console.log("Is Loading:", isLoading);
+    console.log("Node ID:", nodeId);
+    // === DEBUGGING END ===
 
-
-  // Canonical redirect handling
-  if (!isLoading && !isError && data?.data) {
-    if (redirectUrl) {
-      const currentPath = window.location.pathname;
-      if (currentPath !== redirectUrl) {
-        return <Navigate replace to={redirectUrl} />;
+    if (nodeId && !isLoading) {
+      console.log("%cCondition MET. Calling trackArticleView...", "color: green; font-weight: bold;");
+      const nidNum = parseInt(nodeId, 10);
+      if (!Number.isNaN(nidNum)) {
+        const uuid = data?.data?.id as string | undefined;
+        trackArticleView(nidNum, uuid);
+      } else {
+        console.warn("nodeId is not a valid number, skip tracking:", nodeId);
       }
     } else {
-      const canonicalUrl = getArticleUrl(effectiveLang, data.data);
+      console.log("%cCondition NOT MET. Not tracking view.", "color: red;");
+    }
+  }, [nodeId, isLoading]);
+
+  // Dev helper: expose manual trigger to test track-view from console
+  React.useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).trackViewTest = (nid: number | string) => {
+      const parsed = typeof nid === 'string' ? parseInt(nid, 10) : nid;
+      if (!Number.isNaN(parsed)) {
+        console.log('[TrackView][Manual] Triggering for nid:', parsed);
+        return trackArticleView(parsed);
+      }
+      console.warn('[TrackView][Manual] Invalid nid:', nid);
+      return Promise.resolve();
+    };
+    return () => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        delete (window as any).trackViewTest;
+      } catch (_) {}
+    };
+  }, []);
+
+
+
+  // Canonical redirect handling moved to effect so tracking can run first
+  React.useEffect(() => {
+    if (!isLoading && !isError && data?.data) {
       const currentPath = window.location.pathname;
-      if (currentPath !== canonicalUrl) {
-        return <Navigate replace to={canonicalUrl} />;
+      const targetPath = redirectUrl || getArticleUrl(effectiveLang, data.data);
+      if (targetPath && currentPath !== targetPath) {
+        navigate(targetPath, { replace: true });
       }
     }
-  }
+  }, [isLoading, isError, data, redirectUrl, effectiveLang, navigate]);
 
   const handleShare = (platform: string) => {
     const url = window.location.href;

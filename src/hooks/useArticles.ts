@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { extractImageUrl, useDrupalApi } from "@/utils/drupal";
+import { getEventChildCategoryIds } from "./useAllNews";
 import { extractFirstImageFromRichText } from "@/utils/richTextProcessor";
 import { useAllNewsCategories } from "./useNewsCategories";
 import { useLanguage } from "@/context/LanguageContext";
@@ -14,6 +15,7 @@ export interface Article {
   path: string;
   published_date: string;
   categories: string[];
+  categoryIds?: string[];
   is_featured?: boolean;
 }
 
@@ -42,79 +44,128 @@ export const useArticles = () => {
       include: 'field_anh_dai_dien.field_media_image,field_chuyen_muc' // Include images và categories
     };
 
-    // Nếu targetCategory là 'su-kien', 'events', hoặc 'tin-tuc' thì lấy tất cả tin tức (không filter)
-    const showAllNews = targetCategory === 'su-kien' || targetCategory === 'tin-tuc' || targetCategory === 'events';
+    // Nếu targetCategory là 'su-kien' hoặc 'events' thì filter theo các chuyên mục con của taxonomy "Sự kiện"
+    const isEventsRoot = targetCategory === 'su-kien' || targetCategory === 'events';
 
-    // URL mapping để convert từ URL slug sang category name thực tế
-    const urlToCategoryMap: { [key: string]: string } = {
-      'dau-tu-hop-tac-quoc-te': 'Đầu tư – Hợp tác quốc tế',
-      'dao-tao-uom-tao-khoi-nghiep': 'Đào tạo, Ươm tạo khởi nghiệp',
-      'chuyen-doi-so': 'Chuyển đổi số',
-      'hoat-dong-ban-quan-ly': 'Hoạt động Ban quản lý',
-      'tin-khac': 'Tin khác',
-      'tin-tuc-khac': 'Tin khác',
-      'other-news': 'Tin khác',
-      'doanh-nghiep': 'Doanh nghiệp',
-      'thong-bao': 'Thông báo',
-      'thong-tin-bao-chi': 'Thông tin báo chí',
-      'press-information': 'Thông tin báo chí',
-      'hoat-dong': 'Hoạt động',
-      'su-kien': 'Tin tức & Sự kiện',
-      'events': 'Tin tức & Sự kiện',
-      'tin-tuc': 'Tin tức',
+    // URL mapping để convert từ URL slug sang category name thực tế (đa ngôn ngữ cho các mục quan trọng)
+    const urlToCategoryMap: { [key: string]: string | { vi: string; en: string } } = {
+      'dau-tu-hop-tac-quoc-te': { vi: 'Đầu tư – Hợp tác quốc tế', en: 'Investment – International Cooperation' },
+      // English slug for the above category
+      'investment-international-cooperation': { vi: 'Đầu tư – Hợp tác quốc tế', en: 'Investment – International Cooperation' },
+      'dao-tao-uom-tao-khoi-nghiep': { vi: 'Đào tạo, Ươm tạo khởi nghiệp', en: 'Training, Startup Incubation' },
+      'chuyen-doi-so': { vi: 'Chuyển đổi số', en: 'Digital Transformation' },
+      'hoat-dong-ban-quan-ly': { vi: 'Hoạt động Ban quản lý', en: 'Management Board Activities' },
+      // Tin khác / Other News (nguyên nhân lỗi): cần map theo ngôn ngữ hiện tại
+      'tin-khac': { vi: 'Tin khác', en: 'Other News' },
+      'tin-tuc-khac': { vi: 'Tin khác', en: 'Other News' },
+      'other-news': { vi: 'Tin khác', en: 'Other News' },
+      'doanh-nghiep': { vi: 'Doanh nghiệp', en: 'Enterprises' },
+      'thong-bao': { vi: 'Thông báo', en: 'Announcements' },
+      'thong-tin-bao-chi': { vi: 'Thông tin báo chí', en: 'Press Information' },
+      'press-information': { vi: 'Thông tin báo chí', en: 'Press Information' },
+      'hoat-dong': { vi: 'Hoạt động', en: 'Activities' },
+      'su-kien': { vi: 'Tin tức & Sự kiện', en: 'News & Events' },
+      'events': { vi: 'Tin tức & Sự kiện', en: 'News & Events' },
+      'tin-tuc': { vi: 'Tin tức', en: 'News' },
       // Investment-related categories
-      'quy-trinh-linh-vuc-dau-tu': 'Quy trình lĩnh vực đầu tư',
-      'linh-vuc-khuyen-khich-dau-tu': 'Lĩnh vực thu hút đầu tư',
-      'linh-vuc-thu-hut-dau-tu': 'Lĩnh vực thu hút đầu tư', // Alternative slug
-      'danh-cho-nha-dau-tu': 'Dành cho nhà đầu tư', // Parent category
+      'quy-trinh-linh-vuc-dau-tu': { vi: 'Quy trình lĩnh vực đầu tư', en: 'Investment Sector Procedures' },
+      'linh-vuc-khuyen-khich-dau-tu': { vi: 'Lĩnh vực thu hút đầu tư', en: 'Investment Incentive Sectors' },
+      'linh-vuc-thu-hut-dau-tu': { vi: 'Lĩnh vực thu hút đầu tư', en: 'Investment Incentive Sectors' }, // Alternative slug
+      'danh-cho-nha-dau-tu': { vi: 'Dành cho nhà đầu tư', en: 'For Investors' }, // Parent category
       
       // Investment environment subcategories
-      'moi-truong-dau-tu': 'Môi trường đầu tư', // Parent category
-      'ha-tang-giao-thong': 'Hạ tầng giao thông',
-      'khoa-hoc-cong-nghe-moi-truong': 'Khoa học công nghệ - Môi trường',
-      'logistics': 'Logistics',
-      'ha-tang-xa-hoi': 'Hạ tầng xã hội',
-      'nguon-nhan-luc': 'Nguồn nhân lực',
-      'cai-cach-hanh-chinh': 'Cải cách hành chính',
-      // English slugs for Investment Environment categories mapping to Vietnamese category names
-      'transportation-infrastructure': 'Hạ tầng giao thông',
-      'science-technology-environment': 'Khoa học công nghệ - Môi trường',
-      'social-infrastructure': 'Hạ tầng xã hội',
-      'human-resources': 'Nguồn nhân lực',
-      'industrial-park-infrastructure': 'Hạ tầng khu công nghiệp',
+      'moi-truong-dau-tu': { vi: 'Môi trường đầu tư', en: 'Investment Environment' }, // Parent category
+      'ha-tang-giao-thong': { vi: 'Hạ tầng giao thông', en: 'Transportation Infrastructure' },
+      'khoa-hoc-cong-nghe-moi-truong': { vi: 'Khoa học công nghệ - Môi trường', en: 'Science Technology - Environment' },
+      'logistics': { vi: 'Logistics', en: 'Logistics' },
+      'ha-tang-xa-hoi': { vi: 'Hạ tầng xã hội', en: 'Social Infrastructure' },
+      'nguon-nhan-luc': { vi: 'Nguồn nhân lực', en: 'Human Resources' },
+      'cai-cach-hanh-chinh': { vi: 'Cải cách hành chính', en: 'Administrative Reform' },
+      // English slugs for Investment Environment categories mapping
+      'transportation-infrastructure': { vi: 'Hạ tầng giao thông', en: 'Transportation Infrastructure' },
+      'science-technology-environment': { vi: 'Khoa học công nghệ - Môi trường', en: 'Science Technology - Environment' },
+      'social-infrastructure': { vi: 'Hạ tầng xã hội', en: 'Social Infrastructure' },
+      'human-resources': { vi: 'Nguồn nhân lực', en: 'Human Resources' },
+      'industrial-park-infrastructure': { vi: 'Hạ tầng khu công nghiệp', en: 'Industrial Park Infrastructure' },
       // English slugs for Investor-related categories
-      'investment-sector-procedures': 'Quy trình lĩnh vực đầu tư',
-      'investment-incentive-sectors': 'Lĩnh vực thu hút đầu tư',
-      'administrative-reform': 'Cải cách hành chính',
+      'investment-sector-procedures': { vi: 'Quy trình lĩnh vực đầu tư', en: 'Investment Sector Procedures' },
+      'investment-incentive-sectors': { vi: 'Lĩnh vực thu hút đầu tư', en: 'Investment Incentive Sectors' },
+      'administrative-reform': { vi: 'Cải cách hành chính', en: 'Administrative Reform' },
     };
 
-    // Lấy category name từ mapping, hoặc nếu không có trong map thì tìm trong categoriesData
-    let categoryNameToFilter = urlToCategoryMap[targetCategory];
+    // Lấy category name từ mapping (ưu tiên map đa ngôn ngữ), hoặc nếu không có trong map thì tìm trong categoriesData
+    let categoryNameToFilter: string | undefined;
+    let targetCategoryId: string | undefined;
     
-    // Nếu không tìm thấy trong hardcode map, thử tìm trong real categories data
-    if (!categoryNameToFilter && categoriesData) {
-      const foundCategory = categoriesData.find(cat => 
-        cat.name.toLowerCase().includes(targetCategory.replace(/-/g, ' ').toLowerCase()) ||
-        targetCategory.replace(/-/g, ' ').toLowerCase().includes(cat.name.toLowerCase())
-      );
+    const normalize = (text: string): string => {
+      return (text || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[–—]/g, '-')
+        .replace(/\s+/g, ' ');
+    };
+    const slugify = (text: string): string => {
+      return normalize(text)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-');
+    };
+    const mapped = urlToCategoryMap[targetCategory];
+    if (typeof mapped === 'string') {
+      categoryNameToFilter = mapped;
+    } else if (mapped && typeof mapped === 'object') {
+      categoryNameToFilter = mapped[language];
+    }
+    
+    // Nếu không tìm thấy trong hardcode map, thử tìm trong real categories data bằng so khớp CHÍNH XÁC (không dùng contains)
+    if (categoriesData) {
+      const normalizedSlug = targetCategory.toLowerCase();
+      // Tìm theo tên tiếng VI/EN tương đương hoặc theo slug của tên
+      const foundCategory = categoriesData.find(cat => {
+        const viName = normalize(cat.name || '');
+        const enName = normalize(cat.nameEn || '');
+        return (
+          (categoryNameToFilter && (normalize(categoryNameToFilter) === viName || normalize(categoryNameToFilter) === enName)) ||
+          slugify(cat.name || '') === normalizedSlug ||
+          slugify(cat.nameEn || '') === normalizedSlug
+        );
+      });
       if (foundCategory) {
-        categoryNameToFilter = foundCategory.name;
+        // Lưu cả tên (đúng ngôn ngữ hiện tại) và ID của taxonomy để lọc chính xác
+        categoryNameToFilter = language === 'en' && foundCategory.nameEn ? foundCategory.nameEn : foundCategory.name;
+        targetCategoryId = foundCategory.id;
       }
     }
 
-    if (!showAllNews && categoryNameToFilter) {
-      // Debug: Log category filtering info
-      console.log(`🔍 Filtering articles for category: "${categoryNameToFilter}" (from slug: "${targetCategory}")`);
-      // Add category filter to API options
-      apiOptions.filter['field_chuyen_muc.name'] = categoryNameToFilter;
-    } else if (!showAllNews) {
-      console.log(`⚠️ No category name found for filtering. Target category: "${targetCategory}"`);
+    if (!isEventsRoot) {
+      if (targetCategoryId) {
+        // Ưu tiên filter theo ID nếu có để chính xác với taxonomy
+        console.log(`🔍 Filtering by taxonomy ID: ${targetCategoryId} (slug: "${targetCategory}")`);
+        apiOptions.filter['field_chuyen_muc.id'] = targetCategoryId;
+      } else if (categoryNameToFilter) {
+        // Fallback theo tên (chính xác) nếu chưa tìm được ID
+        console.log(`🔍 Filtering articles for category (by name): "${categoryNameToFilter}" (from slug: "${targetCategory}")`);
+        apiOptions.filter['field_chuyen_muc.name'] = categoryNameToFilter;
+      } else {
+        console.log(`⚠️ No category mapping found for filtering. Target category: "${targetCategory}"`);
+      }
     }
 
     try {
       console.log(`📡 API call for category "${targetCategory}" with options:`, apiOptions);
-      console.log(`🔍 showAllNews: ${showAllNews}, categoryNameToFilter: "${categoryNameToFilter}"`);
+      console.log(`🔍 isEventsRoot: ${isEventsRoot}, categoryNameToFilter: "${categoryNameToFilter}"`);
       
+      // Nếu là trang gốc "Tin tức & Sự kiện", filter theo danh sách term con của "Sự kiện" bằng ID để chính xác
+      if (isEventsRoot) {
+        const childIds = await getEventChildCategoryIds(language);
+        if (childIds.length > 0) {
+          // JSON:API không hỗ trợ filter IN theo mảng trực tiếp qua client helper này,
+          // nên ta không set filter server-side ở đây mà sẽ lọc client-side phía dưới.
+          console.log('🎯 Using client-side filter for event child categories:', childIds);
+        }
+      }
+
       const data = await apiGet('/jsonapi/node/bai-viet', apiOptions);
       console.log(`📊 API returned ${data.data?.length || 0} articles for category "${targetCategory}"`);
       console.log(`📋 Raw API response:`, data);
@@ -123,6 +174,7 @@ export const useArticles = () => {
       let articles = data.data?.map((item: any) => {
         // Lấy categories từ relationships
         let categories: string[] = [];
+        let categoryIds: string[] = [];
         if (item.relationships?.field_chuyen_muc?.data?.length > 0 && data.included) {
           item.relationships.field_chuyen_muc.data.forEach((categoryRelation: any) => {
             const categoryItem = data.included.find((inc: any) => 
@@ -130,6 +182,7 @@ export const useArticles = () => {
             );
             if (categoryItem) {
               categories.push(categoryItem.attributes.name);
+              categoryIds.push(categoryRelation.id);
             }
           });
         }
@@ -155,74 +208,47 @@ export const useArticles = () => {
           path: articlePath,
           published_date: item.attributes.created,
           categories: categories,
+          categoryIds: categoryIds,
           is_featured: item.attributes?.field_su_kien_tieu_bieu || false,
         };
       }) || [];
       
             // Client-side filtering fallback nếu server-side filtering không hoạt động
-      if (!showAllNews && articles.length > 0) {
-        // Helper function to normalize text for comparison
-        const normalizeText = (text: string): string => {
-          return text.toLowerCase()
-                     .trim()
-                     .replace(/\s+/g, ' ') // normalize spaces
-                     .replace(/[–—-]/g, '-') // normalize dashes
-                     .replace(/[^\w\s-]/g, ''); // remove special chars except word chars, spaces, and dashes
-        };
-
-        // If we have a specific category name to filter by
-        if (categoryNameToFilter) {
-          const originalCount = articles.length;
-          
-          // Filter articles that contain the target category name in their categories array
-          articles = articles.filter(article => {
-            const hasMatchingCategory = article.categories.some(category => {
-              const normalizedArticleCategory = normalizeText(category);
-              const normalizedTargetCategory = normalizeText(categoryNameToFilter);
-              
-              // Multiple matching strategies
-              return (
-                // Exact match
-                normalizedArticleCategory === normalizedTargetCategory ||
-                // Contains match (both directions)
-                normalizedArticleCategory.includes(normalizedTargetCategory) ||
-                normalizedTargetCategory.includes(normalizedArticleCategory) ||
-                // Word boundary match
-                normalizedArticleCategory.split(' ').some(word => 
-                  normalizedTargetCategory.split(' ').includes(word) && word.length > 2
-                )
-              );
-            });
-            
-            return hasMatchingCategory;
-          });
-          
-          console.log(`🎯 Client-side filtered: ${originalCount} → ${articles.length} articles for "${categoryNameToFilter}"`);
-          
-          // Debug: Log first few articles and their categories
-          if (articles.length > 0) {
-            console.log(`✅ Sample filtered articles:`, articles.slice(0, 3).map(a => ({
-              title: a.title,
-              categories: a.categories
-            })));
-          } else {
-            console.log(`❌ No articles found for category "${categoryNameToFilter}"`);
+      if (!isEventsRoot && articles.length > 0) {
+        if (targetCategoryId) {
+          const before = articles.length;
+          articles = articles.filter(article => Array.isArray(article.categoryIds) && article.categoryIds.includes(targetCategoryId!));
+          console.log(`✅ Client-side ID filter: ${before} → ${articles.length} (categoryId=${targetCategoryId})`);
+        } else if (categoryNameToFilter) {
+          const before = articles.length;
+          // Tạo tập tên cho cả VI và EN để so khớp chính xác
+          const allowedNames = new Set<string>();
+          allowedNames.add(normalize(categoryNameToFilter));
+          if (categoriesData) {
+            const found = categoriesData.find(cat => normalize(cat.name) === normalize(categoryNameToFilter) || normalize(cat.nameEn || '') === normalize(categoryNameToFilter));
+            if (found) {
+              if (found.name) allowedNames.add(normalize(found.name));
+              if (found.nameEn) allowedNames.add(normalize(found.nameEn));
+            }
           }
-        } else if (targetCategory && targetCategory !== 'su-kien' && targetCategory !== 'tin-tuc') {
-          // Fallback: filter by URL slug if no category name mapping found
-          const originalCount = articles.length;
-          const targetSlugWords = targetCategory.replace(/-/g, ' ').toLowerCase().split(' ');
-          
-          articles = articles.filter(article => {
-            return article.categories.some(category => {
-              const categoryWords = category.toLowerCase().split(' ');
-              return targetSlugWords.some(slugWord => 
-                categoryWords.some(catWord => catWord.includes(slugWord) && slugWord.length > 2)
-              );
-            });
-          });
-          
-          console.log(`🔄 Slug-based filtered: ${originalCount} → ${articles.length} articles for "${targetCategory}"`);
+          articles = articles.filter(article => article.categories.some(cat => allowedNames.has(normalize(cat))));
+          console.log(`✅ Client-side name filter: ${before} → ${articles.length} for "${categoryNameToFilter}"`);
+        }
+      }
+
+      // Nếu là trang gốc "Tin tức & Sự kiện", lọc client-side theo các category con của "Sự kiện"
+      if (isEventsRoot && articles.length > 0) {
+        try {
+          const childIds = await getEventChildCategoryIds(language);
+          if (childIds.length > 0) {
+            const before = articles.length;
+            articles = articles.filter(article => 
+              Array.isArray(article.categoryIds) && article.categoryIds.some(id => childIds.includes(id))
+            );
+            console.log(`✅ Filtered Events root by child IDs: ${before} → ${articles.length}`);
+          }
+        } catch (e) {
+          console.warn('⚠️ Could not load event child categories for filtering:', e);
         }
       }
        

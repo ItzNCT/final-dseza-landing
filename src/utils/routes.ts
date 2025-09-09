@@ -236,6 +236,33 @@ export const useLanguageRoutes = () => {
 };
 
 /**
+ * Normalize an internal URL so that it always uses the desired language prefix.
+ * - External URLs are returned unchanged
+ * - Existing "/vi/" or "/en/" prefixes are replaced with the target language
+ * - Paths without a language prefix are prefixed with the target language
+ */
+export const normalizeUrlForLanguage = (url: string, lang?: "vi" | "en"): string => {
+  // External URL: return as-is
+  if (/^(https?:)?\/\//.test(url)) return url;
+
+  // Determine target language
+  const targetLang = lang || (typeof window !== 'undefined' ? (localStorage.getItem('i18nextLng') as "vi" | "en") || 'vi' : 'vi');
+
+  // Ensure leading slash
+  const withLeadingSlash = url.startsWith('/') ? url : '/' + url;
+
+  // Replace existing language prefix
+  if (withLeadingSlash.startsWith('/vi/') || withLeadingSlash.startsWith('/en/')) {
+    // Slice off the 3 characters of "/vi" or "/en"; keeps following slash
+    return `/${targetLang}${withLeadingSlash.slice(3)}`;
+  }
+
+  // Add language prefix if missing
+  const withoutLeadingSlash = withLeadingSlash.slice(1);
+  return `/${targetLang}/${withoutLeadingSlash}`;
+};
+
+/**
  * Extract the path without language prefix from current URL
  * @param fullPath - Full pathname (e.g., "/vi/tin-tuc/category")
  * @returns Path without language prefix (e.g., "/tin-tuc/category")

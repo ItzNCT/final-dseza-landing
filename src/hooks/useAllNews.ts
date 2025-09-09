@@ -26,7 +26,7 @@ export interface NewsItem {
 /**
  * Get all event child category IDs (categories that have "Sự kiện" as parent)
  */
-async function getEventChildCategoryIds(language: 'vi' | 'en' = 'vi'): Promise<string[]> {
+export async function getEventChildCategoryIds(language: 'vi' | 'en' = 'vi'): Promise<string[]> {
   const languagePrefix = language === 'en' ? '/en' : '/vi';
   const categoriesUrl = `${DRUPAL_BASE_URL}${languagePrefix}/jsonapi/taxonomy_term/news_category?include=parent&sort=weight`;
   

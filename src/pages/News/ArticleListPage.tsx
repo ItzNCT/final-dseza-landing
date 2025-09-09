@@ -25,6 +25,11 @@ const formatTitle = (slug: string, categoriesData?: any[], language: 'vi' | 'en'
       vi: 'Đầu tư – Hợp tác quốc tế',
       en: 'Investment – International Cooperation'
     },
+    // English slug counterparts
+    'investment-international-cooperation': {
+      vi: 'Đầu tư – Hợp tác quốc tế',
+      en: 'Investment – International Cooperation'
+    },
     'dao-tao-uom-tao-khoi-nghiep': {
       vi: 'Đào tạo, Ươm tạo khởi nghiệp',
       en: 'Training, Startup Incubation'
@@ -86,11 +91,11 @@ const formatTitle = (slug: string, categoriesData?: any[], language: 'vi' | 'en'
     // Add missing investment-related categories
     'quy-trinh-linh-vuc-dau-tu': {
       vi: 'Quy trình lĩnh vực đầu tư',
-      en: 'Investment Process'
+      en: 'Investment Sector Procedures'
     },
     'linh-vuc-khuyen-khich-dau-tu': {
       vi: 'Lĩnh vực thu hút đầu tư',
-      en: 'Investment Attraction Fields'
+      en: 'Investment Incentive Sectors'
     },
     'linh-vuc-thu-hut-dau-tu': {
       vi: 'Lĩnh vực thu hút đầu tư',
@@ -640,16 +645,7 @@ const ArticleListPage = () => {
                   <p className="text-sm mb-4">
                     Hiện tại chưa có bài viết nào trong "{pageTitle}".
                   </p>
-                  <Link 
-                    to={`/${translatePath('news', language)}`}
-                    className={`inline-flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                      theme === 'dark' 
-                        ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary/80' 
-                        : 'bg-dseza-light-primary text-white hover:bg-dseza-light-primary/80'
-                    }`}
-                  >
-                    {language === 'en' ? 'View all news' : 'Xem tất cả tin tức'}
-                  </Link>
+                  {/* Removed action button per request */}
                 </div>
               </div>
             )}
@@ -933,17 +929,7 @@ const ArticleListPage = () => {
                     : `Hiện tại chưa có bài viết nào trong chuyên mục "${pageTitle}".`
                   }
                 </p>
-                <Link 
-                  to={`/${translatePath('news', language)}`}
-                  className={`inline-flex items-center px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-                    theme === 'dark' 
-                      ? 'bg-dseza-dark-primary text-dseza-dark-main-text hover:bg-dseza-dark-primary-hover' 
-                      : 'bg-dseza-light-primary text-white hover:bg-dseza-light-primary-hover'
-                  }`}
-                >
-                  <ArrowRight className="h-5 w-5 mr-2" />
-                  {language === 'en' ? 'View all news' : 'Xem tất cả tin tức'}
-                </Link>
+                {/* Removed action button per request */}
               </div>
             </div>
           )}

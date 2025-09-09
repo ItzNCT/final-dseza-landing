@@ -98,35 +98,36 @@ const MegaMenu = ({ config }: MegaMenuProps) => {
                           { "cursor-pointer": !!content.items },
                           { "bg-dseza-light-hover/40 dark:bg-dseza-dark-hover/40": isDropdownOpen }
                         )}
-                        onClick={() => content.items && toggleDropdown(dropdownId)}
+                        onClick={() => {
+                          if (content.items) {
+                            toggleDropdown(dropdownId);
+                          } else if (content.url) {
+                            handleNavigation(content.url);
+                          }
+                        }}
                       >
-                        <button
-                          onClick={() => {
-                            if (content.url) {
-                              handleNavigation(content.url);
-                            }
-                          }}
+                        <div
                           className={cn(
                             "flex items-center gap-3 flex-grow text-left",
                             "transition-colors duration-200",
-                            "hover:text-dseza-light-primary dark:hover:text-dseza-dark-primary",
-                            { "cursor-pointer": !content.items }
+                            "hover:text-dseza-light-primary dark:hover:text-dseza-dark-primary"
                           )}
-                          disabled={!!content.items}
                         >
                           {content.iconName && iconMap[content.iconName] && (
-                            <span className={cn(
-                              "text-dseza-light-primary dark:text-dseza-dark-primary",
-                              "transition-all duration-200",
-                              "group-hover:scale-110"
-                            )}>
+                            <span
+                              className={cn(
+                                "text-dseza-light-primary dark:text-dseza-dark-primary",
+                                "transition-all duration-200",
+                                "group-hover:scale-110"
+                              )}
+                            >
                               {React.createElement(iconMap[content.iconName], { size: 20 })}
                             </span>
                           )}
                           <span className="font-medium">
                             {getLocalizedTitle(content.title, content.titleEn)}
                           </span>
-                        </button>
+                        </div>
                         {content.items && (
                           <button
                             aria-expanded={isDropdownOpen}

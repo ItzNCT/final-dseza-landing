@@ -1,5 +1,5 @@
 // src/components/BusinessesAndPartners.tsx
-import React, { useMemo } from "react";
+import React from "react";
 import { useTheme } from "@/context/ThemeContext";
 import { cn } from "@/lib/utils";
 import { usePartners } from "@/hooks/usePartners";
@@ -10,7 +10,7 @@ import { useTranslation } from "@/utils/translations";
 const PartnerLogoSkeleton = () => {
   return (
     <div className="flex-shrink-0 mx-8">
-      <Skeleton className="h-12 md:h-16 w-24 md:w-40" />
+      <Skeleton className="h-16 md:h-20 lg:h-24 w-40 md:w-52 lg:w-60" />
     </div>
   );
 };
@@ -23,20 +23,11 @@ const BusinessesAndPartners: React.FC = () => {
   const { t } = useTranslation();
   const { partners, isLoading, isError, error, hasPartners } = usePartners();
 
-  // Create a duplicated list of partners based on the number of available logos
-  // to ensure the carousel is always filled and scrolls seamlessly.
-  const displayedPartners = useMemo(() => {
-    if (!partners || partners.length === 0) return [];
-    // Ensure the scrolling track is long enough before repeating.
-    const repeatCount = partners.length < 10 ? 4 : 3;
-
-    const duplicated: typeof partners = [] as any;
-    for (let i = 0; i < repeatCount; i += 1) {
-      duplicated.push(...partners);
-    }
-
-    return duplicated;
-  }, [partners]);
+  // Use provided partners list and create a duplicated list for seamless marquee
+  const displayedPartners = partners || [];
+  const marqueePartners = displayedPartners.length > 0
+    ? [...displayedPartners, ...displayedPartners]
+    : [];
 
   // Theme-specific styles
   const textColor = theme === "dark" ? "text-dseza-dark-main-text" : "text-dseza-light-main-text";
@@ -58,7 +49,7 @@ const BusinessesAndPartners: React.FC = () => {
         {/* Loading State */}
         {isLoading && (
           <div className="relative w-full overflow-hidden">
-            <div className="flex">
+            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-8">
               {Array.from({ length: 10 }).map((_, index) => (
                 <PartnerLogoSkeleton key={index} />
               ))}
@@ -80,101 +71,35 @@ const BusinessesAndPartners: React.FC = () => {
           </div>
         )}
 
-        {/* Data State - Continuous scrolling logo carousel */}
+        {/* Data State - Continuous marquee of partner logos */}
         {hasPartners && !isLoading && !isError && (
-          <div className="relative w-full overflow-hidden group">
-            <div
-              className="flex animate-[scroll_20s_linear_infinite] group-hover:[animation-play-state:paused]"
-              style={{ animationDirection: 'reverse' }}
-            >
-              {displayedPartners.map((partner, index) => (
-                <a
-                  key={`partner-${index}-${partner.id}`}
-                  href={partner.partnerUrl || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 mx-8 transition-all duration-300 filter grayscale hover:grayscale-0 hover:scale-105"
-                  title={partner.name}
-                >
-                  <img
-                    src={partner.logoUrl || '/media/placeholder.svg'}
-                    alt={partner.name}
-                    className="h-24 md:h-32 w-auto object-contain"
-                    onError={(e) => {
-                      // Fallback to placeholder if image fails to load
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/media/placeholder.svg';
-                    }}
-                  />
-                </a>
-              ))}
-
-              {displayedPartners.map((partner, index) => (
-                <a
-                  key={`partner-dup-${index}-${partner.id}`}
-                  href={partner.partnerUrl || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 mx-8 transition-all duration-300 filter grayscale hover:grayscale-0 hover:scale-105"
-                  title={partner.name}
-                >
-                  <img
-                    src={partner.logoUrl || '/media/placeholder.svg'}
-                    alt={partner.name}
-                    className="h-24 md:h-32 w-auto object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/media/placeholder.svg';
-                    }}
-                  />
-                </a>
-              ))}
-
-              {/* Duplicate set of logos for seamless scrolling - disabled */}
-              {false && partners.map((partner, index) => (
-                <a
-                  key={`partner-2-${partner.id}`}
-                  href={partner.partnerUrl || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 mx-8 transition-all duration-300 filter grayscale hover:grayscale-0 hover:scale-105"
-                  title={partner.name}
-                >
-                  <img
-                    src={partner.logoUrl || '/media/placeholder.svg'}
-                    alt={partner.name}
-                    className="h-12 md:h-16 w-auto object-contain"
-                    onError={(e) => {
-                      // Fallback to placeholder if image fails to load
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/media/placeholder.svg';
-                    }}
-                  />
-                </a>
-              ))}
-
-              {/* Third set of logos for seamless scrolling - disabled */}
-              {false && partners.map((partner, index) => (
-                <a
-                  key={`partner-3-${partner.id}`}
-                  href={partner.partnerUrl || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 mx-8 transition-all duration-300 filter grayscale hover:grayscale-0 hover:scale-105"
-                  title={partner.name}
-                >
-                  <img
-                    src={partner.logoUrl || '/media/placeholder.svg'}
-                    alt={partner.name}
-                    className="h-12 md:h-16 w-auto object-contain"
-                    onError={(e) => {
-                      // Fallback to placeholder if image fails to load
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/media/placeholder.svg';
-                    }}
-                  />
-                </a>
-              ))}
+          <div className="mt-6 group" dir="ltr">
+            <div className="relative w-full overflow-hidden">
+              <div className="marquee-track flex items-center">
+                {marqueePartners.map((partner, index) => (
+                  <div key={`partner-${partner.id}-${index}`} className="flex-shrink-0 mx-8">
+                    <a
+                      href={partner.partnerUrl || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block transition-transform duration-300 filter grayscale hover:grayscale-0 hover:scale-105"
+                      title={partner.name}
+                    >
+                      <div className="h-16 md:h-20 lg:h-24 xl:h-28 w-40 md:w-52 lg:w-60 xl:w-64 flex items-center justify-center">
+                        <img
+                          src={partner.logoUrl || '/media/placeholder.svg'}
+                          alt={partner.name}
+                          className="max-h-full max-w-full object-contain"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/media/placeholder.svg';
+                          }}
+                        />
+                      </div>
+                    </a>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -188,6 +113,20 @@ const BusinessesAndPartners: React.FC = () => {
           </div>
         )}
       </div>
+      {/* Component-scoped marquee styles */}
+      <style>{`
+        .marquee-track {
+          width: max-content;
+          animation: dseza-marquee 40s linear infinite;
+        }
+        .group:hover .marquee-track {
+          animation-play-state: paused;
+        }
+        @keyframes dseza-marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </section>
   );
 };

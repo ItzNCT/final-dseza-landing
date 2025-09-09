@@ -10,58 +10,58 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { AccessibilityProvider } from "@/context/AccessibilityContext";
-import Index from "./pages/Index";
-import ArticleDetailPage from "@/pages/Article/ArticleDetailPage";
-import ArticleListPage from "@/pages/News/ArticleListPage";
-import DocumentSearchPage from "@/pages/Document/DocumentSearchPage";
-import DocumentTabLayout from "@/pages/Document/Layout/DocumentTabLayout";
-import EnterpriseListPage from "@/pages/Enterprise/EnterpriseListPage";
-import WorkSchedulePage from "@/pages/Schedule/WorkSchedulePage";
-import QnAListPage from "@/pages/QnA/QnAListPage";
-import CreateQuestionPage from "@/pages/QnA/CreateQuestionPage";
-import QnADetailPage from "@/pages/QnA/QnADetailPage";
-import ContactPage from "@/pages/Contact/ContactPage";
-import LoginPage from "@/pages/Auth/LoginPage";
-import CallbackPage from "@/pages/Auth/CallbackPage";
-import RegisterPage from "@/pages/Auth/RegisterPage";
-import ProfilePage from "@/pages/Auth/ProfilePage";
-import DocumentListPage from "@/pages/Enterprise/DocumentListPage";
-import DocumentViewerPage from "@/pages/Enterprise/DocumentViewerPage";
-import RecruitmentPage from "@/pages/Enterprise/RecruitmentPage";
-import ManagementBoardOverviewPage from "./pages/Introduction/ManagementBoardOverviewPage";
-import { FunctionsDutiesPage } from "./pages/Introduction/FunctionsDutiesPage";
-import { DepartmentsPage } from "./pages/Introduction/DepartmentsPage";
-import { AffiliatedUnitsPage } from "./pages/Introduction/AffiliatedUnitsPage";
-import WelcomeLetterPage from "./pages/Introduction/WelcomeLetterPage";
-import DanangOverviewPage from "./pages/Introduction/DanangOverviewPage";
-import FunctionalZonesListPage from "./pages/Functionalzone/FunctionalZonesListPage";
-import FunctionalzoneDetailPage from "./pages/Functionalzone/FunctionalzoneDetailPage";
-import FunctionalzoneLayout from "./pages/Functionalzone/FunctionalzoneLayout";
-// Import 10 Industrial Zone Components
-import KhuCongNgheCaoDaNang from "./pages/Functionalzone/KhuCongNgheCaoDaNang";
-import KhuThuongMaiTuDoDaNang from "./pages/Functionalzone/KhuThuongMaiTuDoDaNang";
-import KhuCNTTTapTrung from "./pages/Functionalzone/KhuCNTTTapTrung";
-import KhuCongNghiepHoaKhanh from "./pages/Functionalzone/KhuCongNghiepHoaKhanh";
-import KhuCongNghiepHoaKhanhMoRong from "./pages/Functionalzone/KhuCongNghiepHoaKhanhMoRong";
-import KhuCongNghiepDaNang from "./pages/Functionalzone/KhuCongNghiepDaNang";
-import KhuCongNghiepDichVuThuySanDaNang from "./pages/Functionalzone/KhuCongNghiepDichVuThuySanDaNang";
-import KhuCongNghiepHoaCam from "./pages/Functionalzone/KhuCongNghiepHoaCam";
-import KhuCongNghiepLienChieu from "./pages/Functionalzone/KhuCongNghiepLienChieu";
-import KhuCongNghiepHoaNinh from "./pages/Functionalzone/KhuCongNghiepHoaNinh";
-import InvestmentGuidePage from "./pages/Brochure/InvestmentGuidePage";
-import InvestmentPolicyPage from "./pages/Brochure/InvestmentPolicyPage";
-import BrochurePage from "./pages/Brochure/BrochurePage";
-// Removed InvestmentEnvironmentPage and InvestorGuidelinesPage; handled by ArticleListPage
-import DraftFeedbackPage from "./pages/Feedback/DraftFeedbackPage";
-import DraftDetailPage from "./pages/Feedback/DraftDetailPage";
-import VanBanHuongDanPage from "./pages/Feedback/VanBanHuongDanPage";
-import ResourceListPage from "@/pages/Resource/ResourceListPage";
-import FaqPage from "./pages/QnA/FaqPage";
 import MobileLayout from "./components/mobile/MobileLayout";
 import AccessibilityPanel from "./components/AccessibilityPanel";
 import LanguageLayout from "./components/LanguageLayout";
 import RootRedirect from "./components/RootRedirect";
-import SiteMapPage from "./pages/SiteMap/SiteMapPage";
+
+// Lazily loaded pages for code-splitting
+const Index = React.lazy(() => import("./pages/Index"));
+const ArticleDetailPage = React.lazy(() => import("@/pages/Article/ArticleDetailPage"));
+const ArticleListPage = React.lazy(() => import("@/pages/News/ArticleListPage"));
+const DocumentSearchPage = React.lazy(() => import("@/pages/Document/DocumentSearchPage"));
+const DocumentTabLayout = React.lazy(() => import("@/pages/Document/Layout/DocumentTabLayout"));
+const EnterpriseListPage = React.lazy(() => import("@/pages/Enterprise/EnterpriseListPage"));
+const WorkSchedulePage = React.lazy(() => import("@/pages/Schedule/WorkSchedulePage"));
+const QnAListPage = React.lazy(() => import("@/pages/QnA/QnAListPage"));
+const CreateQuestionPage = React.lazy(() => import("@/pages/QnA/CreateQuestionPage"));
+const QnADetailPage = React.lazy(() => import("@/pages/QnA/QnADetailPage"));
+const ContactPage = React.lazy(() => import("@/pages/Contact/ContactPage"));
+const LoginPage = React.lazy(() => import("@/pages/Auth/LoginPage"));
+const CallbackPage = React.lazy(() => import("@/pages/Auth/CallbackPage"));
+const RegisterPage = React.lazy(() => import("@/pages/Auth/RegisterPage"));
+const ProfilePage = React.lazy(() => import("@/pages/Auth/ProfilePage"));
+const DocumentListPage = React.lazy(() => import("@/pages/Enterprise/DocumentListPage"));
+const DocumentViewerPage = React.lazy(() => import("@/pages/Enterprise/DocumentViewerPage"));
+const RecruitmentPage = React.lazy(() => import("@/pages/Enterprise/RecruitmentPage"));
+const ManagementBoardOverviewPage = React.lazy(() => import("./pages/Introduction/ManagementBoardOverviewPage"));
+const FunctionsDutiesPage = React.lazy(() => import("./pages/Introduction/FunctionsDutiesPage").then(m => ({ default: m.FunctionsDutiesPage })));
+const DepartmentsPage = React.lazy(() => import("./pages/Introduction/DepartmentsPage").then(m => ({ default: m.DepartmentsPage })));
+const AffiliatedUnitsPage = React.lazy(() => import("./pages/Introduction/AffiliatedUnitsPage").then(m => ({ default: m.AffiliatedUnitsPage })));
+const WelcomeLetterPage = React.lazy(() => import("./pages/Introduction/WelcomeLetterPage"));
+const DanangOverviewPage = React.lazy(() => import("./pages/Introduction/DanangOverviewPage"));
+const FunctionalZonesListPage = React.lazy(() => import("./pages/Functionalzone/FunctionalZonesListPage"));
+const FunctionalzoneDetailPage = React.lazy(() => import("./pages/Functionalzone/FunctionalzoneDetailPage"));
+// const FunctionalzoneLayout = React.lazy(() => import("./pages/Functionalzone/FunctionalzoneLayout")); // not used
+const KhuCongNgheCaoDaNang = React.lazy(() => import("./pages/Functionalzone/KhuCongNgheCaoDaNang"));
+const KhuThuongMaiTuDoDaNang = React.lazy(() => import("./pages/Functionalzone/KhuThuongMaiTuDoDaNang"));
+const KhuCNTTTapTrung = React.lazy(() => import("./pages/Functionalzone/KhuCNTTTapTrung"));
+const KhuCongNghiepHoaKhanh = React.lazy(() => import("./pages/Functionalzone/KhuCongNghiepHoaKhanh"));
+const KhuCongNghiepHoaKhanhMoRong = React.lazy(() => import("./pages/Functionalzone/KhuCongNghiepHoaKhanhMoRong"));
+const KhuCongNghiepDaNang = React.lazy(() => import("./pages/Functionalzone/KhuCongNghiepDaNang"));
+const KhuCongNghiepDichVuThuySanDaNang = React.lazy(() => import("./pages/Functionalzone/KhuCongNghiepDichVuThuySanDaNang"));
+const KhuCongNghiepHoaCam = React.lazy(() => import("./pages/Functionalzone/KhuCongNghiepHoaCam"));
+const KhuCongNghiepLienChieu = React.lazy(() => import("./pages/Functionalzone/KhuCongNghiepLienChieu"));
+const KhuCongNghiepHoaNinh = React.lazy(() => import("./pages/Functionalzone/KhuCongNghiepHoaNinh"));
+const InvestmentGuidePage = React.lazy(() => import("./pages/Brochure/InvestmentGuidePage"));
+const InvestmentPolicyPage = React.lazy(() => import("./pages/Brochure/InvestmentPolicyPage"));
+const BrochurePage = React.lazy(() => import("./pages/Brochure/BrochurePage"));
+const DraftFeedbackPage = React.lazy(() => import("./pages/Feedback/DraftFeedbackPage"));
+const DraftDetailPage = React.lazy(() => import("./pages/Feedback/DraftDetailPage"));
+const VanBanHuongDanPage = React.lazy(() => import("./pages/Feedback/VanBanHuongDanPage"));
+const ResourceListPage = React.lazy(() => import("@/pages/Resource/ResourceListPage"));
+const FaqPage = React.lazy(() => import("./pages/QnA/FaqPage"));
+const SiteMapPage = React.lazy(() => import("./pages/SiteMap/SiteMapPage"));
 
 // Article route translations
 const articleRoutes = { vi: 'bai-viet', en: 'article' };
@@ -82,6 +82,7 @@ const App: React.FC = () => (
                 <Sonner />
                 <BrowserRouter>
                   <MobileLayout>
+                    <React.Suspense fallback={<div>Loading...</div>}>
                     <Routes>
                       {/* Global callback route for OIDC */}
                       <Route path="/auth/callback" element={<CallbackPage />} />
@@ -266,6 +267,7 @@ const App: React.FC = () => (
                       {/* Catch-all for invalid URLs without language prefix */}
                       <Route path="*" element={<RootRedirect />} />
                     </Routes>
+                    </React.Suspense>
                     {/* Accessibility Panel - available on all pages */}
                     <AccessibilityPanel />
                   </MobileLayout>

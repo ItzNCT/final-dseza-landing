@@ -724,24 +724,24 @@ async function fetchMissingMediaData(articleData: any, mediaRef: any, language: 
 }
 
 /**
- * Fetch article view count from Statistics module
- * @param nid - The node ID of the article
- * @returns Promise containing the view count data
+ * Fetch article view count via Stats service
+ * Uses endpoint /api/stats/track-view with query parameter
+ * Accepts flexible responses and normalizes output
  */
 async function fetchArticleViewCount(nid: string): Promise<{ totalcount: number; uuid: string; nid: string }> {
   try {
-    const url = `${JSON_API_BASE_URL}/api/view-count/${encodeURIComponent(nid)}?_format=json`;
+    const url = `${JSON_API_BASE_URL}/api/stats/track-view?nid=${encodeURIComponent(nid)}`;
     
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
-      // If view count fails, return default values instead of throwing error
-      console.warn(`Failed to fetch view count for nid ${nid}: ${response.status}`);
+      console.warn(`Failed to fetch stats for nid ${nid}: ${response.status}`);
       return {
         nid,
         totalcount: 0,
@@ -749,27 +749,17 @@ async function fetchArticleViewCount(nid: string): Promise<{ totalcount: number;
       };
     }
 
-    const data = await response.json();
-    
-    // API returns an array, get the first item
-    const viewData = Array.isArray(data) && data.length > 0 ? data[0] : null;
-    
-    if (!viewData) {
-      return {
-        nid,
-        totalcount: 0,
-        uuid: '',
-      };
-    }
+    const data: any = await response.json().catch(() => null);
+    const payload = Array.isArray(data) ? (data[0] || {}) : (data || {});
+    const total = parseInt(String(payload.totalcount ?? payload.count ?? payload.views ?? 0), 10);
 
     return {
-      nid: viewData.nid || nid,
-      totalcount: parseInt(viewData.totalcount || '0', 10),
-      uuid: viewData.uuid || '',
+      nid: String(payload.nid ?? payload.id ?? nid),
+      totalcount: Number.isFinite(total) ? total : 0,
+      uuid: String(payload.uuid ?? ''),
     };
   } catch (error) {
-    // Don't throw error for view count - just log and return defaults
-    console.warn(`Error fetching view count for nid ${nid}:`, error);
+    console.warn(`Error fetching stats for nid ${nid}:`, error);
     return {
       nid,
       totalcount: 0,

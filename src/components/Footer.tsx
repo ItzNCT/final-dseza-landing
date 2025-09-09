@@ -3,6 +3,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useTranslation } from "@/utils/translations";
 import { cn } from "@/lib/utils";
 import { MapPin, Phone, File, Mail, Facebook, Youtube, Linkedin } from "lucide-react";
+import { getApiBaseUrl } from "@/utils/api";
 
 /**
  * Footer component with contact information, legal details, and social media links
@@ -10,6 +11,35 @@ import { MapPin, Phone, File, Mail, Facebook, Youtube, Linkedin } from "lucide-r
 const Footer: React.FC = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const [totalVisits, setTotalVisits] = React.useState<number | null>(null);
+  const [isLoadingVisits, setIsLoadingVisits] = React.useState<boolean>(false);
+  const [visitsError, setVisitsError] = React.useState<string | null>(null);
+  
+  React.useEffect(() => {
+    let isCancelled = false;
+    const fetchVisits = async () => {
+      try {
+        setIsLoadingVisits(true);
+        setVisitsError(null);
+        const apiBaseUrl = getApiBaseUrl();
+        const res = await fetch(`${apiBaseUrl}/api/stats/total-visits`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          credentials: 'include',
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const value = data?.total ?? data?.visits ?? data?.count ?? data?.totalVisits;
+        if (!isCancelled) setTotalVisits(typeof value === 'number' ? value : parseInt(String(value || 0), 10));
+      } catch (e: any) {
+        if (!isCancelled) setVisitsError(e?.message || 'Failed to load visits');
+      } finally {
+        if (!isCancelled) setIsLoadingVisits(false);
+      }
+    };
+    fetchVisits();
+    return () => { isCancelled = true; };
+  }, []);
   
   // Theme-specific styles
   const bgColor = theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-dseza-light-secondary-bg";
@@ -161,7 +191,7 @@ const Footer: React.FC = () => {
             {t('footer.copyright')}
           </p>
           <p className={cn("font-inter", secondaryTextColor)}>
-            {t('footer.visitorCount')}: 28,734
+            {t('footer.visitorCount')}: {isLoadingVisits ? '...' : (totalVisits !== null ? totalVisits.toLocaleString('vi-VN') : '—')}
           </p>
         </div>
       </div>

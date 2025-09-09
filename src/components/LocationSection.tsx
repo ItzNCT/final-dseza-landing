@@ -75,20 +75,18 @@ const LocationSection: React.FC = () => {
           <div className="w-full lg:w-2/3">
             {activeTab === "vr-tour" ? (
               <div className={cn(
-                "rounded-lg h-72 sm:h-80 md:h-96 p-4 md:p-6 flex flex-col items-center justify-center", 
+                  "rounded-lg h-72 sm:h-80 md:h-96 overflow-hidden",
                 secondaryBgColor
               )}>
-                <p className={cn("text-lg md:text-xl font-montserrat text-center", textColor)}>
-                  VR 360 Tour Placeholder
-                </p>
-                <a
-                  href="https://dseza.danang.gov.vn/vr360/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn("mt-4", accentColor, "underline text-sm md:text-base hover:opacity-80 transition-opacity")} 
-                >
-                  https://dseza.danang.gov.vn/vr360/
-                </a>
+                <iframe
+                  src="https://tred.vn/360VNPT/"
+                  title="DSEZA VR360"
+                  className="w-full h-full"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  style={{ border: 0 }}
+                />
               </div>
             ) : (
               <div className={cn(
