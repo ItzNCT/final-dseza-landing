@@ -1,9 +1,7 @@
 // src/utils/drupal.ts
 import { api } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
-
-const DRUPAL_BASE = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+import { DRUPAL_BASE_URL as DRUPAL_BASE } from '@/config';
 
 // Type definitions for API options
 interface ApiGetOptions {

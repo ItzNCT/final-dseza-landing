@@ -22,9 +22,8 @@ interface DocumentDetails {
   fileUrl: string;
 }
 
-// Base URL
-const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+// Base URL from centralized config
+import { DRUPAL_BASE_URL } from '@/config';
 
 // Function to fetch single document by ID with language support
 const fetchSingleDocument = async (docId: string, language: 'vi' | 'en' = 'vi'): Promise<DocumentDetails | null> => {

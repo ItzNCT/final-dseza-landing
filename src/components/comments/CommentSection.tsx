@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { DRUPAL_BASE_URL as JSON_API_BASE_URL } from '@/config';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -37,10 +38,8 @@ interface CommentFormData {
 }
 
 /**
- * Base URL for JSON:API endpoints
+ * Base URL for JSON:API endpoints from centralized config
  */
-const JSON_API_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
 
 /**
  * JSON:API headers for consistent API calls

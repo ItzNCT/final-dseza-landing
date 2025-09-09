@@ -30,10 +30,9 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Separator } from "@/components/ui/separator";
 import CommentSection from "@/components/comments/CommentSection";
 import { useTranslation } from "react-i18next";
+import { DRUPAL_BASE_URL } from '@/config';
 
-// Base URL pattern consistent with other hooks in the project
-const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+// Base URL from centralized config
 
 // JSON:API headers
 const jsonApiHeaders = {

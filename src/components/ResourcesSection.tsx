@@ -13,6 +13,7 @@ import { useDocuments } from "@/hooks/useDocuments";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useLanguageRoutes } from "@/utils/routes";
+import { DRUPAL_BASE_URL } from '@/config';
 
 // Modal component for video playback
 const VideoModal: React.FC<{
@@ -140,12 +141,12 @@ const ErrorDisplay: React.FC<{
           theme === "dark" ? "border-red-800 bg-red-900/10 text-red-300" : "border-red-200 bg-red-50 text-red-700"
         )}>
           <p className="font-semibold mb-2">🔍 Thông tin debug:</p>
-          <p>Base URL: {import.meta.env.VITE_DRUPAL_BASE_URL || 'https://dseza-backend.lndo.site'}</p>
-          <p>API Endpoint: /jsonapi/node/resource</p>
+          <p>Base URL: {DRUPAL_BASE_URL || '(proxy)'}</p>
+          <p>API Endpoint: {DRUPAL_BASE_URL || ''}/jsonapi/node/resource</p>
           <p className="mt-2">Bạn có thể kiểm tra API trực tiếp tại:</p>
           <div className="mt-2 space-y-1">
             <a 
-              href="https://dseza-backend.lndo.site/jsonapi/node/resource" 
+              href={`${DRUPAL_BASE_URL || ''}/jsonapi/node/resource`} 
               target="_blank"
               rel="noopener noreferrer"
               className={cn("block transition-colors underline",
@@ -155,7 +156,7 @@ const ErrorDisplay: React.FC<{
               📋 Danh sách tất cả tài nguyên
             </a>
             <a 
-              href="https://dseza-backend.lndo.site/jsonapi/node/resource/97c6db25-8859-4ef8-a9ef-a563eb6599fa"
+              href={`${DRUPAL_BASE_URL || ''}/jsonapi/node/resource/97c6db25-8859-4ef8-a9ef-a563eb6599fa`}
               target="_blank"
               rel="noopener noreferrer"
               className={cn("block transition-colors underline",

@@ -1,11 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
+import { DRUPAL_BASE_URL as JSON_API_BASE_URL } from '@/config';
 
 /**
- * Base URL for JSON:API endpoints
- * Use relative URLs in development to leverage Vite proxy
+ * Base URL for JSON:API endpoints from centralized config
  */
-const JSON_API_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
 
 /**
  * JSON:API headers for consistent API calls

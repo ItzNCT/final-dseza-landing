@@ -1,10 +1,7 @@
 /**
  * API client for Drupal JSON:API
  */
-
-const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  import.meta.env.VITE_API || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+import { DRUPAL_BASE_URL } from '@/config';
 
 interface ApiGetOptions {
   sort?: string;

@@ -1,10 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { extractImageUrl } from '@/utils/drupal';
+import { DRUPAL_BASE_URL as JSON_API_BASE_URL } from '@/config';
 
-// Base URL của Drupal backend - same pattern as other hooks
-const JSON_API_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  import.meta.env.VITE_API || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+// Base URL comes from centralized config
 
 // Interface cho dữ liệu functional zone sau khi đã xử lý
 export interface FunctionalZone {

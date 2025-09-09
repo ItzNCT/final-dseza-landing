@@ -1,4 +1,5 @@
 import DOMPurify from 'dompurify';
+import { DRUPAL_BASE_URL } from '@/config';
 
 /**
  * Process rich text content and fix image URLs
@@ -87,8 +88,7 @@ function findMediaByUuid(uuid: string, includedData: any[]): string | null {
   if (!fileEntity?.attributes?.uri?.url) return null;
 
   // Resolve to absolute URL
-  const baseUrl = import.meta.env.VITE_DRUPAL_BASE_URL || 
-    (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+  const baseUrl = DRUPAL_BASE_URL;
   
   const fileUrl = fileEntity.attributes.uri.url;
   return fileUrl.startsWith('http') ? fileUrl : `${baseUrl}${fileUrl}`;
@@ -137,8 +137,7 @@ function createImageTag(imageUrl: string, caption: string, alignment: string): s
  * Fix relative image URLs to absolute URLs
  */
 function fixImageUrls(html: string): string {
-  const baseUrl = import.meta.env.VITE_DRUPAL_BASE_URL || 
-    (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+  const baseUrl = DRUPAL_BASE_URL;
 
   return html.replace(/<img([^>]*)\ssrc="([^"]*)"([^>]*)>/g, (match, before, src, after) => {
     // Skip if already absolute URL
@@ -233,8 +232,7 @@ export function extractFirstImageFromRichText(richTextHtml: string, includedData
     }
     
     // Convert relative to absolute
-    const baseUrl = import.meta.env.VITE_DRUPAL_BASE_URL || 
-      (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+    const baseUrl = DRUPAL_BASE_URL;
     return src.startsWith('/') ? `${baseUrl}${src}` : `${baseUrl}/${src}`;
   }
 

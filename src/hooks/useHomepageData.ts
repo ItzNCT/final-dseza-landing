@@ -1,11 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { extractImageUrl } from '@/utils/drupal';
 import { createPlainTextSummary } from '@/utils/richTextProcessor';
+import { DRUPAL_BASE_URL } from '@/config';
 
-// Use relative path for proxy in development, full URL in production
-const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  import.meta.env.VITE_API || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+// Base URL from centralized config
 
 // Define TypeScript interfaces for the homepage data structure
 interface NewsItem {

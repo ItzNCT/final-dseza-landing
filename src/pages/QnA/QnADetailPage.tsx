@@ -34,8 +34,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
  */
 async function fetchQuestionById(id: string, language: 'vi' | 'en' = 'vi') {
   try {
-    const JSON_API_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-      (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+    const { DRUPAL_BASE_URL: JSON_API_BASE_URL } = await import('@/config');
     
     const languagePrefix = language === 'en' ? '/en' : '/vi';
     const url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/question/${id}`;

@@ -1,10 +1,10 @@
 import { GraphQLClient } from 'graphql-request';
+import { GRAPHQL_ENDPOINT } from '@/config';
 
 // Lấy địa chỉ API từ biến môi trường với fallback
 // Trong development mode sử dụng relative URL để tận dụng Vite proxy
 const getEndpoint = (language?: string) => {
-  const baseEndpoint = import.meta.env.VITE_GRAPHQL_ENDPOINT ||
-    (import.meta.env.DEV ? '/graphql' : '');
+  const baseEndpoint = GRAPHQL_ENDPOINT;
   
   // Nếu có language code, thêm vào URL
   if (language) {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useTheme } from '../../context/ThemeContext'
+import { API_TARGET } from '@/config'
 
 
 const LoginPage: React.FC = () => {
@@ -14,14 +15,14 @@ const LoginPage: React.FC = () => {
 
   const handleLoginExternal = () => {
     setIsLoading(true)
-    const target = (import.meta as any).env?.VITE_API_TARGET || 'https://dseza-backend.lndo.site'
+    const target = API_TARGET
     const callback = encodeURIComponent(window.location.origin + '/vi/auth/callback')
     window.location.href = `${target}/api/auth/login?flow=external&redirect=${callback}`
   }
 
   const handleLoginInternal = () => {
     setIsLoading(true)
-    const target = (import.meta as any).env?.VITE_API_TARGET || 'https://dseza-backend.lndo.site'
+    const target = API_TARGET
     window.location.href = `${target}/api/auth/login?flow=internal`
   }
 

@@ -14,10 +14,10 @@
 import { useLanguage } from '@/context/LanguageContext';
 
 // API Configuration
+import { DRUPAL_BASE_URL } from '@/config';
 const API_CONFIG = {
   // Base URLs for different environments
-  baseUrl: import.meta.env.VITE_DRUPAL_BASE_URL || 
-    (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site'),
+  baseUrl: DRUPAL_BASE_URL,
   
   // Language-specific endpoints
   endpoints: {

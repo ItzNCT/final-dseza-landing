@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/context/LanguageContext';
+import { DRUPAL_BASE_URL } from '@/config';
 
-// Base URL pattern consistent with other hooks in the project
-const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+// Base URL from centralized config
 
 // JSON:API headers
 const jsonApiHeaders = {

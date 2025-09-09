@@ -3,16 +3,10 @@ import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import { componentTagger } from 'lovable-tagger';
 
-// ---------------------------------------------------------------------------
-// ĐỔI GIÁ TRỊ NÀY NẾU BACKEND ĐỔI HOST / PORT
-// Mặc định trỏ tới Lando: https://dseza-backend.lndo.site
-// ---------------------------------------------------------------------------
-const DEFAULT_API_TARGET = 'https://dseza-backend.lndo.site';
-
 export default defineConfig(({ mode }) => {
   // Cho phép override bằng biến môi trường VITE_API_TARGET
   const env = loadEnv(mode, process.cwd(), '');
-  const API_TARGET = env.VITE_API_TARGET || DEFAULT_API_TARGET;
+  const API_TARGET = env.VITE_API_TARGET;
   const isProduction = mode === 'production';
 
   return {

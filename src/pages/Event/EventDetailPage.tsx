@@ -183,12 +183,11 @@ const EventDetailPage: React.FC = () => {
                 {/* Debug: API Information */}
                 <div className={`text-sm border p-4 rounded-lg ${theme === 'dark' ? 'text-dseza-dark-secondary-text border-dseza-dark-border bg-dseza-dark-secondary-bg/50' : 'text-dseza-light-secondary-text border-dseza-light-border bg-dseza-light-secondary-bg/50'}`}>
                   <p className="font-semibold mb-2">Debug Information:</p>
-                  <p>Base URL: https://dseza-backend.lndo.site</p>
-                  <p>Full URL: https://dseza-backend.lndo.site/jsonapi/node/bai-viet/{uuid}</p>
+                  <p>Base URL and endpoints are configured via env.</p>
                   <p className="mt-2">Bạn có thể kiểm tra API trực tiếp tại:</p>
                   <div className="mt-2 space-y-1">
                     <a 
-                      href="https://dseza-backend.lndo.site/jsonapi/node/bai-viet?filter[field_su_kien_tieu_bieu][value]=1" 
+                      href="#" 
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`block transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
@@ -196,7 +195,7 @@ const EventDetailPage: React.FC = () => {
                       📋 Danh sách sự kiện tiêu điểm
                     </a>
                     <a 
-                      href={`https://dseza-backend.lndo.site/jsonapi/node/bai-viet/${uuid}`}
+                      href={`#`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`block transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}

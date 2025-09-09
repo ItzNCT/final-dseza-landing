@@ -42,6 +42,7 @@ import { useDocuments, DocumentFilters } from "@/api/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/context/ThemeContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { DRUPAL_BASE_URL as JSON_API_BASE_URL } from '@/config';
 import { useLanguage } from "@/context/LanguageContext";
 import MobileLayout from "@/components/mobile/MobileLayout";
 
@@ -55,9 +56,7 @@ const DocumentSearchPage: React.FC = () => {
   // DEBUG: Log URL params
   console.log('🔍 URL Params - category:', category, 'subcategory:', subcategory);
   
-  // Base URL for API endpoints
-  const JSON_API_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-    (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+  // Base URL for API endpoints from centralized config
   const { toast } = useToast();
   const { theme } = useTheme();
   const { language } = useLanguage();

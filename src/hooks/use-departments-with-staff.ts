@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { DRUPAL_BASE_URL } from '@/config';
 
 // Interface cho nhân sự
 export interface Staff {
@@ -139,9 +140,6 @@ function processDepartmentsWithStaffData(
           
           // Đảm bảo URL đầy đủ (thêm base URL nếu cần)
           if (iconUrl && !iconUrl.startsWith('http')) {
-            const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-              import.meta.env.VITE_API || 
-              'https://dseza-backend.lndo.site';
             iconUrl = `${DRUPAL_BASE_URL}${iconUrl}`;
           }
           

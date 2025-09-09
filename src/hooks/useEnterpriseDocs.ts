@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useDrupalApi } from "@/utils/drupal";
 import { useLanguage } from "@/context/LanguageContext";
+import { DRUPAL_BASE_URL } from '@/config';
 
 // Định nghĩa cấu trúc cho một tài liệu
 export interface EnterpriseDocument {
@@ -13,9 +14,7 @@ export interface EnterpriseDocument {
   content?: string; // Thêm trường này để chứa nội dung chi tiết
 }
 
-// Base URL pattern consistent with other hooks in the project
-const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+// Base URL from centralized config
 
 // Utility function to strip HTML tags and decode HTML entities
 const stripHtml = (html: string): string => {

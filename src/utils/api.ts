@@ -1,18 +1,12 @@
 /**
  * API utilities for Dseza project
  */
+import { API_TARGET } from '@/config';
 
 /**
  * Get the API base URL based on environment
  */
-export const getApiBaseUrl = (): string => {
-  // Trong development, sử dụng backend URL trực tiếp
-  if (import.meta.env.DEV) {
-    return import.meta.env.VITE_API_TARGET || 'https://dseza-backend.lndo.site';
-  }
-  // Trong production, có thể sử dụng relative URL nếu cùng domain
-  return import.meta.env.VITE_API_TARGET || '';
-};
+export const getApiBaseUrl = (): string => API_TARGET;
 
 
 

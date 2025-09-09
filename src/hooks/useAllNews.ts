@@ -1,11 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { extractImageUrl } from '@/utils/drupal';
 import { extractFirstImageFromRichText, createPlainTextSummary } from '@/utils/richTextProcessor';
+import { DRUPAL_BASE_URL } from '@/config';
 
-// Use same base URL pattern as useHomepageData
-const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  import.meta.env.VITE_API || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+// Base URL from centralized config
 
 // Interface for news item (only includes articles from event child categories)
 export interface NewsItem {

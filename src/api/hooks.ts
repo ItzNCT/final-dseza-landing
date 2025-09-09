@@ -385,10 +385,9 @@ export { fetchMainMenuData };
 
 /**
  * Base URL for JSON:API endpoints
- * Use relative URLs in development to leverage Vite proxy
+ * Use centralized config and rely on Vite proxy in dev when empty
  */
-const JSON_API_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+import { DRUPAL_BASE_URL as JSON_API_BASE_URL } from '@/config';
 /**
  * JSON:API headers for consistent API calls
  */

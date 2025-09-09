@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { DRUPAL_BASE_URL } from '@/config';
 
 // Định nghĩa cấu trúc cho một tin tuyển dụng
 export interface Job {
@@ -10,9 +11,7 @@ export interface Job {
   deadline: string;       // Hạn nộp hồ sơ
 }
 
-// Base URL pattern consistent with other hooks in the project
-const DRUPAL_BASE_URL = import.meta.env.VITE_DRUPAL_BASE_URL || 
-  (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+// Base URL from centralized config
 
 // Utility function to strip HTML tags and decode HTML entities
 const stripHtml = (html: string): string => {

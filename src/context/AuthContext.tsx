@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { API_TARGET } from '@/config';
 
 // Interface định nghĩa thông tin người dùng
 export interface User {
@@ -44,10 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // API base (use full backend origin so cookies are sent to the correct domain)
-  const API_BASE: string = (
-    (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_TARGET)
-    || 'https://dseza-backend.lndo.site'
-  );
+  const API_BASE: string = API_TARGET;
 
   // Hàm đồng bộ người dùng từ backend
   const syncUser = useCallback(async () => {

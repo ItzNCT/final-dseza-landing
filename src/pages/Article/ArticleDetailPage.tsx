@@ -27,7 +27,7 @@ import MobileLayout from "@/components/mobile/MobileLayout";
 import CommentSection from "@/components/comments/CommentSection";
 import { useTranslation } from "react-i18next";
 import { useLanguageRoutes } from "@/utils/routes";
-import { getApiBaseUrl } from "@/utils/api";
+import { DRUPAL_BASE_URL } from "@/config";
 
 /**
  * Secure DOMPurify configuration for XSS protection
@@ -106,8 +106,8 @@ const sanitizeHTML = (html: string | null | undefined): string => {
 // Track article view to backend stats service via POST with JSON body
 const trackArticleView = async (nodeId: number, uuid?: string) => {
   try {
-    // Prefer DRUPAL base URL; fallback to API target helper
-    const apiUrlBase = import.meta.env.VITE_DRUPAL_BASE_URL || getApiBaseUrl() || '';
+    // Prefer DRUPAL base URL from centralized config
+    const apiUrlBase = DRUPAL_BASE_URL;
     const nid = Number.parseInt(String(nodeId), 10);
     const url = `${apiUrlBase}/api/stats/track-view`;
     console.log('[TrackView] POST', { url, nid, uuid });
@@ -180,7 +180,7 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
         if (isDirectUuid(identifier)) {
           console.log('[Smart Fetch] Thử chiến lược 1: Direct UUID');
           try {
-            const response = await fetch(`${import.meta.env.VITE_DRUPAL_JSON_API_BASE_URL || 'https://dseza-backend.lndo.site'}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${identifier}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`, {
+            const response = await fetch(`${DRUPAL_BASE_URL}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${identifier}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`, {
               headers: {
                 'Accept': 'application/vnd.api+json',
                 'Content-Type': 'application/vnd.api+json',
@@ -212,7 +212,7 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
         if (potentialUuid && potentialUuid !== identifier) {
           console.log('[Smart Fetch] Thử chiến lược 2: Embedded UUID');
           try {
-            const response = await fetch(`${import.meta.env.VITE_DRUPAL_JSON_API_BASE_URL || 'https://dseza-backend.lndo.site'}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${potentialUuid}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`, {
+            const response = await fetch(`${DRUPAL_BASE_URL}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${potentialUuid}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`, {
               headers: {
                 'Accept': 'application/vnd.api+json',
                 'Content-Type': 'application/vnd.api+json',
@@ -286,7 +286,7 @@ const useSmartArticleRouterFetch = (identifier: string, language: 'vi' | 'en') =
         if (matchedArticle) {
           console.log(`[Smart Fetch] Đã tìm thấy bài viết khớp: ${matchedArticle.uuid}. Đang fetch...`);
           try {
-            const finalApiUrl = `${import.meta.env.VITE_DRUPAL_JSON_API_BASE_URL || 'https://dseza-backend.lndo.site'}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${matchedArticle.uuid}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`;
+            const finalApiUrl = `${DRUPAL_BASE_URL}/${language === 'en' ? 'en' : 'vi'}/jsonapi/node/bai-viet/${matchedArticle.uuid}?include=field_chuyen_muc,field_anh_dai_dien,field_anh_dai_dien.field_media_image,field_noi_dung_bai_viet,field_noi_dung_bai_viet.field_file_dinh_kem,field_noi_dung_bai_viet.field_file_dinh_kem.field_media_document`;
             console.log("[Smart Fetch] URL cuối cùng sẽ gọi là:", finalApiUrl);
             const response = await fetch(finalApiUrl, {
               headers: {
@@ -736,8 +736,7 @@ const ArticleDetailPage: React.FC = () => {
                     );
                     
                     if (fileEntity?.attributes?.uri?.url) {
-                      const baseUrl = import.meta.env.VITE_DRUPAL_BASE_URL || 
-                        (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+                      const baseUrl = DRUPAL_BASE_URL;
                       
                       const fileUrl = fileEntity.attributes.uri.url;
                       const fullUrl = fileUrl.startsWith('http') ? fileUrl : `${baseUrl}${fileUrl}`;
@@ -784,8 +783,7 @@ const ArticleDetailPage: React.FC = () => {
             const pdfMatch = value.match(/([^\/\\]+\.pdf)/i);
             if (pdfMatch) {
               const filename = pdfMatch[1];
-              const baseUrl = import.meta.env.VITE_DRUPAL_BASE_URL || 
-                (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+              const baseUrl = DRUPAL_BASE_URL;
               
               const guessedUrl = `${baseUrl}/sites/default/files/${filename}`;
               console.log(`🎯 Guessed PDF URL: ${guessedUrl}`);
@@ -1201,8 +1199,7 @@ const ArticleDetailPage: React.FC = () => {
     }
     
     // Get file URL and MIME type
-    const baseUrl = import.meta.env.VITE_DRUPAL_BASE_URL || 
-      (import.meta.env.DEV ? '' : 'https://dseza-backend.lndo.site');
+    const baseUrl = DRUPAL_BASE_URL;
     
     const fileUrl = fileEntity.attributes.uri.url;
     const fullUrl = fileUrl.startsWith('http') ? fileUrl : `${baseUrl}${fileUrl}`;
@@ -1461,12 +1458,12 @@ const ArticleDetailPage: React.FC = () => {
                 {/* Debug: API Information */}
                 <div className={`text-sm border p-4 rounded-lg ${theme === 'dark' ? 'text-dseza-dark-secondary-text border-dseza-dark-border bg-dseza-dark-secondary-bg/50' : 'text-dseza-light-secondary-text border-dseza-light-border bg-dseza-light-secondary-bg/50'}`}>
                   <p className="font-semibold mb-2">Debug Information:</p>
-                  <p>Base URL: https://dseza-backend.lndo.site</p>
-                   <p>Full URL: https://dseza-backend.lndo.site/jsonapi/node/bai-viet/[id]</p>
+                  <p>Base URL: from config</p>
+                   <p>Full URL: [base]/jsonapi/node/bai-viet/[id]</p>
                   <p className="mt-2">Bạn có thể kiểm tra API trực tiếp tại:</p>
                   <div className="mt-2 space-y-1">
                     <a 
-                      href="https://dseza-backend.lndo.site/jsonapi/node/bai-viet" 
+                      href="#" 
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
@@ -1475,7 +1472,7 @@ const ArticleDetailPage: React.FC = () => {
                       Danh sách tất cả bài viết
                     </a>
                     <a 
-                       href={`https://dseza-backend.lndo.site/jsonapi/node/bai-viet/[id]?include=field_anh_dai_dien.field_media_image`}
+                       href={`#`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`flex items-center gap-2 transition-colors ${theme === 'dark' ? 'text-dseza-dark-primary hover:text-dseza-dark-primary/80' : 'text-dseza-light-primary hover:text-dseza-light-primary/80'}`}
