@@ -67,6 +67,9 @@ export const useArticles = () => {
       'su-kien': { vi: 'Tin tức & Sự kiện', en: 'News & Events' },
       'events': { vi: 'Tin tức & Sự kiện', en: 'News & Events' },
       'tin-tuc': { vi: 'Tin tức', en: 'News' },
+        // Utilities - Procurement
+      'mua-sam-cong': { vi: 'Mua sắm công', en: 'Public Procurement' },
+      'public-procurement': { vi: 'Mua sắm công', en: 'Public Procurement' },
       // Investment-related categories
       'quy-trinh-linh-vuc-dau-tu': { vi: 'Quy trình lĩnh vực đầu tư', en: 'Investment Sector Procedures' },
       'linh-vuc-khuyen-khich-dau-tu': { vi: 'Lĩnh vực thu hút đầu tư', en: 'Investment Incentive Sectors' },

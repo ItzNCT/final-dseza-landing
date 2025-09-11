@@ -723,13 +723,13 @@ async function fetchMissingMediaData(articleData: any, mediaRef: any, language: 
 }
 
 /**
- * Fetch article view count via Stats service
- * Uses endpoint /api/stats/track-view with query parameter
+ * Fetch article view count via View Count service
+ * Uses endpoint GET /api/view-count/{id}?_format=json
  * Accepts flexible responses and normalizes output
  */
 async function fetchArticleViewCount(nid: string): Promise<{ totalcount: number; uuid: string; nid: string }> {
   try {
-    const url = `${JSON_API_BASE_URL}/api/stats/track-view?nid=${encodeURIComponent(nid)}`;
+    const url = `${JSON_API_BASE_URL}/api/view-count/${encodeURIComponent(nid)}?_format=json`;
     
     const response = await fetch(url, {
       method: 'GET',
@@ -740,7 +740,7 @@ async function fetchArticleViewCount(nid: string): Promise<{ totalcount: number;
     });
 
     if (!response.ok) {
-      console.warn(`Failed to fetch stats for nid ${nid}: ${response.status}`);
+      console.warn(`Failed to fetch view count for nid ${nid}: ${response.status}`);
       return {
         nid,
         totalcount: 0,
@@ -750,7 +750,8 @@ async function fetchArticleViewCount(nid: string): Promise<{ totalcount: number;
 
     const data: any = await response.json().catch(() => null);
     const payload = Array.isArray(data) ? (data[0] || {}) : (data || {});
-    const total = parseInt(String(payload.totalcount ?? payload.count ?? payload.views ?? 0), 10);
+    // Support both new field name total_views and older keys
+    const total = parseInt(String(payload.total_views ?? payload.totalcount ?? payload.count ?? payload.views ?? 0), 10);
 
     return {
       nid: String(payload.nid ?? payload.id ?? nid),
@@ -758,7 +759,7 @@ async function fetchArticleViewCount(nid: string): Promise<{ totalcount: number;
       uuid: String(payload.uuid ?? ''),
     };
   } catch (error) {
-    console.warn(`Error fetching stats for nid ${nid}:`, error);
+    console.warn(`Error fetching view count for nid ${nid}:`, error);
     return {
       nid,
       totalcount: 0,

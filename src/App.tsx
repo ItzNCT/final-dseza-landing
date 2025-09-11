@@ -227,6 +227,8 @@ const App: React.FC = () => (
                         <Route path="cam-nang-dau-tu/chinh-sach-uu-dai" element={<InvestmentPolicyPage />} />
                         <Route path="cam-nang-dau-tu/brochure" element={<BrochurePage />} />
                         <Route path="investment-handbook" element={<InvestmentGuidePage />} />
+                        <Route path="investment-handbook/preferential-policy" element={<InvestmentPolicyPage />} />
+                        <Route path="investment-handbook/brochure" element={<BrochurePage />} />
                         
                         {/* Vietnamese Functional Zone Specific Routes */}
                         <Route path="gioi-thieu/cac-khu-chuc-nang/khu-cong-nghe-cao-da-nang" element={<KhuCongNgheCaoDaNang />} />

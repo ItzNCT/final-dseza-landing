@@ -1,0 +1,58 @@
+[
+  {
+    "nam": "2019",
+    "thuTu": 5,
+    "soDuAnFDI": 11,
+    "soDuAnDDI": 21,
+    "vonDauTuFDI": 297,
+    "vonDauTuDDI": 4306
+  },
+  {
+    "nam": "2020",
+    "thuTu": 6,
+    "soDuAnFDI": 1,
+    "soDuAnDDI": 15,
+    "vonDauTuFDI": 60,
+    "vonDauTuDDI": 2201
+  },
+  {
+    "nam": "2021",
+    "thuTu": 7,
+    "soDuAnFDI": 5,
+    "soDuAnDDI": 19,
+    "vonDauTuFDI": 145,
+    "vonDauTuDDI": 786.9
+  },
+  {
+    "nam": "2022",
+    "thuTu": 8,
+    "soDuAnFDI": 4,
+    "soDuAnDDI": 23,
+    "vonDauTuFDI": 65.3,
+    "vonDauTuDDI": 3991.8
+  },
+  {
+    "nam": "2023",
+    "thuTu": 9,
+    "soDuAnFDI": 5,
+    "soDuAnDDI": 14,
+    "vonDauTuFDI": 156.4,
+    "vonDauTuDDI": 2490.8
+  },
+  {
+    "nam": "2024",
+    "thuTu": 10,
+    "soDuAnFDI": 3,
+    "soDuAnDDI": 10,
+    "vonDauTuFDI": 188.5,
+    "vonDauTuDDI": 3191.7
+  },
+  {
+    "nam": "2025",
+    "thuTu": 11,
+    "soDuAnFDI": 2,
+    "soDuAnDDI": 2,
+    "vonDauTuFDI": 18.5,
+    "vonDauTuDDI": 6293.7
+  }
+]

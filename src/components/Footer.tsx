@@ -29,7 +29,12 @@ const Footer: React.FC = () => {
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        const value = data?.total ?? data?.visits ?? data?.count ?? data?.totalVisits;
+        const value =
+          data?.total_visits ??
+          data?.total ??
+          data?.visits ??
+          data?.count ??
+          data?.totalVisits;
         if (!isCancelled) setTotalVisits(typeof value === 'number' ? value : parseInt(String(value || 0), 10));
       } catch (e: any) {
         if (!isCancelled) setVisitsError(e?.message || 'Failed to load visits');
@@ -50,10 +55,10 @@ const Footer: React.FC = () => {
   
   return (
     <footer className={cn(
-      theme === "dark" ? "bg-[#1D262E]" : "bg-[#F2F2F2]"
+      theme === "dark" ? "bg-dseza-dark-secondary-bg" : "bg-[#FFFFFFF]"
     )}>
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Column 1: Contact Information */}
           <div>
             <h3 className={cn(
@@ -117,30 +122,6 @@ const Footer: React.FC = () => {
             </div>
           </div>
           
-          {/* Column 3: Legal Information */}
-          <div>
-            <h3 className={cn(
-              "font-montserrat font-semibold text-lg mb-4",
-              textColor
-            )}>
-              {t('footer.legalInfo')}
-            </h3>
-            
-            <div className="space-y-2">
-              <a href="#" className={cn("block font-inter text-sm", accentColor)}>
-                {t('footer.networkCredibility')}
-              </a>
-              
-              <p className={cn("font-inter text-sm", secondaryTextColor)}>
-                {t('footer.license')}
-              </p>
-              
-              <p className={cn("font-inter text-sm", secondaryTextColor)}>
-                {t('footer.editor')}
-              </p>
-            </div>
-          </div>
-          
           {/* Column 4: Citation and Connect */}
           <div>
             <h3 className={cn(
@@ -149,10 +130,6 @@ const Footer: React.FC = () => {
             )}>
               {t('footer.citationConnect')}
             </h3>
-            
-            <p className={cn("font-inter text-sm mb-4", secondaryTextColor)}>
-              {t('footer.citationNote')}
-            </p>
             
             <div className="flex space-x-4">
               <a 
@@ -176,6 +153,34 @@ const Footer: React.FC = () => {
               >
                 <Linkedin className="w-6 h-6" />
               </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Legal banner moved below grid */}
+      <div className="border-t border-white/10">
+        <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
+            <a href="#" aria-label={t('footer.networkCredibility')} className="md:shrink-0">
+              <img 
+                src="/placeholder.svg" 
+                alt={t('footer.networkCredibility')} 
+                className={cn("w-[380px] max-w-full h-auto rounded-md border", theme === "dark" ? "border-[#334155]" : "border-[#D1D5DB]")} 
+              />
+            </a>
+            <div className="flex-1">
+              <div className={cn("space-y-2 text-sm", secondaryTextColor)}>
+                <p className="font-inter">
+                  {t('footer.license')}
+                </p>
+                <p className="font-inter">
+                  {t('footer.editor')}
+                </p>
+                <p className="font-inter">
+                  {t('footer.citationNote')}
+                </p>
+              </div>
             </div>
           </div>
         </div>

@@ -103,21 +103,19 @@ const sanitizeHTML = (html: string | null | undefined): string => {
   return typeof sanitized === 'string' ? sanitized : '';
 };
 
-// Track article view to backend stats service via POST with JSON body
+// Track article view to backend stats service via GET query (no POST body)
 const trackArticleView = async (nodeId: number, uuid?: string) => {
   try {
     // Prefer DRUPAL base URL from centralized config
     const apiUrlBase = DRUPAL_BASE_URL;
     const nid = Number.parseInt(String(nodeId), 10);
-    const url = `${apiUrlBase}/api/stats/track-view`;
-    console.log('[TrackView] POST', { url, nid, uuid });
+    const url = `${apiUrlBase}/api/stats/track-view?nid=${encodeURIComponent(nid)}`;
+    console.log('[TrackView] GET', { url, nid, uuid });
     const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       credentials: 'include',
-      body: JSON.stringify({ nid, id: nid, uuid }),
+      headers: {
+        'Accept': 'application/json',
+      },
     });
     console.log('[TrackView] Response status:', res.status);
     if (!res.ok) {

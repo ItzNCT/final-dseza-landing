@@ -21,25 +21,25 @@ export default defineConfig(({ mode }) => {
         '/jsonapi': {
           target: API_TARGET,
           changeOrigin: true,
-          secure: false,   // đặt true nếu backend dùng SSL hợp lệ
+          secure: true,   // đặt true nếu backend dùng SSL hợp lệ
         },
         // Proxy cho GraphQL endpoints
         '/graphql': {
           target: API_TARGET,
           changeOrigin: true,
-          secure: false,
+          secure: true,
         },
         // Proxy cho custom API endpoints
         '/api': {
           target: API_TARGET,
           changeOrigin: true,
-          secure: false,
+          secure: true,
         },
         // (tuỳ chọn) proxy luôn cả OAuth, REST khác…
         '/oauth': {
           target: API_TARGET,
           changeOrigin: true,
-          secure: false,
+          secure: true,
         },
       },
     },

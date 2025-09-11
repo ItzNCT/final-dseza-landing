@@ -58,63 +58,35 @@ const LocationSection: React.FC = () => {
               {t('location.vrTour')}
             </button>
             
-            <button
+            <a
+              href="https://maps.dseza.vn/"
+              target="_blank"
+              rel="noopener noreferrer"
               className={cn(
-                "px-6 py-4 rounded-lg font-montserrat font-semibold text-base md:text-lg transition-all duration-300 ease-in-out text-center", 
-                activeTab === "digital-map" ?
-                  cn(accentBgColor, tabActiveText, "hover:scale-103 hover:shadow-md") : // Thêm hover cho tab active
-                  cn(tabDefaultBg, textColor, tabInactiveHoverBg, tabInactiveHoverTextColor) // Áp dụng hover mới cho tab inactive
+                "px-6 py-4 rounded-lg font-montserrat font-semibold text-base md:text-lg transition-all duration-300 ease-in-out text-center",
+                cn(tabDefaultBg, textColor, tabInactiveHoverBg, tabInactiveHoverTextColor)
               )}
-              onClick={() => setActiveTab("digital-map")}
             >
               {t('location.digitalMap')}
-            </button>
+            </a>
           </div>
           
           {/* Right column: content display */}
           <div className="w-full lg:w-2/3">
-            {activeTab === "vr-tour" ? (
-              <div className={cn(
-                  "rounded-lg h-72 sm:h-80 md:h-96 overflow-hidden",
-                secondaryBgColor
-              )}>
-                <iframe
-                  src="https://tred.vn/360VNPT/"
-                  title="DSEZA VR360"
-                  className="w-full h-full"
-                  loading="lazy"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  style={{ border: 0 }}
-                />
-              </div>
-            ) : (
-              <div className={cn(
-                "rounded-lg h-72 sm:h-80 md:h-96 p-4 md:p-6 flex flex-col items-center justify-center", 
-                secondaryBgColor
-              )}>
-                <h3 className={cn("text-lg md:text-xl font-montserrat font-medium mb-3 md:mb-4 text-center", textColor)}>
-                  {t('location.digitalMapTitle')}
-                </h3>
-                <p className={cn("text-sm md:text-base font-inter text-center max-w-lg leading-relaxed", secondaryTextColor)}>
-                  {t('location.digitalMapDescription')}
-                </p>
-                <Button
-                  asChild
-                  className={cn(
-                    "mt-4 md:mt-6 px-5 py-2.5 md:px-6 md:py-3 text-sm md:text-base transition-all duration-300 ease-in-out", // Added transition
-                    accentBgColor,
-                    theme === "dark" ? 
-                      "text-dseza-dark-main-bg hover:bg-dseza-dark-primary-accent-hover hover:scale-105" : // Added scale
-                      "text-white hover:bg-dseza-light-primary-accent-hover hover:scale-105" // Added scale
-                  )}
-                >
-                  <a href="https://maps.dseza.vn/" target="_blank" rel="noopener noreferrer">
-                    {t('location.accessDigitalMap')}
-                  </a>
-                </Button>
-              </div>
-            )}
+            <div className={cn(
+                "rounded-lg h-72 sm:h-80 md:h-96 overflow-hidden",
+              secondaryBgColor
+            )}>
+              <iframe
+                src="https://tred.vn/360VNPT/"
+                title="DSEZA VR360"
+                className="w-full h-full"
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                style={{ border: 0 }}
+              />
+            </div>
           </div>
         </div>
       </div>

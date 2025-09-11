@@ -8,6 +8,7 @@ import InvestmentInformation from "@/components/InvestmentInformation";
 import LocationSection from "@/components/LocationSection";
 import ResourcesSection from "@/components/ResourcesSection";
 import BusinessesAndPartners from "@/components/BusinessesAndPartners";
+import InvestmentAttractionResults from "@/components/InvestmentAttractionResults";
 import Footer from "@/components/Footer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileQuickLinksCarousel from "@/components/mobile/MobileQuickLinksCarousel";
@@ -48,6 +49,9 @@ const Index: React.FC = () => {
 
         {/* Businesses and Partners Section */}
         <BusinessesAndPartners />
+
+        {/* Investment Attraction Results - placed right under partner logos */}
+        <InvestmentAttractionResults />
       </div>
       
       {/* Footer */}

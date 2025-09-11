@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useArticles } from "../../hooks/useArticles";
 import { useAllNewsCategories } from "../../hooks/useNewsCategories";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
-import { ChevronRight, Calendar, ArrowRight, Star, Filter } from "lucide-react";
+import { ChevronRight, Calendar, ArrowRight, Star, Filter, CheckCircle2 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTranslation } from "react-i18next";
@@ -87,6 +87,15 @@ const formatTitle = (slug: string, categoriesData?: any[], language: 'vi' | 'en'
     'tin-tuc': {
       vi: 'Tin tức',
       en: 'News'
+    },
+    // Utilities - Procurement
+    'mua-sam-cong': {
+      vi: 'Mua sắm công',
+      en: 'Public Procurement'
+    },
+    'public-procurement': {
+      vi: 'Mua sắm công',
+      en: 'Public Procurement'
     },
     // Add missing investment-related categories
     'quy-trinh-linh-vuc-dau-tu': {
@@ -601,6 +610,9 @@ const ArticleListPage = () => {
                                   : 'bg-dseza-light-primary/20 text-dseza-light-primary'
                               }`}
                             >
+                              {(category === 'mua-sam-cong' || category === 'public-procurement') && (
+                                <CheckCircle2 className="h-3 w-3 mr-1 inline" />
+                              )}
                               {article.categories.length > 0 ? article.categories[0] : formatTitle(subcategory || category!, categoriesData, language)}
                             </Badge>
                             <span className={`text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
@@ -815,6 +827,9 @@ const ArticleListPage = () => {
                               : 'bg-dseza-light-primary text-white'
                           }`}
                         >
+                          {(category === 'mua-sam-cong' || category === 'public-procurement') && (
+                            <CheckCircle2 className="h-3 w-3 mr-1 inline" />
+                          )}
                           {article.categories.length > 0 ? article.categories[0] : formatTitle(subcategory || category!, categoriesData, language)}
                         </Badge>
                       </div>

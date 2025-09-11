@@ -76,6 +76,9 @@ const URL_MAPPING = {
     'enterprise-statistics': 'thong-ke-doanh-nghiep',
     'recruitment': 'tuyen-dung',
     
+    // Brochure section
+    'preferential-policy': 'chinh-sach-uu-dai',
+    'brochure': 'brochure',
     
     // Documents section
     'legal-documents': 'van-ban-phap-luat',
@@ -96,6 +99,7 @@ const URL_MAPPING = {
     'frequently-asked-questions': 'cau-hoi-thuong-gap',
     'enterprise-connection': 'ket-noi-doanh-nghiep',
     'create': 'tao-moi',
+    'public-procurement': 'mua-sam-cong',
     
     // Additional common paths
     'home': 'trang-chu',

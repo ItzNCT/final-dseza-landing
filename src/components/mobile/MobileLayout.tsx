@@ -59,6 +59,15 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
 
     // Tài nguyên
     "tai-nguyen", "resources",
+
+    // Cẩm nang đầu tư
+    "cam-nang-dau-tu", "investment-handbook",
+
+    // Chính sách ưu đãi
+    "chinh-sach-uu-dai", "preferential-policy",
+
+    // Brochure
+    "brochure", "brochure",
     
   ];
 

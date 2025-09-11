@@ -21,6 +21,10 @@ import NavigationBar from "@/components/hero/NavigationBar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/context/LanguageContext";
+import { useLanguageRoutes } from "@/utils/routes";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileLayout from "@/components/mobile/MobileLayout";
 
 // Brochure Content Component
 const BrochureContent = () => {
@@ -226,8 +230,40 @@ const BrochureContent = () => {
 
 const BrochurePage = () => {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const isVi = language === 'vi';
+  const { createUrl } = useLanguageRoutes();
+  const isMobile = useIsMobile();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const pdfUrl = '/dhpiza-profile-2023-176x250-vn.pdf';
+  const [mobileViewerSrc, setMobileViewerSrc] = React.useState<string>(`${pdfUrl}#view=FitH&toolbar=0&navpanes=0`);
+
+  React.useEffect(() => {
+    if (!isMobile) return;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const absolutePdf = `${origin}${pdfUrl}`;
+    const pdfjsViewer = `/pdfjs/web/viewer.html?file=${encodeURIComponent(absolutePdf)}`;
+    let cancelled = false;
+
+    const probeViewer = async () => {
+      try {
+        const res = await fetch('/pdfjs/web/viewer.html', { headers: { 'Accept': 'text/html' } });
+        if (!res.ok) return;
+        const html = await res.text();
+        if (cancelled) return;
+        // Only switch if the returned HTML contains known PDF.js markers
+        if (/PDF\.js|viewerContainer|pdfjs/i.test(html)) {
+          setMobileViewerSrc(pdfjsViewer);
+        }
+      } catch (_) {
+        // Keep native viewer fallback silently
+      }
+    };
+
+    probeViewer();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
 
   const handleDownload = () => {
     // Tải xuống file PDF thật
@@ -243,14 +279,14 @@ const BrochurePage = () => {
     // Logic chia sẻ
     if (navigator.share) {
       navigator.share({
-        title: 'Brochure - Giới thiệu tổng quan DSEZA',
-        text: 'Brochure giới thiệu tổng quan về Ban Quản lý Khu công nghệ cao và các Khu công nghiệp Đà Nẵng',
+        title: isVi ? 'Brochure - Giới thiệu tổng quan DSEZA' : 'Brochure - DSEZA Overview',
+        text: isVi ? 'Brochure giới thiệu tổng quan về Ban Quản lý Khu công nghệ cao và các Khu công nghiệp Đà Nẵng' : 'Overview brochure of the Management Board of Da Nang Hi‑Tech Park and Industrial Zones',
         url: window.location.href,
       });
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
-      alert('Đã sao chép link vào clipboard!');
+      alert(isVi ? 'Đã sao chép link vào clipboard!' : 'Link copied to clipboard!');
     }
   };
 
@@ -262,6 +298,109 @@ const BrochurePage = () => {
   const handleViewFullscreen = () => {
     window.open(pdfUrl, '_blank');
   };
+
+  // Mobile optimized layout
+  if (isMobile) {
+    return (
+      <MobileLayout>
+        <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
+          {/* Main Content - Mobile optimized */}
+          <main className="flex-1 px-4 py-4 space-y-4">
+            {/* Mobile Breadcrumb */}
+            <div className={`${theme === 'dark' ? 'bg-dseza-dark-secondary-bg/50' : 'bg-dseza-light-secondary-bg/50'} py-1 px-2 rounded-lg`}>
+              <nav className={`flex items-center space-x-1 text-xs ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                <Link 
+                  to={createUrl('/')} 
+                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  {isVi ? 'Trang chủ' : 'Home'}
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <Link 
+                  to={createUrl('/cam-nang-dau-tu')} 
+                  className={`transition-colors hover:underline ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
+                >
+                  {isVi ? 'Cẩm nang đầu tư' : 'Investment handbook'}
+                </Link>
+                <ChevronRight className="h-2.5 w-2.5" />
+                <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
+                  {isVi ? 'Brochure - Giới thiệu tổng quan DSEZA' : 'Brochure - DSEZA Overview'}
+                </span>
+              </nav>
+            </div>
+
+            {/* Header - Mobile optimized */}
+            <div className="text-center py-3">
+              <h1 className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} text-xl font-bold mb-2`}>
+                {isVi ? 'Brochure - Giới thiệu tổng quan DSEZA' : 'Brochure - DSEZA Overview'}
+              </h1>
+              <div className={`${theme === 'dark' ? 'bg-dseza-dark-primary' : 'bg-dseza-light-primary'} w-12 h-0.5 mx-auto mb-2 rounded-full`}></div>
+            </div>
+
+            {/* PDF quick actions */}
+            <div className={`rounded-lg p-3 border ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <div className={`flex items-center gap-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
+                  <FileText className="w-4 h-4" />
+                  <span>{isVi ? 'File PDF' : 'PDF File'} - {(3.7).toFixed(1)} MB</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleViewFullscreen}>
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  {isVi ? 'Mở' : 'Open'}
+                </Button>
+                <Button size="sm" onClick={handleDownload} className={`${theme === 'dark' ? 'bg-dseza-dark-primary hover:bg-dseza-dark-primary-hover' : 'bg-dseza-light-primary hover:bg-dseza-light-primary-hover'} flex items-center gap-2`}>
+                  <Download className="w-4 h-4" />
+                  {isVi ? 'Tải xuống PDF' : 'Download PDF'}
+                </Button>
+              </div>
+
+              {/* PDF Preview - Mobile (match ratio from ArticleDetailPage) */}
+              <div className="mt-3 relative w-full overflow-hidden rounded">
+                <div
+                  className={`${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'} border`}
+                  style={{ height: '300px' }}
+                >
+                  <iframe
+                    src={mobileViewerSrc}
+                    className={`w-full h-full border-0 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}
+                    title="Brochure DSEZA"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Share Section - Mobile optimized */}
+            <div className={`${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'} mt-2 pt-4 border-t`}>
+              <h3 className={`${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'} text-base font-semibold mb-3 flex items-center gap-2`}>
+                <Share2 className="h-5 w-5" />
+                {isVi ? 'Chia sẻ trang:' : 'Share this page:'}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={handleDownload}>
+                  <Download className="w-4 h-4 mr-1" />
+                  {isVi ? 'Tải xuống' : 'Download'}
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleShare}>
+                  <Share2 className="w-4 h-4 mr-1" />
+                  {isVi ? 'Chia sẻ' : 'Share'}
+                </Button>
+                <Button variant="outline" size="sm" onClick={handlePrint}>
+                  <Printer className="w-4 h-4 mr-1" />
+                  {isVi ? 'In' : 'Print'}
+                </Button>
+              </div>
+            </div>
+          </main>
+
+          {/* Footer */}
+          <Footer />
+        </div>
+      </MobileLayout>
+    );
+  }
 
   return (
     <div className={`min-h-screen flex flex-col ${theme === 'dark' ? 'bg-dseza-dark-main-bg' : 'bg-dseza-light-main-bg'}`}>
@@ -277,21 +416,21 @@ const BrochurePage = () => {
           <div className="container mx-auto px-4">
             <nav className={`flex items-center space-x-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
               <Link 
-                to="/" 
+                to={createUrl('/')} 
                 className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Trang chủ
+                {isVi ? 'Trang chủ' : 'Home'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <Link 
-                to="/cam-nang-dau-tu" 
+                to={createUrl('/cam-nang-dau-tu')} 
                 className={`transition-colors ${theme === 'dark' ? 'hover:text-dseza-dark-primary' : 'hover:text-dseza-light-primary'}`}
               >
-                Cẩm nang đầu tư
+                {isVi ? 'Cẩm nang đầu tư' : 'Investment handbook'}
               </Link>
               <ChevronRight className="h-4 w-4" />
               <span className={`font-medium ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Brochure - Giới thiệu tổng quan DSEZA
+                {isVi ? 'Brochure - Giới thiệu tổng quan DSEZA' : 'Brochure - DSEZA Overview'}
               </span>
             </nav>
           </div>
@@ -303,26 +442,26 @@ const BrochurePage = () => {
             {/* Article Header */}
             <header className="mb-8">
               <h1 className={`text-3xl md:text-4xl font-bold mb-4 leading-tight ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
-                Brochure - Giới thiệu tổng quan DSEZA
+                {isVi ? 'Brochure - Giới thiệu tổng quan DSEZA' : 'Brochure - DSEZA Overview'}
               </h1>
               
               {/* Action Buttons */}
               <div className="flex items-center justify-center gap-2 flex-wrap pt-4">
                 <Button variant="outline" size="sm" onClick={handleDownload}>
                   <Download className="w-4 h-4 mr-2" />
-                  Tải xuống
+                  {isVi ? 'Tải xuống' : 'Download'}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleViewFullscreen}>
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  Xem toàn màn hình
+                  {isVi ? 'Xem toàn màn hình' : 'View full screen'}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleShare}>
                   <Share2 className="w-4 h-4 mr-2" />
-                  Chia sẻ
+                  {isVi ? 'Chia sẻ' : 'Share'}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handlePrint}>
                   <Printer className="w-4 h-4 mr-2" />
-                  In
+                  {isVi ? 'In' : 'Print'}
                 </Button>
               </div>
             </header>
@@ -331,10 +470,10 @@ const BrochurePage = () => {
             <div className="w-full mb-8">
               <div className={`rounded-lg p-4 mb-4 border ${theme === 'dark' ? 'bg-dseza-dark-secondary-bg border-dseza-dark-border' : 'bg-dseza-light-secondary-bg border-dseza-light-border'}`}>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-lg">Xem trước tài liệu</h3>
+                  <h3 className="font-semibold text-lg">{isVi ? 'Xem trước tài liệu' : 'Preview document'}</h3>
                   <div className={`flex items-center gap-2 text-sm ${theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'}`}>
                     <FileText className="w-4 h-4" />
-                    <span>File PDF - {(3.7).toFixed(1)} MB</span>
+                    <span>{isVi ? 'File PDF' : 'PDF File'} - {(3.7).toFixed(1)} MB</span>
                   </div>
                 </div>
                 
@@ -356,7 +495,7 @@ const BrochurePage = () => {
                     className="flex items-center gap-2"
                   >
                     <ZoomIn className="w-4 h-4" />
-                    Xem kích thước thật
+                    {isVi ? 'Xem kích thước thật' : 'View actual size'}
                   </Button>
                   <Button 
                     size="sm" 
@@ -368,7 +507,7 @@ const BrochurePage = () => {
                     }`}
                   >
                     <Download className="w-4 h-4" />
-                    Tải xuống PDF
+                    {isVi ? 'Tải xuống PDF' : 'Download PDF'}
                   </Button>
                 </div>
               </div>
@@ -383,19 +522,19 @@ const BrochurePage = () => {
                   <FileText className={`w-5 h-5 mt-0.5 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`} />
                   <div className="flex-1">
                     <h4 className={`font-medium mb-1 ${theme === 'dark' ? 'text-yellow-200' : 'text-yellow-800'}`}>
-                      Không thể hiển thị PDF?
+                      {isVi ? 'Không thể hiển thị PDF?' : 'Cannot display PDF?'}
                     </h4>
                     <p className={`text-sm mb-3 ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-700'}`}>
-                      Trình duyệt của bạn có thể không hỗ trợ hiển thị PDF. Bạn có thể tải xuống để xem.
+                      {isVi ? 'Trình duyệt của bạn có thể không hỗ trợ hiển thị PDF. Bạn có thể tải xuống để xem.' : 'Your browser may not support embedded PDFs. You can download the file instead.'}
                     </p>
                     <div className="flex gap-2">
                       <Button size="sm" onClick={handleDownload}>
                         <Download className="w-4 h-4 mr-2" />
-                        Tải xuống PDF
+                        {isVi ? 'Tải xuống PDF' : 'Download PDF'}
                       </Button>
                       <Button variant="outline" size="sm" onClick={handleViewFullscreen}>
                         <ExternalLink className="w-4 h-4 mr-2" />
-                        Mở trong tab mới
+                        {isVi ? 'Mở trong tab mới' : 'Open in new tab'}
                       </Button>
                     </div>
                   </div>
@@ -407,20 +546,20 @@ const BrochurePage = () => {
             <div className={`mt-12 pt-8 border-t ${theme === 'dark' ? 'border-dseza-dark-border' : 'border-dseza-light-border'}`}>
               <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-dseza-dark-main-text' : 'text-dseza-light-main-text'}`}>
                 <Share2 className="h-5 w-5" />
-                Chia sẻ trang:
+                {isVi ? 'Chia sẻ trang:' : 'Share this page:'}
               </h3>
               <div className="flex flex-wrap gap-3">
                 <Button variant="outline" size="sm" onClick={handleDownload}>
                   <Download className="w-4 h-4 mr-2" />
-                  Tải xuống
+                  {isVi ? 'Tải xuống' : 'Download'}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleShare}>
                   <Share2 className="w-4 h-4 mr-2" />
-                  Chia sẻ
+                  {isVi ? 'Chia sẻ' : 'Share'}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handlePrint}>
                   <Printer className="w-4 h-4 mr-2" />
-                  In
+                  {isVi ? 'In' : 'Print'}
                 </Button>
               </div>
             </div>
