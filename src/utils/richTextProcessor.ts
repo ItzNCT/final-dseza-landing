@@ -10,8 +10,11 @@ import { DRUPAL_BASE_URL } from '@/config';
 export function processRichTextContent(rawHtml: string, includedData?: any[]): string {
   if (!rawHtml) return '';
 
+  // Normalize alignment so inline styles like text-align are preserved via classes
+  const htmlWithAlignmentClasses = normalizeTextAlignment(rawHtml);
+
   // First, sanitize the content
-  let processedHtml = DOMPurify.sanitize(rawHtml, {
+  let processedHtml = DOMPurify.sanitize(htmlWithAlignmentClasses, {
     ALLOWED_TAGS: [
       'p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
       'ul', 'ol', 'li', 'a', 'img', 'figure', 'figcaption', 'blockquote',
@@ -40,6 +43,83 @@ export function processRichTextContent(rawHtml: string, includedData?: any[]): s
   processedHtml = addTableStyling(processedHtml);
 
   return processedHtml;
+}
+
+/**
+ * Convert inline text alignment (style/align) to Tailwind classes so alignment survives sanitization
+ */
+function normalizeTextAlignment(html: string): string {
+  if (!html) return html;
+
+  // Helper to inject a class into a start tag
+  const addClassToStartTag = (startTag: string, className: string): string => {
+    if (/\sclass="[^"]*"/i.test(startTag)) {
+      return startTag.replace(/class="([^"]*)"/i, (m, cls) => `class="${cls} ${className}"`);
+    }
+    return startTag.replace(/<([a-z0-9-]+)(\s|>)/i, (m, tag, tail) => `<${tag} class="${className}"${tail}`);
+  };
+
+  // 1) Handle align="..." attribute on elements
+  html = html.replace(/<([a-z0-9-]+)([^>]*?)\salign="(left|center|right|justify)"([^>]*)>/gi, (
+    _match,
+    tag: string,
+    before: string,
+    align: string,
+    after: string
+  ) => {
+    const classForAlign =
+      align.toLowerCase() === 'center' ? 'text-center' :
+      align.toLowerCase() === 'right' ? 'text-right' :
+      align.toLowerCase() === 'justify' ? 'text-justify' : 'text-left';
+
+    // Remove align attribute from before/after
+    const cleanedBefore = before.replace(/\salign="(left|center|right|justify)"/i, '');
+    const cleanedAfter = after.replace(/\salign="(left|center|right|justify)"/i, '');
+    const startTag = `<${tag}${cleanedBefore}${cleanedAfter}>`;
+    return addClassToStartTag(startTag, classForAlign);
+  });
+
+  // 2) Handle style="...text-align: ...;..." by converting to classes and removing text-align
+  html = html.replace(/<([a-z0-9-]+)([^>]*?)\sstyle="([^"]*)"([^>]*)>/gi, (
+    _match,
+    tag: string,
+    before: string,
+    style: string,
+    after: string
+  ) => {
+    // Find text-align declaration
+    const alignMatch = style.match(/text-align\s*:\s*(left|center|right|justify)\s*;?/i);
+    if (!alignMatch) {
+      // No text-align in style; return original tag unchanged
+      return _match;
+    }
+
+    const align = alignMatch[1].toLowerCase();
+    const classForAlign =
+      align === 'center' ? 'text-center' :
+      align === 'right' ? 'text-right' :
+      align === 'justify' ? 'text-justify' : 'text-left';
+
+    // Remove only the text-align declaration from style string
+    let newStyle = style
+      .replace(/text-align\s*:\s*(left|center|right|justify)\s*;?/i, '')
+      .trim();
+
+    // Also trim leftover semicolons/spaces
+    newStyle = newStyle.replace(/^;\s*|;\s*$/g, '').trim();
+
+    // Rebuild start tag without or with remaining style
+    let startTag = `<${tag}${before}`;
+    if (newStyle.length > 0) {
+      startTag += ` style="${newStyle}"`;
+    }
+    startTag += `${after}>`;
+
+    // Inject alignment class
+    return addClassToStartTag(startTag, classForAlign);
+  });
+
+  return html;
 }
 
 /**

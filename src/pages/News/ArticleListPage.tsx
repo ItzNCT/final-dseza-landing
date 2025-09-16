@@ -16,6 +16,7 @@ import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
 import { generateArticleLink } from "@/utils/generateArticleLink";
 import { translatePath } from "@/utils/seo";
+import { createPlainTextSummary } from "@/utils/richTextProcessor";
 
 // Hàm để định dạng tiêu đề với real categories
 const formatTitle = (slug: string, categoriesData?: any[], language: 'vi' | 'en' = 'vi') => {
@@ -633,7 +634,7 @@ const ArticleListPage = () => {
                           <p className={`text-sm line-clamp-2 leading-relaxed ${
                             theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                           }`}>
-                            {article.summary}
+                            {createPlainTextSummary(article.summary)}
                           </p>
                         </div>
                       </div>
@@ -888,7 +889,7 @@ const ArticleListPage = () => {
                       <p className={`text-sm line-clamp-3 leading-relaxed ${
                         theme === 'dark' ? 'text-dseza-dark-secondary-text' : 'text-dseza-light-secondary-text'
                       }`}>
-                        {article.summary}
+                        {createPlainTextSummary(article.summary)}
                       </p>
 
                       {/* Categories */}

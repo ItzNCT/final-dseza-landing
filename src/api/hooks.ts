@@ -396,6 +396,96 @@ const jsonApiHeaders = {
   'Accept': 'application/vnd.api+json',
 };
 
+// ────────────────────────────────────────────────────────────────────────────────
+// Banners (node--banner_tuyen_truyen)
+// ────────────────────────────────────────────────────────────────────────────────
+import { apiGetWithLanguage, extractImageUrl } from '@/utils/drupal';
+
+interface BannerNode {
+  id: string;
+  type: string;
+  attributes: {
+    title: string;
+    field_link?: any;
+  };
+  relationships?: Record<string, any>;
+}
+
+export type BannerSlideItem = {
+  id: string;
+  title: string;
+  description?: string;
+  href?: string;
+  imageUrl?: string;
+};
+
+async function fetchBanners({ queryKey }: { queryKey: readonly unknown[] }): Promise<{
+  data: BannerNode[];
+  included?: any[];
+}> {
+  const language = (queryKey[1] as 'vi' | 'en') || 'vi';
+  const response = await apiGetWithLanguage<{ data: BannerNode[]; included?: any[] }>(
+    '/jsonapi/node/banner_tuyen_truyen',
+    {
+      sort: '-created',
+      include: 'field_hinh_anh_banner,field_hinh_anh_banner.field_media_image',
+      filter: {
+        status: { value: 1 },
+      },
+      page: { limit: 10 },
+    },
+    language
+  );
+  return response as any;
+}
+
+export const useBanners = (language: 'vi' | 'en' = 'vi') => {
+  const { data, isLoading, isError, error, isSuccess, refetch } = useQuery({
+    queryKey: ['banners', language],
+    queryFn: fetchBanners,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    retry: 2,
+  });
+
+  const slides: BannerSlideItem[] = (data?.data || []).map((item) => {
+    const imageUrl = extractImageUrl(
+      item.relationships?.field_hinh_anh_banner,
+      data?.included || []
+    );
+
+    // Drupal link fields may return { uri, title }, handle common cases
+    const rawLink = (item as any)?.attributes?.field_link;
+    let href: string | undefined;
+    if (rawLink && typeof rawLink === 'object') {
+      const uri = (rawLink.uri as string) || '';
+      if (uri) {
+        // Internal links are usually like "internal:/path"
+        href = uri.startsWith('internal:') ? '/' + uri.replace(/^internal:\/*/, '') : uri;
+      }
+    }
+
+    return {
+      id: item.id,
+      title: item.attributes?.title || '',
+      description: undefined,
+      href,
+      imageUrl,
+    } as BannerSlideItem;
+  });
+
+  return {
+    data,
+    isLoading,
+    isError,
+    error,
+    isSuccess,
+    refetch,
+    slides,
+    hasSlides: slides.length > 0,
+  };
+};
+
 /**
  * Fetch article details by UUID from Drupal JSON:API with language support
  * @param uuid - The UUID of the article to fetch
@@ -1344,24 +1434,25 @@ export { fetchEnterprises };
  */
 async function fetchWorkSchedule(weekRange: string, language: 'vi' | 'en' = 'vi'): Promise<any> {
   try {
-    // Parse week range to get start and end dates
-    const [startDate, endDate] = weekRange.split('_');
-    
-    // Build JSON:API query parameters for date range filtering
+    const [startDateStr, endDateStr] = weekRange.split('_');
+    const startDateIso = `${startDateStr}T00:00:00`;
+    const endDateIso = `${endDateStr}T23:59:59`;
+
     const queryParams = new URLSearchParams();
-    
-    // Simple approach: filter by start date with >= operator
-    queryParams.append('filter[field_ngay][value]', startDate);
-    queryParams.append('filter[field_ngay][operator]', '>=');
-    
-    // For now, let's get all items from start date onwards and filter in frontend
-    // This is more reliable than complex date range filtering
-    
-    // Sort by date and time
-    queryParams.append('sort', 'field_ngay,field_thoi_gian');
+
+    // Server-side filter by field_thoi_gian range (>= start, <= end)
+    queryParams.append('filter[field_thoi_gian][value]', startDateIso);
+    queryParams.append('filter[field_thoi_gian][operator]', '>=');
+    queryParams.append('filter[field_thoi_gian_end][value]', endDateIso);
+    queryParams.append('filter[field_thoi_gian_end][operator]', '<=');
+    queryParams.append('filter[field_thoi_gian_end][path]', 'field_thoi_gian');
+
+    // Sort by time
+    queryParams.append('sort', 'field_thoi_gian');
+
     const languagePrefix = language === 'en' ? '/en' : '/vi';
     const url = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/schedule_item?${queryParams.toString()}`;
-    
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -1371,51 +1462,88 @@ async function fetchWorkSchedule(weekRange: string, language: 'vi' | 'en' = 'vi'
       },
     });
 
+    let data: any;
+
     if (!response.ok) {
-      // If filtering fails, try without any filters as fallback
-      if (response.status === 500) {
-        console.warn('Date filtering failed, fetching all schedule items');
-        const fallbackUrl = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/schedule_item?sort=field_ngay,field_thoi_gian`;
-        const fallbackResponse = await fetch(fallbackUrl, {
-          method: 'GET',
-          headers: {
-            ...jsonApiHeaders,
-            'Accept-Language': language,
-            'Content-Language': language,
-          },
-        });
-        
-        if (fallbackResponse.ok) {
-          const fallbackData = await fallbackResponse.json();
-          // Filter data in frontend
-          if (fallbackData.data) {
-            const startDateObj = new Date(startDate);
-            const endDateObj = new Date(endDate);
-            
-            fallbackData.data = fallbackData.data.filter((item: any) => {
-              const itemDate = new Date(item.attributes.field_ngay);
-              return itemDate >= startDateObj && itemDate <= endDateObj;
-            });
-          }
-          return fallbackData;
-        }
+      // Fallback without filters, then filter client-side
+      const fallbackUrl = `${JSON_API_BASE_URL}${languagePrefix}/jsonapi/node/schedule_item?sort=field_thoi_gian`;
+      const fallbackResponse = await fetch(fallbackUrl, {
+        method: 'GET',
+        headers: {
+          ...jsonApiHeaders,
+          'Accept-Language': language,
+          'Content-Language': language,
+        },
+      });
+
+      if (!fallbackResponse.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
-      
-      const errorText = await response.text();
-      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+
+      data = await fallbackResponse.json();
+    } else {
+      data = await response.json();
     }
 
-    const data = await response.json();
-    
-    // Apply end date filtering in frontend to ensure we only get items in the week range
-    if (data.data && endDate) {
-      const endDateObj = new Date(endDate);
-      data.data = data.data.filter((item: any) => {
-        const itemDate = new Date(item.attributes.field_ngay);
-        return itemDate <= endDateObj;
-      });
+    // Normalize items: derive field_ngay, normalize field_buoi codes, and filter by end date if needed
+    if (Array.isArray(data?.data)) {
+      const startMs = new Date(startDateStr).getTime();
+      const endMs = new Date(endDateStr).getTime();
+
+      const normalizeSession = (raw: string | null | undefined): string => {
+        if (!raw) return '';
+        const v = String(raw).trim();
+        const upper = v.toUpperCase();
+        const lower = v.toLowerCase();
+        // Code mappings
+        if (upper === 'S') return 'sang';
+        if (upper === 'C') return 'chieu';
+        if (upper === 'T') return 'toi';
+        if (upper === 'M') return 'morning';
+        if (upper === 'A') return 'afternoon';
+        if (upper === 'E') return 'evening';
+        // Text mappings pass through
+        if (['sang','chieu','toi','morning','afternoon','evening'].includes(lower)) {
+          return lower;
+        }
+        return v; // fallback raw
+      };
+
+      data.data = data.data
+        .map((item: any) => {
+          const attrs = item?.attributes || {};
+          const timeStr = attrs.field_thoi_gian as string | undefined;
+          let dateOnly = attrs.field_ngay as string | undefined;
+          if (!dateOnly && timeStr) {
+            const d = new Date(timeStr);
+            if (!isNaN(d.getTime())) {
+              const yyyy = d.getFullYear();
+              const mm = String(d.getMonth() + 1).padStart(2, '0');
+              const dd = String(d.getDate()).padStart(2, '0');
+              dateOnly = `${yyyy}-${mm}-${dd}`;
+            }
+          }
+
+          const normalizedSession = normalizeSession(attrs.field_buoi);
+
+          return {
+            ...item,
+            attributes: {
+              ...attrs,
+              field_ngay: dateOnly || attrs.field_ngay || '',
+              field_buoi: normalizedSession || attrs.field_buoi || '',
+            },
+          };
+        })
+        // Ensure items fall within the selected week range when using fallback/all fetch
+        .filter((item: any) => {
+          const dateStr = item?.attributes?.field_ngay;
+          const t = new Date(dateStr).getTime();
+          return Number.isFinite(t) ? t >= startMs && t <= endMs : true;
+        });
     }
-    
+
     return data;
   } catch (error) {
     throw new Error(`Failed to fetch work schedule: ${error instanceof Error ? error.message : 'Unknown error'}`);

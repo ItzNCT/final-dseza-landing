@@ -176,18 +176,26 @@ const WorkSchedulePage: React.FC = () => {
       // Map session values from API to display based on language
       const sessionMap: { [key: string]: string } = language === 'en' ? {
         'morning': 'Morning',
+        'noon': 'Noon',
+        'midday': 'Noon',
         'afternoon': 'Afternoon',
         'evening': 'Evening',
         // fallback to Vietnamese keys if backend returns VI strings
         'sang': 'Morning',
+        'trua': 'Noon',
         'chieu': 'Afternoon',
-        'toi': 'Evening'
+        'toi': 'Evening',
+        'trưa': 'Noon',
       } : {
         'sang': 'Sáng',
+        'trua': 'Trưa',
+        'trưa': 'Trưa',
         'chieu': 'Chiều',
         'toi': 'Tối',
         // fallback to English keys if backend returns EN strings
         'morning': 'Sáng',
+        'noon': 'Trưa',
+        'midday': 'Trưa',
         'afternoon': 'Chiều',
         'evening': 'Tối'
       };
@@ -237,8 +245,8 @@ const WorkSchedulePage: React.FC = () => {
           items: items.sort((a, b) => {
             // Sort by session order
             const sessionOrder: Record<string, number> = {
-              'Sáng': 1, 'Chiều': 2, 'Tối': 3,
-              'Morning': 1, 'Afternoon': 2, 'Evening': 3,
+              'Sáng': 1, 'Trưa': 2, 'Chiều': 3, 'Tối': 4,
+              'Morning': 1, 'Noon': 2, 'Afternoon': 3, 'Evening': 4,
             };
             return (sessionOrder[a.session as keyof typeof sessionOrder] || 999) - 
                    (sessionOrder[b.session as keyof typeof sessionOrder] || 999);
@@ -291,6 +299,11 @@ const WorkSchedulePage: React.FC = () => {
       case 'Morning':
         return theme === 'dark' 
           ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary border border-dseza-dark-primary/30' 
+          : 'bg-dseza-light-primary/10 text-dseza-light-primary border border-dseza-light-primary/20';
+      case 'Trưa':
+      case 'Noon':
+        return theme === 'dark'
+          ? 'bg-dseza-dark-primary/20 text-dseza-dark-primary border border-dseza-dark-primary/30'
           : 'bg-dseza-light-primary/10 text-dseza-light-primary border border-dseza-light-primary/20';
       case 'Chiều':
       case 'Afternoon':
