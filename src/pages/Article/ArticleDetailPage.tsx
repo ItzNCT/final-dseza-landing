@@ -21,6 +21,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import TTSControls from "@/components/TTSControls";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileLayout from "@/components/mobile/MobileLayout";
@@ -1509,6 +1510,27 @@ const ArticleDetailPage: React.FC = () => {
   const articleContent = getArticleContent();
   const pdfDocument = getPdfDocument();
 
+  // Prepare plain text for Text-to-Speech (no hooks to avoid order issues)
+  const ttsPlainText = (() => {
+    try {
+      if (typeof window === 'undefined') return '';
+      const html = sanitizeHTML(articleContent || '');
+      const container = document.createElement('div');
+      container.innerHTML = html;
+      const contentText = container.textContent || container.innerText || '';
+      const pieces = [article.attributes.title, metaDescription || '', contentText]
+        .filter(Boolean)
+        .join('\n\n');
+      return pieces
+        .replace(/\u00A0/g, ' ')
+        .replace(/[ \t]+/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    } catch {
+      return '';
+    }
+  })();
+
   // Generate SEO meta data
   const articleTitle = article.attributes.title;
   const siteTitle = language === 'en' ? 'DSEZA - Da Nang Software and Digital Economy Zone' : 'DSEZA - Khu Kinh tế Phần mềm và Số Đà Nẵng';
@@ -1892,6 +1914,12 @@ const ArticleDetailPage: React.FC = () => {
                   </div>
                 )}
               </div>
+              {/* TTS Controls - Desktop */}
+              {ttsPlainText && (
+                <div className="pt-2">
+                  <TTSControls textToSpeak={ttsPlainText} />
+                </div>
+              )}
             </header>
 
             {/* Images are now handled within paragraphs content */}
